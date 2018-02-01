@@ -1,5 +1,5 @@
 @charset "UTF-8";
-@import url('https://fonts.googleapis.com/css?family=Poiret+One');
+@import url('https://fonts.googleapis.com/css?family=Megrim');
 @import url('https://fonts.googleapis.com/css?family=Oswald');
 
 html, body {
@@ -34,7 +34,7 @@ html, body {
 }
 
 .content h1 {
-	font-family: 'Poiret One', sans-serif;
+	font-family: 'Megrim', cursive;
 	color: #036A81;
 	font-size: 500%;
 }
