@@ -26,6 +26,8 @@ html, body {
 }
 
 .content {
+	position: relative;
+	top: -9px;
 	max-width: 600px;
 	margin: 0 auto;
 	text-align: center;
