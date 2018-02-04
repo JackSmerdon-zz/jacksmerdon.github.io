@@ -133,12 +133,12 @@ nav a:hover::before {
 	background-size: cover;
 }
 
-.split b {
+.split .split_text {
 	font-family: 'Megrim', cursive;
 	color: antiquewhite;
 	font-size: 200%;
 	position: relative;
-	text-align: center;
+	top: 90px;
 }
 
 @media screen and (max-width: 768px) {
