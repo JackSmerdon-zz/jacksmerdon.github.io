@@ -1,6 +1,5 @@
 @charset "UTF-8";
-@import url('https://fonts.googleapis.com/css?family=Megrim');
-@import url('https://fonts.googleapis.com/css?family=Oswald');
+@import url('https://fonts.googleapis.com/css?family=Bungee+Inline|Jura|Libre+Barcode+39+Text|Megrim|Oswald|Nixie+One|Patrick+Hand');
 
 html, body {
 	margin: 0;
@@ -33,7 +32,6 @@ html, body {
 	margin: 0 auto;
 	text-align: center;
 }
-
 .content h1 {
 	font-family: 'Megrim', cursive;
 	color: #036A81;
@@ -50,16 +48,17 @@ html, body {
 	text-transform: uppercase;
 	text-decoration: none;
 }
-.btn:hover{
+.btn:hover {
 	color: #C1DBE0;
 	border: solid #036a81 3px;
 }
+
 p {
 	font-size: 150%;
 	line-height: 210%;
-	text-align: justify;
+	text-align: center;
 	margin: 3%;
-	font-family: sans-serif;
+	font-family: 'Nixie One', cursive;
 	color: antiquewhite;
 }
 
