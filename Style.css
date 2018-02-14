@@ -10,60 +10,6 @@ html, body {
 	background-color: #142A2C;
 }
 
-.intro {
-	height: 95%;
-	width: 100%;
-	margin: auto;
-	background: url(Images/waves.jpg);
-	display: table;
-	top: 0;
-	background-size: cover;
-}
-.intro .inner {
-	display: table-cell;
-	vertical-align: middle;
-	width: 100%;
-	max-width: none;
-}
-
-.content {
-	position: relative;
-	top: -22px;
-	max-width: 600px;
-	margin: 0 auto;
-	text-align: center;
-}
-.content h1 {
-	font-family: 'Megrim', cursive;
-	color: #036A81;
-	font-size: 500%;
-}
-
-.btn {
-	border-radius: 9px;
-	font-family: 'Oswald', sans-serif;
-	color: #fff;
-	font-size: 135%;
-	padding: 10px 20px;
-	border: solid #fff 3px;
-	text-transform: uppercase;
-	text-decoration: none;
-}
-.btn:hover {
-	color: #C1DBE0;
-	border: solid #036a81 3px;
-}
-
-p {
-	font-size: 120%;
-	line-height: 210%;
-	text-align: justify;
-	margin: 3%;
-	font-family: 'Nixie One', cursive;
-	color: antiquewhite;
-}
-
-
 .navbar {
 	width: 100%;
 	margin: 0 auto;
@@ -125,6 +71,59 @@ nav a:hover::before {
 	width: 75%;
 }
 
+.intro {
+	height: calc(100% - 30px);
+	width: 100%;
+	margin: auto;
+	background: url(Images/waves.jpg);
+	display: table;
+	top: 0;
+	background-size: cover;
+}
+.intro .inner {
+	display: table-cell;
+	vertical-align: middle;
+	width: 100%;
+	max-width: none;
+}
+
+.content {
+	position: relative;
+	top: -22px;
+	max-width: 600px;
+	margin: 0 auto;
+	text-align: center;
+}
+.content h1 {
+	font-family: 'Megrim', cursive;
+	color: #036A81;
+	font-size: 500%;
+}
+
+.btn {
+	border-radius: 9px;
+	font-family: 'Oswald', sans-serif;
+	color: #fff;
+	font-size: 135%;
+	padding: 10px 20px;
+	border: solid #fff 3px;
+	text-transform: uppercase;
+	text-decoration: none;
+}
+.btn:hover {
+	color: #C1DBE0;
+	border: solid #036a81 3px;
+}
+
+p {
+	font-size: 120%;
+	line-height: 210%;
+	text-align: justify;
+	margin: 3%;
+	font-family: 'Nixie One', cursive;
+	color: antiquewhite;
+}
+
 .split {
 	width: 100%;
 	height: 30%;
@@ -140,6 +139,15 @@ nav a:hover::before {
 	font-size: 200%;
 	position: relative;
 	top: 100px;
+}
+
+.tort {
+	height: auto;
+	width: 50%;
+	position: relative;
+	background: url(Images/tort.gif);
+	display: table;
+	background-size: contain;
 }
 
 @media screen and (max-width: 768px) {
