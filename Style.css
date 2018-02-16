@@ -142,20 +142,26 @@ p {
 }
 
 .tort {
-	height: auto;
-	width: 75%;
-	left: auto;
-	position: relative;
+	height: 50%;
+	min-height: 540px;
+	width: 80%;
+	min-width: 960px;
+	margin: auto;
+	background: url(Images/tort.gif);
 	display: table;
-	background-size: contain;
+	position: relative;
+	background-size: cover;
 }
 
 .zomb {
-	height: auto;
-	width: 75%;
-	left: 12.5%;
-	position: relative;
+	height: 50%;
+	min-height: 330px;
+	width: 80%;
+	min-width: 600px;
+	margin: auto;
+	background: url(Images/zomb.gif);
 	display: table;
+	position: relative;
 	background-size: cover;
 }
 
