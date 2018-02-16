@@ -142,19 +142,21 @@ p {
 }
 
 .tort {
-	height: 50%;
-	min-height: 540px;
+	height: 80%;
+	min-height: 330px;
 	width: 80%;
-	min-width: 960px;
+	min-width: 600px;
 	margin: auto;
 	background: url(Images/tort.gif);
 	display: table;
 	position: relative;
-	background-size: cover;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
 }
 
 .zomb {
-	height: 50%;
+	height: 80%;
 	min-height: 330px;
 	width: 80%;
 	min-width: 600px;
@@ -162,7 +164,23 @@ p {
 	background: url(Images/zomb.gif);
 	display: table;
 	position: relative;
-	background-size: cover;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.OpenGL {
+	height: 80%;
+	min-height: 600px;
+	width: 80%;
+	min-width: 600px;
+	margin: auto;
+	background: url(Images/openGL.gif);
+	display: table;
+	position: relative;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
 }
 
 @media screen and (max-width: 768px) {
