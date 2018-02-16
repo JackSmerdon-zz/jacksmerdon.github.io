@@ -123,6 +123,9 @@ p {
 	font-family: 'Nixie One', cursive;
 	color: antiquewhite;
 }
+p a{
+	font-size: 160%;
+}
 
 .split {
 	width: 100%;
@@ -142,9 +145,9 @@ p {
 }
 
 .tort {
-	height: 80%;
+	height: 50%;
 	min-height: 330px;
-	width: 80%;
+	width: 50%;
 	min-width: 600px;
 	margin: auto;
 	background: url(Images/tort.gif);
@@ -156,9 +159,9 @@ p {
 }
 
 .zomb {
-	height: 80%;
+	height: 50%;
 	min-height: 330px;
-	width: 80%;
+	width: 50%;
 	min-width: 600px;
 	margin: auto;
 	background: url(Images/zomb.gif);
@@ -170,9 +173,9 @@ p {
 }
 
 .OpenGL {
-	height: 80%;
+	height: 50%;
 	min-height: 600px;
-	width: 80%;
+	width: 50%;
 	min-width: 600px;
 	margin: auto;
 	background: url(Images/openGL.gif);
