@@ -123,8 +123,18 @@ p {
 	font-family: 'Nixie One', cursive;
 	color: antiquewhite;
 }
-p a{
+p b{
 	font-size: 160%;
+	color: antiquewhite;
+	text-decoration: none;
+}
+
+p a{
+	color: antiquewhite;
+	text-decoration: none;
+}
+p a:hover{
+	color: #A48F8F;
 }
 
 .split {
