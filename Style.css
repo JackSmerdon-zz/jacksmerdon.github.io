@@ -236,5 +236,13 @@ iframe{
 		font-size: 100%;
 		line-height: 160%;
 	}
+	.split {
+		height: 20%;
+	}
+	
+	.split .split_text {
+		padding-top: 10%;
+		padding-bottom: 10%;
+	}
 }
 
