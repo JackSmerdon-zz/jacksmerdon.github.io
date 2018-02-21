@@ -149,10 +149,13 @@ p a:hover{
 
 .split .split_text {
 	font-family: 'Megrim', cursive;
-	color: antiquewhite;
-	font-size: 200%;
+	color: antiquewhite;	
 	position: relative;
-	top: 100px;
+	padding-top: 15%;
+	padding-bottom: 15%;
+	font-size: 200%;
+	text-align: left;
+
 }
 
 .tort {
