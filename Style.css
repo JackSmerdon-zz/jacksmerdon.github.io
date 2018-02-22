@@ -116,7 +116,13 @@ nav a:hover::before {
 	border: solid #fff 3px;
 }
 */
-p {
+
+article {
+	background-color:#173335;
+	padding: 10px;
+	height: 50%;
+	min-height: 600px;
+	overflow-y: auto;
 	font-size: 120%;
 	line-height: 210%;
 	text-align: justify;
@@ -124,17 +130,17 @@ p {
 	font-family: 'Nixie One', cursive;
 	color: antiquewhite;
 }
-p b{
+article b{
 	font-size: 160%;
 	color: antiquewhite;
 	text-decoration: none;
 }
 
-p a{
+article a{
 	color: antiquewhite;
 	text-decoration: none;
 }
-p a:hover{
+article a:hover{
 	color: #A48F8F;
 }
 
