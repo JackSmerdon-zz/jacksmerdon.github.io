@@ -130,7 +130,7 @@ article {
 	font-family: 'Nixie One', cursive;
 	color: antiquewhite;
 }
-article b{
+article h1{
 	font-size: 160%;
 	color: antiquewhite;
 	text-decoration: none;
@@ -142,6 +142,10 @@ article a{
 }
 article a:hover{
 	color: #A48F8F;
+}
+
+article b {
+	height: 10%;
 }
 
 .split {
