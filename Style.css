@@ -120,8 +120,6 @@ nav a:hover::before {
 article {
 	background-color:#173335;
 	padding: 10px;
-	height: 50%;
-	min-height: 600px;
 	overflow-y: auto;
 	font-size: 120%;
 	line-height: 210%;
@@ -142,22 +140,6 @@ article a{
 }
 article a:hover{
 	color: #A48F8F;
-}
-
-article b {
-	height: 10%;
-}
-
-p {
-	background-color:#173335;
-	padding: 10px;
-	overflow-y: auto;
-	font-size: 120%;
-	line-height: 210%;
-	text-align: justify;
-	margin: 3%;
-	font-family: 'Nixie One', cursive;
-	color: antiquewhite;
 }
 
 .split {
@@ -243,8 +225,9 @@ iframe{
 	margin: auto;
 }
 
-.twitter-timeline-rendered {
-    margin: auto;
+.articleShort {
+	height: 50%;
+	min-height: 600px;
 }
 
 @media screen and (max-width: 768px) {
