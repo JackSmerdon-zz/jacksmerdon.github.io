@@ -230,6 +230,25 @@ iframe{
 	min-height: 600px;
 }
 
+.image {
+	text-align: justify;
+}
+
+.image img {
+	display: inline-block;
+	width: 15%;
+}
+
+.image img:hover {
+	opacity: 0.6;
+}
+
+.image::after {
+	content: '';
+	display: inline-block;
+	width: 100%;
+}
+
 @media screen and (max-width: 768px) {
 	.content {
 		position: relative;
