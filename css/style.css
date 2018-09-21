@@ -1,0 +1,93 @@
+body, html{
+  height: 100%;
+  margin:0;
+  font-size: 16px;
+  font-family: "Lato", sans-serif;
+  font-weight: 400;
+  line-height: 1.8em;
+  color: #666;
+}
+
+.coverimg, .cnmimg, .brainsimg, .dissimg{
+  position: relative;
+  opacity: 0.70;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.coverimg{
+  background-image:url('../img/cover.jpg');
+  min-height: 100%;
+}
+
+.cnmimg{
+  background-image:url('../img/cnm.png');
+  min-height: 425px;
+}
+
+.brainsimg{
+  background-image:url('../img/brains.png');
+  min-height: 425px;
+}
+
+.dissimg{
+  background-image:url('../img/diss.jpg');
+  min-height: 425px;
+}
+
+.section .heading{
+  text-align: center;
+}
+
+.section{
+  text-align: justify;
+  padding: 50px 80px;
+}
+
+.section .heading{
+  text-align: center;
+}
+
+.section .subheading{
+  text-align: center;
+  font-size: 16px;
+}
+
+.section-light{
+  background-color: #f4f4f4;
+  color: #666;
+}
+
+.section-dark{
+  background-color: #282e34;
+  color: #ddd;
+}
+
+.ptext{
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  text-align: center;
+  color: #000;
+  font-size: 27px;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+}
+
+.ptext .border{
+  background-color: #111;
+  color: #fff;
+  padding: 20px;
+}
+
+.ptext .border.trans{
+  background-color: transparent;
+}
+
+@media(max-width:568px){
+  .coverimg, .cnmimg, .brainsimg, .dissimg{
+    background-attachment: scroll;
+  }
+}

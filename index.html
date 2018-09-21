@@ -1,160 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<title>Jack Smerdon</title>
-	<link rel="stylesheet" href="Style.css">
-	<!-- SMOOTH SCROLL -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script>
-$(function() {
-  $('a[href*=#]:not([href=#])').click(function() {
-    if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
-      var target = $(this.hash);
-      target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
-      if (target.length) {
-        $('html,body').animate({
-          scrollTop: target.offset().top
-        }, 1000);
-        return false;
-      }
-    }
-  });
-});
-</script>
-<!-- End of SMOOTH SCROLL -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title> Jack Smerdon </title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-		<div id="navbar" class="navbar">
-		<nav>
-			<ul>
-				<li><a href="#gameprogramming">Game Programming</a></li>
-				<li><a href="#youtube">YouTube</a></li>
-				<li><a href="#photography">Photography</a></li>
-				<li><a href="#about">About Me</a></li>
-				<li><a href="#Social">Contact</a></li>
-			</ul>
-		</nav>
-		</div>
-		
-	<section class="intro">
-	
-		<div class="inner">
-			<div class="content">
-				<h1>Jack Smerdon</h1>
-				<!-- <a class="btn" href="#about">Welcome In</a> -->
-			</div>
-		</div>
-	</section>
-	
-	<div class="split">
-		<div id="gameprogramming" class="split_text">
-			Game Programming
-		</div>
-	</div>
-<article> 
-	<h1>University of South Wales: Second Year of Study </h1><br>
-	  
-	  Throughout the duration of the course so far I have become skilled in C++, C# and Python with an understanding of SQL databasing. Outside of my studies I have delved into HTML and CSS to create this website and plan to begin some work in Swift for mobile app development. <br>
-</article>
+  <div class="coverimg">
+    <div class="ptext">
+      <span class="border">
+        Jack Smerdon
+      </span>
+    </div>
+  </div>
 
-<article class="articleShort">
-	  <h1>C++</h1> <br>
-	  The first year of study at USW was largly based around the development of fundamental programming skills in the module 'C++ Programming for Game Developers', which consisted of small tests and 2 sizable courseworks:<br>
-	  
-	  The first of these tasks (set early in the year) was the creation of a small racing game based on 'The Tortoise and The Hare', which consisted of a race between the two animals visualised on the system console. Each animal had a set of moves with different probabilities which effected both the direction and the speed of the animal's movement. I also implemented holes as an extension to the game, where the race track had randomised holes that the animals could fall into during the race. This encumbered the participant with a small time penalty, making them unable to perform their next move until a certain number of turns had passed. I scored 75/100 for this assignment.<br> <br>
-	  
-<div class="tort"></div><br>
-  
-	  The second coursework was designed to test the C++ skills developed over the year, with a focus on the use of classes and inheritance in the form of a zombie survival game. Named 'Zombie Island', the aim of the game was to make the zombies, that were chasing the player, fall into the holes around the map without being caught. The player was also given the ability to choose the difficulty level between easy, medium and hard as well as being able to create a custom level. High scores were stored in a text file and could be displayed to the player by selecting 'High Scores' at the menu. Zombies had a basic AI where if they were 5 positions away from the player they would begin to pursue them, with a small probability that they would make a wrong turn which gave the player some time to escape. I scored 82/100 for this assignment.<br> <br>
-	  
-<div class="zomb"></div><br>
-  
-	  In year 2, the 'Data Structures And Algorithms With Object Oriented Programming" module has further improved my understanding of the language. The first of two courseworks was the implementation of a stack, queue and scheduler system using only the 'iostream' library. I was also instructed to devlop a system of prioritisation in addition to an anti-blocking mechanism to prevent tasks of high priority 'blocking' lower priority tasks from being completed. I scored 76/100 for this assignment. <br> <br>
-	  
-	  The second coursework in this (year 2) module was the creation of a 'Poptart Dispenser'. Using a code appendix and a state diagram, included in the repo on github, this coursework was designed to represent a real life scenario in which sticking to the 'Client's' program description was essential in order to achieve good marks. The dispenser took the form of a finite state machine, with the implementation of various design patterns to ensure that all included code was written to a high standard and was both readable and maintainable. I have not received feedback for this assignment yet but I am expecting to receive 70+/100 based on the marking scheme included in the assignment brief. <br> <br>
-	  <br>These, in addition to other examples of my coursework, can be found on my GitHub by clicking on the <a href="#contact">link at the bottom of the page.</a><br> <br>
-</article>
-<article class="articleShort">
-	  <h1>OpenGL</h1> <br>
-	  
-	  The 'Computer Graphics' module in the second year of my studies has been developing my skills in the graphics language OpenGL. Progressing from basic immediate mode rendering at the start of the year to the use of complex, interactive hierarchical models using Vertex Array Objects and Vertex Buffer Objects, I was able to produce a high quality scene for my OpenGL 2D coursework as demonstrated below. A 3D scene is currently in development for my second coursework submission which is due in May. I scored 88/100 for this assignment. <br>
-	  
-<div class="OpenGL"></div><br>
+  <section class="section section-dark">
+    <h2 class="heading"> Aspiring Gameplay Programmer - Final Year Undergraduate </h2>
+    <p>
+        Hello! I'm Jack, a third year student on the Computer Games Development course at the University of South Wales.
+    </p>
+  </section>
 
-</article>
-	
-<article class="articleShort">
-	<h1>C#</h1><br>
-	The module 'Professional Practice and Employability' in both the first and second year of study has been the most relevant in the way of understanding the game development industry. The focus of the module in both years has been to produce a game in a small development team over a set period of time and present it to the course though an E3 style presentation at the end of the year. In the first year this was through the use of Stencyl (due to the anticipation that some students may be unable to code confidently) following on to using Unity 5 for the duration of this year.<br>
-	The game being produced by my team and I this year (dubbed 'Chilly No Mates') follows the character of a university student as he tries to locate his items of clothing and possessions that he has lost from a wild night out in the city. 'Billy' has to complete various quests to regain his footing in the world and make it to the party at the end of the weekend. The game design document for the game that was written up by my team and I 
-	<a href="Docs/Game.Design.Document.pdf">can be found here.</a><br>
-	To date, I have written the inventory system for the character, aided in the picking up, dropping and storing of items and have developed an interactive 3D GUI phone to provide the player with essential information such as vitals, quests and items stored in their inventory. I have also contributed towards the creation of the map, in addition to creating 3D models to be used as assets in Google SketchUp 2017. Samples of my contribution to this project can be produced on request as due to the nature of the project I am unable to share it here.<br>
-	
-	In addition to Unity Development, the module 'Tool Development for Computer Games' is currently furthering my knowledge of C# with the development of a XAML application. I have been tasked with creating a level creation tool for the 'Haunted Dungoen' game provided for the assignment which is a simple, 2D tile based game with the objective of getting the knight from the starting square to the stairs without making contact with a ghost.<br><br>
-</article>
-	
-<article>
-	<h1>Python</h1><br>
-	The first half of the 'Tool Development' module was to implement an intepretation of the retro game 'Missile Command' through the use of Python and PyGame. Having no prior experience with the language was a challange, but I was able to pick it up fairly quickly and was able to produce the simple game demonstrated below. I scored 89/100 for this assignment.<br>
-	
-	<div class="missile"></div><br>
-</article>
+  <div class="cnmimg">
+    <div class="ptext">
+      <span class="border">
+        Chilly No Mates
+      </span>
+    </div>
+  </div>
 
-	<div class="split">
-		<div id="youtube" class="split_text">
-			YouTube
-		</div>
-	</div>
-<article>
-	  Years of skateboarding, photography and a strong interest in video sharing platforms have helped develop my video editing skills. Throughout the summer of 2017 I constructed a series of 10 vlogs which documented my life, which allowed me to further improve my filming and editing skills that I had obtained from recording skateboarding videos when I was younger. This allowed me to make the most out of my summer break, as constantly out looking for the next thing to include in my upcoming video kept me on the look out for exciting things to do in both a creative and engaging way. This also encouraged me to pick up surfing again, which I hope will now develop into a long term hobby. In the future I hope to produce more vlogs in addition to both entertaining and informative content on my YouTube channel, as providing both enjoyable and constructive content that benifits the community is what any creator aspires to produce.
-	  	  
-<iframe style="align-content: center" width="50%" height="50%" src="https://www.youtube.com/embed/videoseries?list=PLW0qAUEEP7wCFydkCe4BqydVeYx-LusKJ" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  <section class="section section-dark">
+    <h2 class="heading"> A Second Year Unity 3D Group Project </h2>
+    <h3 class="subheading"> <i> Developed in collaberation with Gregory Neale, William Akins, Mariya Hristozova & Sean Brennan. </i> </h3>
+    <p>
+        This open world game created by a team of 5 programmers follows the character of Billy, who is left with none of his possessions when he wakes up in Central Park after a messy night out on the town.
+        As Billy, you must navigate the city and surrounding suberbs to locate your missing clothes, phone, wallet and other items in order to make it to the next party on time.
+        The game currently only features a 5-10 tutorial section with demonstrations of features such as the inventory, questing, pickup/dropping of items, daytime cycle and bladder control. <br><br>
 
-</article>
+        Initially, my task was to create a fully fledged inventory system inside an interactive GUI, with items stored in suitable catagories and displayed in an informative and intuitive manner.
+        Objects that were collected by the player, using Sean's pick up and drop system, would be stored in the inventory with descriptions, icons and quantity data available for the user to see.
+        From here, the player would also have the ability to use the item or drop it back into the world. <br><br>
 
-	<div class="split">
-		<div id="photography" class="split_text">
-			Photography
-		</div>
-	</div>
-	
-<article>
+        As the project progressed, team and I decided that to make the game more emmersive it would be better to have the system displayed as an app on an interactive phone.
+        This was a key feature of the game from the start but was intended to be found further along the story. It was decided that it would be my responsibility to model a smartphone with a variety of apps for the user to interact with,
+        including the re-implementation of the inventory system, to cover a variety of features that would usually require an on screen prompt rather than something that was in the world with you.
+        In the current build of the game, the player is able to interact with the phone both using the keyboard or controller to view their health app (Showing HP, Energy and Bladder), journal app for quests, the inventory and an anologue clock.
+        Other apps such as the map, banking, camera and a social media app were all planned but have not yet been implemented into the game. <br><br>
 
-	<!-- LightWidget WIDGET --><script src="//lightwidget.com/widgets/lightwidget.js"></script><iframe src="//lightwidget.com/widgets/a2784281b87f5b7b9b4b878d8d3567cf.html" scrolling="no" allowtransparency="true" class="lightwidget-widget" style="width: 100%; border: 0; overflow: hidden;"></iframe>
+        In addition to this, I produced some of the 3D models found in the world in additon to doing a large amount of level design. The project can be viewed on GitHub here. (Add link jack)
+    </p>
+  </section>
+
+  <div class="brainsimg">
+    <div class="ptext">
+      <span class="border">
+        Brains Eden 2018
+      </span>
+    </div>
+  </div>
+
+  <section class="section section-dark">
+    <h2 class="heading"> Fist Full Of 'Nanas - Multiplayer Joy-Con Action </h2>
+    <h3 class="subheading"> <i> Developed in collaberation with Khalid Ali, Jake Passmore, Nicky Jones & Steven Sparkes. </i> </h3>
+    <p>
+      The Anglia Ruskin University in Cambridge annually hosts the largest international student game jam in the UK and in 2018 I had the privilege of attending its 10th anniversary jam. <br> <br>
+
+      The theme of the jam was 'Unreliable' and we collectively decided that we were going to focus on the unreliability of alliances. <br>
+      We then decided after much deliberation that the theme of the game would be the wild west, settling on a multiplayer mexican stand-off game.
 
 
-</article>
 
-	<div class="split">
-		<div id="about" class="split_text">
-			About me
-		</div>
-	</div>
-	
-<article>
- 	  
-  	  I am a hardworking and enthusiastic individual with a passion for gaming. Reliable and motivated, I have a friendly demeanour and a balanced approach to life.
-	  Currently applying for an internship to to learn the ins and outs of the industry which will be continued by my final year of study. I then wish to progress to a Games Development MComp at either USW or elsewhere before starting my career as a game programmer. So far in my second year of study I have produced work to a high standard in every coursework I have submitted, including C++ and Python, which is a trend that I will maintain for duration of my studies.<br>
-	  
-<!-- LightWidget WIDGET --><script src="//lightwidget.com/widgets/lightwidget.js"></script><iframe src="//lightwidget.com/widgets/18a20df1cd375e3f8e907601d5609900.html" scrolling="no" allowtransparency="true" class="lightwidget-widget" style="width: 100%; border: 0; overflow: hidden;"></iframe>
+    </p>
+  </section>
 
-</article>
+  <div class="dissimg">
+    <div class="ptext">
+      <span class="border">
+        Dissertation
+      </span>
+    </div>
+  </div>
 
-	<div class="split">
-		<div id="Social" class="split_text">
-			Social & Contact
-		</div>
-	</div>
-	
-<article>
-	<div class="image">
-		<a href="https://github.com/JackSmerdon"><img src="Social Logos/GitHub.png" width="15%"></a>
-		<a href="https://www.linkedin.com/in/jack-smerdon/"><img src="Social Logos/LinkedIn.png" width="15%"></a>
-		<a href="mailto:j.smerdon@icloud.com"><img src="Social Logos/Mail.png" width="15%"></a>
-		<a href="https://twitter.com/JackSmerd"><img src="Social Logos/Twitter.png" width="15%"></a>
-		<a href="https://www.youtube.com/channel/UCcjsbZ-HxSb8NfMnKABVlhQ"><img src="Social Logos/YouTube.png" width="15%"></a>
-	</div>
-</article>
+  <section class="section section-dark">
+    <h2 class="heading">Web 3D Object Viewer with Manipulation</h2>
+    <p>
+       'A web-based GUI that will load and display 3D objects that can be viewed interactively with rotation, translation and scaling.' <br> <br>
+       In the research stages. Watch this space. <br> <br>
+       Current findings: <br>
+       § WebGL2 - Similar to OpenGL but can be used to render to a HTML canvas. <br>
+       § three.js (?)<br>
+    </p>
+  </section>
+
+  <div class="coverimg">
+    <div class="ptext">
+      <span class="border">
+        Jack Smerdon
+      </span>
+    </div>
+  </div>
+
 </body>
 </html>
