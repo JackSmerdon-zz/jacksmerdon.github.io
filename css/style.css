@@ -8,7 +8,7 @@ body, html{
   color: #666;
 }
 
-.coverimg, .cnmimg, .brainsimg, .dissimg{
+.coverimg, .cnmimg, .brainsimg, .dissimg, .mcimg{
   position: relative;
   opacity: 0.70;
   background-position: center;
@@ -34,6 +34,11 @@ body, html{
 
 .dissimg{
   background-image:url('../img/diss.jpg');
+  min-height: 425px;
+}
+
+.mcimg{
+  background-image:url('../img/mc.gif');
   min-height: 425px;
 }
 
@@ -87,7 +92,7 @@ body, html{
 }
 
 @media(max-width:568px){
-  .coverimg, .cnmimg, .brainsimg, .dissimg{
+  .coverimg, .cnmimg, .brainsimg, .dissimg, .mcimg{
     background-attachment: scroll;
   }
 }
