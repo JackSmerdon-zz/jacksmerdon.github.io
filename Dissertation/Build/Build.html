@@ -149,7 +149,8 @@
                     scene.add(fillLight);
                     scene.add(backLight);
 
-                } else {
+                }
+                else {
 
                     ambient.intensity = 1.0;
                     scene.remove(keyLight);
@@ -160,21 +161,11 @@
 
                 break;
 
-              case 'KeyW':
-                camera.position.y += 1;
-                break;
-              case 'KeyS':
-                camera.position.y -= 1;
-                break;
-              case 'KeyA':
-                camera.position.z += 1;
-                break;
-              case 'KeyD':
-                camera.position.z -= 1;
-                break;
               case 'KeyR':
                 controls.reset();
                 break;
+              case 'KeyE':
+                controls.autoRotate = !controls.autoRotate;
 
             }
         }
