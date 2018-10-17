@@ -34,10 +34,14 @@
         var container;
 
         var camera, controls, scene, renderer;
-        var lighting, ambient, keyLight, fillLight, backLight;
+        var shadows, ambient, shadowLight;
+
+        var gridHelper, plane, lightHelper;
 
         var windowHalfX = window.innerWidth / 2;
         var windowHalfY = window.innerHeight / 2;
+
+        var USE_WIREFRAME = false;
 
         init();
         animate();
@@ -51,33 +55,22 @@
 
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
             camera.position.z = 10;
-            camera.position.y = 2;
+            camera.position.y = 5;
+            camera.position.x = 10;
 
             /* Scene and Lighting*/
 
             scene = new THREE.Scene();
 
-            lighting = true;
+            shadows = true;
 
             ambient = new THREE.AmbientLight(0xffffff, 1.0);
             ambient.intensity = 0.5;
             scene.add(ambient);
 
-            keyLight = new THREE.DirectionalLight(new THREE.Color('hsl(30, 100%, 75%)'), 1.0);
-            keyLight.position.set(-100, 0, 100);
-            scene.add(keyLight);
-
-            fillLight = new THREE.DirectionalLight(new THREE.Color('hsl(240, 100%, 75%)'), 1.0);
-            fillLight.position.set(100, 0, 100);
-            scene.add(fillLight);
-
-            backLight = new THREE.DirectionalLight(0xffffff, 1.0);
-            backLight.position.set(100, 0, -100).normalize();
-            scene.add(backLight);
-
             /* Skybox */
 
-            var cubeSize = new THREE.CubeGeometry(10000, 10000, 10000);
+            var cubeGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
             var cubeMaterials =
             [
               new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Front.png"), side: THREE.DoubleSide}),
@@ -88,9 +81,37 @@
               new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Left.png"), side: THREE.DoubleSide})
             ];
 
-            var cube = new THREE.Mesh(cubeSize, cubeMaterials);
+            var cube = new THREE.Mesh(cubeGeometry, cubeMaterials);
 
             scene.add ( cube );
+
+            /* Grid */
+            var gridSize = 50;
+            var divisions = 50;
+
+            gridHelper = new THREE.GridHelper( gridSize, divisions );
+            gridHelperOn = false;
+
+            /* Plane */
+            var geometry = new THREE.PlaneGeometry( 50, 50, 1, 1 );
+            var material = new THREE.MeshPhongMaterial( {color: 0x707070, side: THREE.DoubleSide} );
+            plane = new THREE.Mesh( geometry, material );
+            plane.rotation.x = 92.69;
+            plane.receiveShadow = true;
+            scene.add( plane );
+
+
+            /* Shadow Test */
+            //Create a PointLight and turn on shadows for the light
+            shadowLight = new THREE.PointLight( 0xffffff, 0.8, 18 );
+            shadowLight.position.set( 3, 6, 3 );
+
+            shadowLight.castShadow = true;            // default false
+            shadowLight.shadow.camera.near = 0.1;       // default
+            shadowLight.shadow.camera.far = 25;      // default
+            lightHelper = new THREE.CameraHelper( shadowLight.shadow.camera );
+            scene.add( shadowLight );
+
 
             /* Model */
 
@@ -98,18 +119,32 @@
 
             var mtlLoader = new THREE.MTLLoader();
             mtlLoader.setPath('Assets/');
-            mtlLoader.load( 'ChubbyMonkey.mtl', function( materials ) {
+            mtlLoader.load( 'Chubby Monkey.mtl', function( materials ) {
 
               materials.preload();
 
+
               var objLoader = new THREE.OBJLoader();
+
               objLoader.setMaterials( materials );
               objLoader.setPath('Assets/');
-              objLoader.load( 'ChubbyMonkey.obj', function ( object ) {
+              objLoader.load( 'Chubby Monkey.obj', function ( object ) {
 
                 monkey = object;
-                monkey.position.y = -1;
                 monkey.rotation.x = 6.1;
+
+                monkey.traverse( function ( child ) {
+
+                  if ( child instanceof THREE.Mesh ) {
+
+                    child.castShadow = true;
+
+                  }
+
+                  } );
+
+                monkey.castShadow = true;
+                monkey.receiveShadow = true;
 
                 scene.add( monkey );
 
@@ -120,9 +155,15 @@
             /* Renderer */
 
             renderer = new THREE.WebGLRenderer();
+            //Shadows
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.BasicShadowMap; // default THREE.PCFShadowMap
+
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
+
+
 
             container.appendChild(renderer.domElement);
 
@@ -157,28 +198,17 @@
         function onKeyboardEvent(e) {
 
             switch (e.code) {
-
-              //Toggles lighting
               case 'KeyL':
-                lighting = !lighting;
-
-                if (lighting) {
-
-                    ambient.intensity = 0.5;
-                    scene.add(keyLight);
-                    scene.add(fillLight);
-                    scene.add(backLight);
-
+                if(shadows){
+                  scene.remove( shadowLight );
+                  ambient.intensity = 1.0;
+                  shadows = false;
                 }
                 else {
-
-                    ambient.intensity = 1.0;
-                    scene.remove(keyLight);
-                    scene.remove(fillLight);
-                    scene.remove(backLight);
-
+                  scene.add( shadowLight );
+                  ambient.intensity = 0.5;
+                  shadows = true;
                 }
-
                 break;
 
               //Resets model to original position
@@ -189,6 +219,26 @@
               //Toggles auto-rotation
               case 'KeyE':
                 controls.autoRotate = !controls.autoRotate;
+                break;
+
+              case 'KeyG':
+                if (!gridHelperOn) {
+
+                  scene.add( gridHelper );
+                  scene.remove( plane );
+                  scene.add( lightHelper );
+                  gridHelperOn = true;
+
+                }
+                else {
+
+                  scene.remove( gridHelper );
+                  scene.add( plane );
+                  scene.remove( lightHelper );
+                  gridHelperOn = false;
+
+                }
+                break;
 
             }
         }
