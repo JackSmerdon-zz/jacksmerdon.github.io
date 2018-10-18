@@ -49,6 +49,10 @@
         init();
         animate();
 
+        function toRadians (angle) {
+          return angle * (Math.PI / 180);
+        }
+
         function init() {
 
             container = document.createElement('div');
@@ -150,8 +154,6 @@
               objLoader.load( 'Chubby Monkey.obj', function ( object ) {
 
                 monkey = object;
-                monkey.rotation.x = 6.1;
-
                 monkey.traverse( function ( child ) {
 
                   if ( child instanceof THREE.Mesh ) {
@@ -164,17 +166,17 @@
 
                 //Wire Frame Monkey
                 wireframeMonkey = monkey.clone();
-
                 wireframeMonkey.traverse( function ( child ) {
+
                   if ( child instanceof THREE.Mesh ) {
 
                     var geo = new THREE.WireframeGeometry( child.geometry );
-                    var mat = new THREE.LineBasicMaterial( { color: 0x404040, linewidth: 2 } );
+                    var mat = new THREE.LineBasicMaterial( { color: 0x808080, linewidth: 2 } );
                     var wireframe = new THREE.LineSegments( geo, mat );
                     child.add( wireframe );
 
                   }
-                })
+                } );
 
                 scene.add( monkey );
 
@@ -201,7 +203,7 @@
             controls.maxDistance = 1500;
             controls.minDistance = 3;
             controls.autoRotate = false;
-            controls.autoRotateSpeed = 0.5;
+            controls.autoRotateSpeed = -0.5;
             controls.maxPolarAngle = 1.5;
 
             /* Events */
@@ -212,8 +214,23 @@
             var guiObject = function() {
               this.Lighting = true;
               this.AutoRotate = false;
-              this.Reset = function(){ controls.reset(); };
+              this.X_Rotation = 0;
+              this.Y_Rotation = 0;
+              this.Z_Rotation = 0;
+              this.X_Position = 0;
+              this.Y_Position = 0;
+              this.Z_Position = 0;
+              this.Reset = function() {
+                monkey.rotation.x = 0;
+                monkey.rotation.y = 0;
+                monkey.rotation.z = 0;
+                monkey.position.x = 0;
+                monkey.position.y = 0;
+                monkey.position.z = 0;
+              }
               this.GridMode = false;
+              this.CameraReset = function(){ controls.reset(); };
+
 
             };
 
@@ -221,6 +238,7 @@
               var content = new guiObject();
               var gui = new dat.GUI();
 
+              //Enable Lighting
               var lightController = gui.add(content, 'Lighting');
               lightController.onChange(function(value){
                 if( value == false ) {
@@ -235,9 +253,27 @@
                   }
               });
 
+              //Auto Rotation
               var aRController = gui.add(content, 'AutoRotate');
               aRController.onChange(function(value){ controls.autoRotate = !controls.autoRotate;});
 
+              //Monkey Folder
+              var monkeyFolder = gui.addFolder('Monkey');
+              var mRX  = monkeyFolder.add(content, 'X_Rotation', -180, 180);
+              mRX.onChange(function(value){ monkey.rotation.x = toRadians(value)});
+              var mRY  = monkeyFolder.add(content, 'Y_Rotation', -180, 180);
+              mRY.onChange(function(value){ monkey.rotation.y = toRadians(value)});
+              var mRZ  = monkeyFolder.add(content, 'Z_Rotation', -180, 180);
+              mRZ.onChange(function(value){ monkey.rotation.z = toRadians(value)});
+              var mPX  = monkeyFolder.add(content, 'X_Position', -50, 50);
+              mPX.onChange(function(value){ monkey.position.x = value});
+              var mPY  = monkeyFolder.add(content, 'Y_Position', -50, 50);
+              mPY.onChange(function(value){ monkey.position.y = value});
+              var mPZ  = monkeyFolder.add(content, 'Z_Position', -50, 50);
+              mPZ.onChange(function(value){ monkey.position.z = value});
+              monkeyFolder.add(content, 'Reset');
+
+              //Grid Mode
               var gridController = gui.add(content, 'GridMode');
               gridController.onChange(function(value){
                 if (value === true) {
@@ -263,7 +299,7 @@
                 }
               });
 
-              gui.add(content, 'Reset');
+              gui.add(content, 'CameraReset');
 
         }
       }
@@ -281,7 +317,6 @@
         }
 
         function onKeyboardEvent(e) {
-
 
         }
 
