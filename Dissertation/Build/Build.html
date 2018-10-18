@@ -34,9 +34,9 @@
         var container;
 
         var camera, controls, scene, renderer;
-        var shadows, ambient, shadowLight;
+        var shadows, ambient, shadowLight1, shadowLight2, shadowLight3, shadowLight4;
 
-        var gridHelper, plane, lightHelper;
+        var gridHelper, plane, lightHelper1, lightHelper2, lightHelper3, lightHelper4;
 
         var windowHalfX = window.innerWidth / 2;
         var windowHalfY = window.innerHeight / 2;
@@ -101,17 +101,38 @@
             scene.add( plane );
 
 
-            /* Shadow Test */
-            //Create a PointLight and turn on shadows for the light
-            shadowLight = new THREE.PointLight( 0xffffff, 0.8, 18 );
-            shadowLight.position.set( 3, 6, 3 );
+            /* Shadow Lights */
+            shadowLight1 = new THREE.PointLight( 0xffffff, 0.8, 18 );
+            shadowLight1.castShadow = true;            // default false
+            shadowLight1.shadow.camera.near = 0.1;       // default
+            shadowLight1.shadow.camera.far = 25;      // default
+            lightHelper1 = new THREE.CameraHelper( shadowLight1.shadow.camera );
 
-            shadowLight.castShadow = true;            // default false
-            shadowLight.shadow.camera.near = 0.1;       // default
-            shadowLight.shadow.camera.far = 25;      // default
-            lightHelper = new THREE.CameraHelper( shadowLight.shadow.camera );
-            scene.add( shadowLight );
+            shadowLight2 = new THREE.PointLight( 0xffffff, 0.8, 18 );
+            shadowLight2.castShadow = true;            // default false
+            shadowLight2.shadow.camera.near = 0.1;       // default
+            shadowLight2.shadow.camera.far = 25;      // default
+            lightHelper2 = new THREE.CameraHelper( shadowLight2.shadow.camera );
 
+            shadowLight3 = new THREE.PointLight( 0xffffff, 0.8, 18 );
+            shadowLight3.castShadow = true;            // default false
+            shadowLight3.shadow.camera.near = 0.1;       // default
+            shadowLight1.shadow.camera.far = 25;      // default
+            lightHelper3 = new THREE.CameraHelper( shadowLight3.shadow.camera );
+
+            shadowLight4 = new THREE.PointLight( 0xffffff, 0.8, 18 );
+            shadowLight4.castShadow = true;            // default false
+            shadowLight4.shadow.camera.near = 0.1;       // default
+            shadowLight4.shadow.camera.far = 25;      // default
+            lightHelper4 = new THREE.CameraHelper( shadowLight4.shadow.camera );
+
+
+            shadowLight1.position.set( 5, 6, 5 );
+            shadowLight2.position.set( 5, 6, -5 );
+            shadowLight3.position.set( -5, 6, 5 );
+            shadowLight4.position.set( -5, 6, -5 );
+
+            scene.add( shadowLight1, shadowLight2, shadowLight3, shadowLight4 );
 
             /* Model */
 
@@ -175,6 +196,7 @@
             controls.enableZoom = false;
             controls.autoRotate = false;
             controls.autoRotateSpeed = 0.5;
+            controls.maxPolarAngle = 1.5;
 
             /* Events */
 
@@ -200,12 +222,12 @@
             switch (e.code) {
               case 'KeyL':
                 if(shadows){
-                  scene.remove( shadowLight );
+                  scene.remove( shadowLight1, shadowLight2, shadowLight3, shadowLight4 );
                   ambient.intensity = 1.0;
                   shadows = false;
                 }
                 else {
-                  scene.add( shadowLight );
+                  scene.add( shadowLight1, shadowLight2, shadowLight3, shadowLight4 );
                   ambient.intensity = 0.5;
                   shadows = true;
                 }
@@ -221,21 +243,24 @@
                 controls.autoRotate = !controls.autoRotate;
                 break;
 
+              //Grid Mode
               case 'KeyG':
                 if (!gridHelperOn) {
 
-                  scene.add( gridHelper );
-                  scene.remove( plane );
-                  scene.add( lightHelper );
+                  scene.add ( gridHelper );
+                  scene.remove ( plane );
+                  scene.add ( lightHelper1, lightHelper2, lightHelper3, lightHelper4 );
                   gridHelperOn = true;
+                  controls.maxPolarAngle = Math.PI;
 
                 }
                 else {
 
-                  scene.remove( gridHelper );
-                  scene.add( plane );
-                  scene.remove( lightHelper );
+                  scene.remove ( gridHelper );
+                  scene.add ( plane );
+                  scene.remove ( lightHelper1, lightHelper2, lightHelper3, lightHelper4 );
                   gridHelperOn = false;
+                  controls.maxPolarAngle = 1.5;
 
                 }
                 break;
