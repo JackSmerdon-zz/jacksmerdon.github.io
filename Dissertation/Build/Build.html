@@ -12,6 +12,7 @@
     <script src="Imports/OrbitControls.js"></script>
     <script src="Imports/OBJLoader.js"></script>
     <script src="Imports/MTLLoader.js"></script>
+    <script src="Imports/dat.gui.js"></script>
 
     <style>
         body {
@@ -28,7 +29,9 @@
 
         //Displays message to the user if webGL is not supported in the browser.
         if (!Detector.webgl) {
+
             Detector.addGetWebGLMessage();
+
         }
 
         var container;
@@ -70,8 +73,8 @@
 
             /* Skybox */
 
-            var cubeGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
-            var cubeMaterials =
+            var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
+            var skyboxMaterials =
             [
               new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Front.png"), side: THREE.DoubleSide}),
               new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Back.png"), side: THREE.DoubleSide}),
@@ -81,9 +84,9 @@
               new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Left.png"), side: THREE.DoubleSide})
             ];
 
-            var cube = new THREE.Mesh(cubeGeometry, cubeMaterials);
+            var skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
 
-            scene.add ( cube );
+            scene.add ( skybox );
 
             /* Grid */
             var gridSize = 50;
@@ -102,27 +105,27 @@
 
             /* Shadow Lights */
             shadowLight1 = new THREE.PointLight( 0xffffff, 0.8, 18 );
-            shadowLight1.castShadow = true;            // default false
-            shadowLight1.shadow.camera.near = 0.1;       // default
-            shadowLight1.shadow.camera.far = 25;      // default
+            shadowLight1.castShadow = true;
+            shadowLight1.shadow.camera.near = 0.1;
+            shadowLight1.shadow.camera.far = 25;
             lightHelper1 = new THREE.CameraHelper( shadowLight1.shadow.camera );
 
             shadowLight2 = new THREE.PointLight( 0xffffff, 0.8, 18 );
-            shadowLight2.castShadow = true;            // default false
-            shadowLight2.shadow.camera.near = 0.1;       // default
-            shadowLight2.shadow.camera.far = 25;      // default
+            shadowLight2.castShadow = true;
+            shadowLight2.shadow.camera.near = 0.1;
+            shadowLight2.shadow.camera.far = 25;
             lightHelper2 = new THREE.CameraHelper( shadowLight2.shadow.camera );
 
             shadowLight3 = new THREE.PointLight( 0xffffff, 0.8, 18 );
-            shadowLight3.castShadow = true;            // default false
-            shadowLight3.shadow.camera.near = 0.1;       // default
-            shadowLight1.shadow.camera.far = 25;      // default
+            shadowLight3.castShadow = true;
+            shadowLight3.shadow.camera.near = 0.1;
+            shadowLight1.shadow.camera.far = 25;
             lightHelper3 = new THREE.CameraHelper( shadowLight3.shadow.camera );
 
             shadowLight4 = new THREE.PointLight( 0xffffff, 0.8, 18 );
-            shadowLight4.castShadow = true;            // default false
-            shadowLight4.shadow.camera.near = 0.1;       // default
-            shadowLight4.shadow.camera.far = 25;      // default
+            shadowLight4.castShadow = true;
+            shadowLight4.shadow.camera.near = 0.1;
+            shadowLight4.shadow.camera.far = 25;
             lightHelper4 = new THREE.CameraHelper( shadowLight4.shadow.camera );
 
 
@@ -134,13 +137,11 @@
             scene.add( shadowLight1, shadowLight2, shadowLight3, shadowLight4 );
 
             /* Model */
-
             var mtlLoader = new THREE.MTLLoader();
             mtlLoader.setPath('Assets/');
             mtlLoader.load( 'Chubby Monkey.mtl', function( materials ) {
 
               materials.preload();
-
 
               var objLoader = new THREE.OBJLoader();
 
@@ -161,7 +162,7 @@
 
                   } );
 
-                /* Wire Frame Monkey */
+                //Wire Frame Monkey
                 wireframeMonkey = monkey.clone();
 
                 wireframeMonkey.traverse( function ( child ) {
@@ -181,7 +182,6 @@
           } );
 
             /* Renderer */
-
             renderer = new THREE.WebGLRenderer();
             //Shadows
             renderer.shadowMap.enabled = true;
@@ -191,12 +191,48 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
 
-
-
             container.appendChild(renderer.domElement);
 
-            /* Controls */
+            /* GUI */
+            var obj = {
+                message: 'Hello World',
+                displayOutline: false,
+                maxSize: 6.0,
+                speed: 5,
+                height: 10,
+                noiseStrength: 10.2,
+                growthSpeed: 0.2,
+                type: 'three',
+                explode: function () {
+                  alert('Bang!');
+                },
+                color0: "#ffae23", // CSS string
+                color1: [ 0, 128, 255 ], // RGB array
+                color2: [ 0, 128, 255, 0.3 ], // RGB with alpha
+                color3: { h: 350, s: 0.9, v: 0.3 } // Hue, saturation, value
+            };
+            var gui = new dat.gui.GUI();
+            gui.remember(obj);
+            gui.add(obj, 'message');
+            gui.add(obj, 'displayOutline');
+            gui.add(obj, 'explode');
+            gui.add(obj, 'maxSize').min(-10).max(10).step(0.25);
+            gui.add(obj, 'height').step(5); // Increment amount
+            // Choose from accepted values
+            gui.add(obj, 'type', [ 'one', 'two', 'three' ] );
+            // Choose from named values
+            gui.add(obj, 'speed', { Stopped: 0, Slow: 0.1, Fast: 5 } );
+            var f1 = gui.addFolder('Colors');
+            f1.addColor(obj, 'color0');
+            f1.addColor(obj, 'color1');
+            f1.addColor(obj, 'color2');
+            f1.addColor(obj, 'color3');
+            var f2 = gui.addFolder('Another Folder');
+            f2.add(obj, 'noiseStrength');
+            var f3 = f2.addFolder('Nested Folder');
+            f3.add(obj, 'growthSpeed');
 
+            /* Controls */
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.25;
@@ -208,7 +244,6 @@
             controls.maxPolarAngle = 1.5;
 
             /* Events */
-
             window.addEventListener('resize', onWindowResize, false);
             window.addEventListener('keydown', onKeyboardEvent, false);
 
