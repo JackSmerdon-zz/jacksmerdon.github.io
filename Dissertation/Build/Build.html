@@ -283,8 +283,6 @@
                   scene.add ( lightHelper1, lightHelper2, lightHelper3, lightHelper4 );
                   gridHelperOn = true;
                   controls.maxPolarAngle = Math.PI;
-                  scene.add (wireframeMonkey);
-                  scene.remove(monkey);
                 }
 
                 else {
@@ -294,8 +292,6 @@
                   scene.remove ( lightHelper1, lightHelper2, lightHelper3, lightHelper4 );
                   gridHelperOn = false;
                   controls.maxPolarAngle = 1.5;
-                  scene.remove(wireframeMonkey);
-                  scene.add(monkey);
                 }
               });
 
