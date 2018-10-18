@@ -54,9 +54,9 @@
             /* Camera */
 
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-            camera.position.z = 10;
-            camera.position.y = 5;
-            camera.position.x = 10;
+            camera.position.z = 15;
+            camera.position.y = 7;
+            camera.position.x = 0;
 
             /* Scene and Lighting*/
 
@@ -200,7 +200,9 @@
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.25;
-            controls.enableZoom = false;
+            controls.enableZoom = true;
+            controls.maxDistance = 1500;
+            controls.minDistance = 3;
             controls.autoRotate = false;
             controls.autoRotateSpeed = 0.5;
             controls.maxPolarAngle = 1.5;
