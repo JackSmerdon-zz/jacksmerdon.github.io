@@ -213,6 +213,7 @@
               this.Lighting = true;
               this.AutoRotate = false;
               this.Reset = function(){ controls.reset(); };
+              this.GridMode = false;
 
             };
 
@@ -237,37 +238,9 @@
               var aRController = gui.add(content, 'AutoRotate');
               aRController.onChange(function(value){ controls.autoRotate = !controls.autoRotate;});
 
-        }
-      }
-
-        function onWindowResize() {
-
-            windowHalfX = window.innerWidth / 2;
-            windowHalfY = window.innerHeight / 2;
-
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-
-            renderer.setSize(window.innerWidth, window.innerHeight);
-
-        }
-
-        function onKeyboardEvent(e) {
-
-            switch (e.code) {
-              //Resets model to original position
-              case 'KeyR':
-                controls.reset();
-                break;
-
-              //Toggles auto-rotation
-              case 'KeyE':
-                controls.autoRotate = !controls.autoRotate;
-                break;
-
-              //Grid Mode
-              case 'KeyG':
-                if (!gridHelperOn) {
+              var gridController = gui.add(content, 'GridMode');
+              gridController.onChange(function(value){
+                if (value === true) {
 
                   scene.add ( gridHelper );
                   scene.remove ( plane );
@@ -288,10 +261,28 @@
                   scene.remove(wireframeMonkey);
                   scene.add(monkey);
                 }
+              });
 
-                break;
+              gui.add(content, 'Reset');
 
-            }
+        }
+      }
+
+        function onWindowResize() {
+
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+        }
+
+        function onKeyboardEvent(e) {
+
+
         }
 
         function animate() {
