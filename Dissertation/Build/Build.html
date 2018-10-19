@@ -41,6 +41,8 @@
 
         var gridHelper, plane, lightHelper1, lightHelper2, lightHelper3, lightHelper4;
 
+        var planeSize;
+
         var monkey, wireframeMonkey;
 
         var windowHalfX = window.innerWidth / 2;
@@ -106,6 +108,8 @@
             plane.rotation.x = 92.69;
             plane.receiveShadow = true;
             scene.add( plane );
+            planeSize = new THREE.Box3().setFromObject( plane );
+
 
             /* Shadow Lights */
             shadowLight1 = new THREE.PointLight( 0xffffff, 0.8, 18 );
@@ -214,12 +218,8 @@
             var guiObject = function() {
               this.Lighting = true;
               this.AutoRotate = false;
-              this.X_Rotation = 0;
-              this.Y_Rotation = 0;
-              this.Z_Rotation = 0;
-              this.X_Position = 0;
-              this.Y_Position = 0;
-              this.Z_Position = 0;
+
+              //Monkey Folder
               this.Reset = function() {
                 monkey.rotation.x = 0;
                 monkey.rotation.y = 0;
@@ -227,15 +227,38 @@
                 monkey.position.x = 0;
                 monkey.position.y = 0;
                 monkey.position.z = 0;
+                monkey.scale.x = 1;
+                monkey.scale.y = 1;
+                monkey.scale.z = 1;
               }
+              //Lights Folder
               this.GridMode = false;
               this.CameraReset = function(){ controls.reset(); };
+            };
 
-
+            var monkeyRotate = function() {
+              this.X = 0;
+              this.Y = 0;
+              this.Z = 0;
+            };
+            var monkeyTranslate = function() {
+              this.X = 0;
+              this.Y = 0;
+              this.Z = 0;
+            };
+            var monkeyScale = function() {
+              this.All = 1.0;
+              this.X = 1.0;
+              this.Y = 1.0;
+              this.Z = 1.0;
             };
 
             window.onload = function() {
               var content = new guiObject();
+              var monkeyR = new monkeyRotate();
+              var monkeyT = new monkeyTranslate();
+              var monkeyS = new monkeyScale();
+
               var gui = new dat.GUI();
 
               //Enable Lighting
@@ -255,23 +278,45 @@
 
               //Auto Rotation
               var aRController = gui.add(content, 'AutoRotate');
-              aRController.onChange(function(value){ controls.autoRotate = !controls.autoRotate;});
+              aRController.onChange(function(value){ controls.autoRotate = !controls.autoRotate; });
 
               //Monkey Folder
               var monkeyFolder = gui.addFolder('Monkey');
-              var mRX  = monkeyFolder.add(content, 'X_Rotation', -180, 180);
-              mRX.onChange(function(value){ monkey.rotation.x = toRadians(value)});
-              var mRY  = monkeyFolder.add(content, 'Y_Rotation', -180, 180);
-              mRY.onChange(function(value){ monkey.rotation.y = toRadians(value)});
-              var mRZ  = monkeyFolder.add(content, 'Z_Rotation', -180, 180);
-              mRZ.onChange(function(value){ monkey.rotation.z = toRadians(value)});
-              var mPX  = monkeyFolder.add(content, 'X_Position', -50, 50);
-              mPX.onChange(function(value){ monkey.position.x = value});
-              var mPY  = monkeyFolder.add(content, 'Y_Position', -50, 50);
-              mPY.onChange(function(value){ monkey.position.y = value});
-              var mPZ  = monkeyFolder.add(content, 'Z_Position', -50, 50);
-              mPZ.onChange(function(value){ monkey.position.z = value});
-              monkeyFolder.add(content, 'Reset');
+              var transformationsFolder = monkeyFolder.addFolder('Transformations')
+              transformationsFolder.add(content, 'Reset');
+
+              var rotationFolder = transformationsFolder.addFolder('Rotation');
+              var mRX  = rotationFolder.add(monkeyR, 'X', -180, 180);
+              mRX.onChange(function(value){ monkey.rotation.x = toRadians(value); });
+              var mRY  = rotationFolder.add(monkeyR, 'Y', -180, 180);
+              mRY.onChange(function(value){ monkey.rotation.y = toRadians(value); });
+              var mRZ  = rotationFolder.add(monkeyR, 'Z', -180, 180);
+              mRZ.onChange(function(value){ monkey.rotation.z = toRadians(value); });
+
+
+              var translationFolder = transformationsFolder.addFolder('Translation');
+              var mTX  = translationFolder.add(monkeyT, 'X', planeSize.min.x, -planeSize.min.x);
+              mTX.onChange(function(value){ monkey.position.x = value; });
+              var mTY  = translationFolder.add(monkeyT, 'Y', -3, 25);
+              mTY.onChange(function(value){ monkey.position.y = value; });
+              var mTZ  = translationFolder.add(monkeyT, 'Z', planeSize.min.x, -planeSize.min.x);
+              mTZ.onChange(function(value){ monkey.position.z = value; });
+
+              var scaleFolder = transformationsFolder.addFolder('Scale');
+              var mSA = scaleFolder.add(monkeyS, 'All', 0.1, 10);
+              mSA.onChange(function(value){
+
+                monkey.scale.x = value;
+                monkey.scale.y = value;
+                monkey.scale.z = value;
+
+              });
+              var mSX  = scaleFolder.add(monkeyS, 'X', 0.1, 10);
+              mSX.onChange(function(value){ monkey.scale.x = value; });
+              var mSY  = scaleFolder.add(monkeyS, 'Y', 0.1, 10);
+              mSY.onChange(function(value){ monkey.scale.y = value; });
+              var mSZ  = scaleFolder.add(monkeyS, 'Z', 0.1, 10);
+              mSZ.onChange(function(value){ monkey.scale.z = value; });
 
               //Grid Mode
               var gridController = gui.add(content, 'GridMode');
