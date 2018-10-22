@@ -43,7 +43,9 @@
 
         var planeSize;
 
-        var monkey, wireframeMonkey;
+        var model, wireframeModel, cloneModel;
+
+        var modelMaterials = {};
 
         var windowHalfX = window.innerWidth / 2;
         var windowHalfY = window.innerHeight / 2;
@@ -157,8 +159,9 @@
               objLoader.setPath('Assets/');
               objLoader.load( 'Chubby Monkey.obj', function ( object ) {
 
-                monkey = object;
-                monkey.traverse( function ( child ) {
+                model = object;
+
+                model.traverse( function ( child ) {
 
                   if ( child instanceof THREE.Mesh ) {
 
@@ -168,21 +171,20 @@
 
                   } );
 
-                //Wire Frame Monkey
-                wireframeMonkey = monkey.clone();
-                wireframeMonkey.traverse( function ( child ) {
+                  wireframeModel = model.clone();
+                  cloneModel = model.clone();
 
-                  if ( child instanceof THREE.Mesh ) {
+                  wireframeModel.traverse( function ( child ) {
 
-                    var geo = new THREE.WireframeGeometry( child.geometry );
-                    var mat = new THREE.LineBasicMaterial( { color: 0x808080, linewidth: 2 } );
-                    var wireframe = new THREE.LineSegments( geo, mat );
-                    child.add( wireframe );
+                    if ( child instanceof THREE.Mesh ) {
 
-                  }
-                } );
+                      child.material = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe : true  }  );
 
-                scene.add( monkey );
+                    }
+
+                    } );
+
+                scene.add( model );
 
               } );
           } );
@@ -219,34 +221,37 @@
               this.Lighting = true;
               this.AutoRotate = false;
 
-              //Monkey Folder
+              //Model Folder
               this.Reset = function() {
-                monkey.rotation.x = 0;
-                monkey.rotation.y = 0;
-                monkey.rotation.z = 0;
-                monkey.position.x = 0;
-                monkey.position.y = 0;
-                monkey.position.z = 0;
-                monkey.scale.x = 1;
-                monkey.scale.y = 1;
-                monkey.scale.z = 1;
+                model.rotation.x = 0;
+                model.rotation.y = 0;
+                model.rotation.z = 0;
+                model.position.x = 0;
+                model.position.y = 0;
+                model.position.z = 0;
+                model.scale.x = 1;
+                model.scale.y = 1;
+                model.scale.z = 1;
               }
+
+              this.WireFrame = false;
+
               //Lights Folder
               this.GridMode = false;
               this.CameraReset = function(){ controls.reset(); };
             };
 
-            var monkeyRotate = function() {
+            var modelRotate = function() {
               this.X = 0;
               this.Y = 0;
               this.Z = 0;
             };
-            var monkeyTranslate = function() {
+            var modelTranslate = function() {
               this.X = 0;
               this.Y = 0;
               this.Z = 0;
             };
-            var monkeyScale = function() {
+            var modelScale = function() {
               this.All = 1.0;
               this.X = 1.0;
               this.Y = 1.0;
@@ -255,9 +260,9 @@
 
             window.onload = function() {
               var content = new guiObject();
-              var monkeyR = new monkeyRotate();
-              var monkeyT = new monkeyTranslate();
-              var monkeyS = new monkeyScale();
+              var modelR = new modelRotate();
+              var modelT = new modelTranslate();
+              var modelS = new modelScale();
 
               var gui = new dat.GUI();
 
@@ -280,43 +285,86 @@
               var aRController = gui.add(content, 'AutoRotate');
               aRController.onChange(function(value){ controls.autoRotate = !controls.autoRotate; });
 
-              //Monkey Folder
-              var monkeyFolder = gui.addFolder('Monkey');
-              var transformationsFolder = monkeyFolder.addFolder('Transformations')
+              //model Folder
+              var modelFolder = gui.addFolder('Model');
+              var wFController = modelFolder.add(content, 'WireFrame');
+              wFController.onChange(function(value){
+                var tempRot = new THREE.Vector3( );
+                var tempSca = new THREE.Vector3( );
+                var tempTra = new THREE.Vector3( );
+
+                tempRot.x = model.rotation.x;
+                tempRot.y = model.rotation.y;
+                tempRot.z = model.rotation.z;
+                tempTra.x = model.position.x;
+                tempTra.y = model.position.y;
+                tempTra.z = model.position.z;
+                tempSca.x = model.scale.x;
+                tempSca.y = model.scale.y;
+                tempSca.z = model.scale.z;
+
+                if (value == true){
+
+                  scene.remove(model);
+                  model = wireframeModel.clone();
+                  scene.add(model);
+
+                }
+                else {
+
+                  scene.remove(model);
+                  model = cloneModel.clone();
+                  scene.add(model);
+
+                }
+
+                model.rotation.x = tempRot.x;
+                model.rotation.y = tempRot.y;
+                model.rotation.z = tempRot.z;
+                model.position.x = tempTra.x;
+                model.position.y = tempTra.y;
+                model.position.z = tempTra.z;
+                model.scale.x = tempSca.x;
+                model.scale.y = tempSca.y;
+                model.scale.z = tempSca.z;
+
+
+              });
+              var transformationsFolder = modelFolder.addFolder('Transformations')
               transformationsFolder.add(content, 'Reset');
 
               var rotationFolder = transformationsFolder.addFolder('Rotation');
-              var mRX  = rotationFolder.add(monkeyR, 'X', -180, 180);
-              mRX.onChange(function(value){ monkey.rotation.x = toRadians(value); });
-              var mRY  = rotationFolder.add(monkeyR, 'Y', -180, 180);
-              mRY.onChange(function(value){ monkey.rotation.y = toRadians(value); });
-              var mRZ  = rotationFolder.add(monkeyR, 'Z', -180, 180);
-              mRZ.onChange(function(value){ monkey.rotation.z = toRadians(value); });
+              var mRX  = rotationFolder.add(modelR, 'X', -180, 180);
+              mRX.onChange(function(value){ model.rotation.x = toRadians(value); });
+              var mRY  = rotationFolder.add(modelR, 'Y', -180, 180);
+              mRY.onChange(function(value){ model.rotation.y = toRadians(value); });
+              var mRZ  = rotationFolder.add(modelR, 'Z', -180, 180);
+              mRZ.onChange(function(value){ model.rotation.z = toRadians(value); });
 
 
               var translationFolder = transformationsFolder.addFolder('Translation');
-              var mTX  = translationFolder.add(monkeyT, 'X', planeSize.min.x, -planeSize.min.x);
-              mTX.onChange(function(value){ monkey.position.x = value; });
-              var mTY  = translationFolder.add(monkeyT, 'Y', -3, 25);
-              mTY.onChange(function(value){ monkey.position.y = value; });
-              var mTZ  = translationFolder.add(monkeyT, 'Z', planeSize.min.x, -planeSize.min.x);
-              mTZ.onChange(function(value){ monkey.position.z = value; });
+              var mTX  = translationFolder.add(modelT, 'X', planeSize.min.x, -planeSize.min.x);
+              mTX.onChange(function(value){ model.position.x = value; });
+              var mTY  = translationFolder.add(modelT, 'Y', -3, 25);
+              mTY.onChange(function(value){ model.position.y = value; });
+              var mTZ  = translationFolder.add(modelT, 'Z', planeSize.min.x, -planeSize.min.x);
+              mTZ.onChange(function(value){ model.position.z = value; });
 
               var scaleFolder = transformationsFolder.addFolder('Scale');
-              var mSA = scaleFolder.add(monkeyS, 'All', 0.1, 10);
+              var mSA = scaleFolder.add(modelS, 'All', 0.1, 10);
               mSA.onChange(function(value){
 
-                monkey.scale.x = value;
-                monkey.scale.y = value;
-                monkey.scale.z = value;
+                model.scale.x = value;
+                model.scale.y = value;
+                model.scale.z = value;
 
               });
-              var mSX  = scaleFolder.add(monkeyS, 'X', 0.1, 10);
-              mSX.onChange(function(value){ monkey.scale.x = value; });
-              var mSY  = scaleFolder.add(monkeyS, 'Y', 0.1, 10);
-              mSY.onChange(function(value){ monkey.scale.y = value; });
-              var mSZ  = scaleFolder.add(monkeyS, 'Z', 0.1, 10);
-              mSZ.onChange(function(value){ monkey.scale.z = value; });
+              var mSX  = scaleFolder.add(modelS, 'X', 0.1, 10);
+              mSX.onChange(function(value){ model.scale.x = value; });
+              var mSY  = scaleFolder.add(modelS, 'Y', 0.1, 10);
+              mSY.onChange(function(value){ model.scale.y = value; });
+              var mSZ  = scaleFolder.add(modelS, 'Z', 0.1, 10);
+              mSZ.onChange(function(value){ model.scale.z = value; });
 
               //Grid Mode
               var gridController = gui.add(content, 'GridMode');
