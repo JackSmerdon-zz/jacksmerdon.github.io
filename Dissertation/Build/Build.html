@@ -1,429 +1,434 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>WebGL 3D Model Viewer</title>
 
-    <title>WebGL 3D Model Viewer</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Remove/replace this for X and = in menu -->
+  <script defer src="http://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
 
-    <script src="Imports/three.js"></script>
-    <script src="Imports/Detector.js"></script>
-    <script src="Imports/OrbitControls.js"></script>
-    <script src="Imports/OBJLoader.js"></script>
-    <script src="Imports/MTLLoader.js"></script>
-    <script src="Imports/dat.gui.js"></script>
-
-    <style>
-        body {
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
-            background: hsl(0, 0%, 10%);
-        }
-    </style>
-
+  <link rel="stylesheet" href="style.css">
+  <script>
+  function openSlideMenu() {
+    document.getElementById('SettingsMenu').style.width = '250px';
+    document.getElementById('SideBar').style.marginLeft = '250px';
+  }
+  function closeSlideMenu() {
+    document.getElementById('SettingsMenu').style.width = '0px';
+    document.getElementById('SideBar').style.marginLeft = '0px';
+  }
+  </script>
 </head>
 <body>
-    <script>
-
-        //Displays message to the user if webGL is not supported in the browser.
-        if (!Detector.webgl) {
-
-            Detector.addGetWebGLMessage();
-
-        }
-
-        var container;
-
-        var camera, controls, scene, renderer;
-        var shadows, ambient, shadowLight1, shadowLight2, shadowLight3, shadowLight4;
-
-        var gridHelper, plane, lightHelper1, lightHelper2, lightHelper3, lightHelper4;
-
-        var planeSize;
-
-        var model, wireframeModel, cloneModel;
-
-        var modelMaterials = {};
-
-        var windowHalfX = window.innerWidth / 2;
-        var windowHalfY = window.innerHeight / 2;
-
-        init();
-        animate();
-
-        function toRadians (angle) {
-          return angle * (Math.PI / 180);
-        }
-
-        function init() {
-
-            container = document.createElement('div');
-            document.body.appendChild(container);
-
-            /* Camera */
-
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-            camera.position.z = 15;
-            camera.position.y = 7;
-            camera.position.x = 0;
-
-            /* Scene and Lighting*/
-
-            scene = new THREE.Scene();
-
-            shadows = true;
-
-            ambient = new THREE.AmbientLight(0xffffff, 1.0);
-            ambient.intensity = 0.5;
-            scene.add(ambient);
-
-            /* Skybox */
-
-            var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
-            var skyboxMaterials =
-            [
-              new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Front.png"), side: THREE.DoubleSide}),
-              new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Back.png"), side: THREE.DoubleSide}),
-              new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Up.png"), side: THREE.DoubleSide}),
-              new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Down.png"), side: THREE.DoubleSide}),
-              new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Right.png"), side: THREE.DoubleSide}),
-              new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Left.png"), side: THREE.DoubleSide})
-            ];
-
-            var skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
-
-            scene.add ( skybox );
-
-            /* Grid */
-            var gridSize = 50;
-            var divisions = 50;
-
-            gridHelper = new THREE.GridHelper( gridSize, divisions );
-            gridHelperOn = false;
-
-            /* Plane */
-            var planeGeometry = new THREE.PlaneGeometry( 50, 50, 1, 1 );
-            var planeMaterial = new THREE.MeshPhongMaterial( {color: 0x707070, side: THREE.DoubleSide} );
-            plane = new THREE.Mesh( planeGeometry, planeMaterial );
-            plane.rotation.x = 92.69;
-            plane.receiveShadow = true;
-            scene.add( plane );
-            planeSize = new THREE.Box3().setFromObject( plane );
-
-
-            /* Shadow Lights */
-            shadowLight1 = new THREE.PointLight( 0xffffff, 0.8, 18 );
-            shadowLight1.castShadow = true;
-            shadowLight1.shadow.camera.near = 0.1;
-            shadowLight1.shadow.camera.far = 25;
-            lightHelper1 = new THREE.CameraHelper( shadowLight1.shadow.camera );
-
-            shadowLight2 = new THREE.PointLight( 0xffffff, 0.8, 18 );
-            shadowLight2.castShadow = true;
-            shadowLight2.shadow.camera.near = 0.1;
-            shadowLight2.shadow.camera.far = 25;
-            lightHelper2 = new THREE.CameraHelper( shadowLight2.shadow.camera );
-
-            shadowLight3 = new THREE.PointLight( 0xffffff, 0.8, 18 );
-            shadowLight3.castShadow = true;
-            shadowLight3.shadow.camera.near = 0.1;
-            shadowLight1.shadow.camera.far = 25;
-            lightHelper3 = new THREE.CameraHelper( shadowLight3.shadow.camera );
-
-            shadowLight4 = new THREE.PointLight( 0xffffff, 0.8, 18 );
-            shadowLight4.castShadow = true;
-            shadowLight4.shadow.camera.near = 0.1;
-            shadowLight4.shadow.camera.far = 25;
-            lightHelper4 = new THREE.CameraHelper( shadowLight4.shadow.camera );
-
-
-            shadowLight1.position.set( 5, 6, 5 );
-            shadowLight2.position.set( 5, 6, -5 );
-            shadowLight3.position.set( -5, 6, 5 );
-            shadowLight4.position.set( -5, 6, -5 );
-
-            scene.add( shadowLight1, shadowLight2, shadowLight3, shadowLight4 );
-
-            /* Model */
-            var mtlLoader = new THREE.MTLLoader();
-            mtlLoader.setPath('Assets/');
-            mtlLoader.load( 'Chubby Monkey.mtl', function( materials ) {
-
-              materials.preload();
-
-              var objLoader = new THREE.OBJLoader();
-
-              objLoader.setMaterials( materials );
-              objLoader.setPath('Assets/');
-              objLoader.load( 'Chubby Monkey.obj', function ( object ) {
-
-                model = object;
-
-                model.traverse( function ( child ) {
-
-                  if ( child instanceof THREE.Mesh ) {
-
-                    child.castShadow = true;
-
-                  }
-
-                  } );
-
-                  wireframeModel = model.clone();
-                  cloneModel = model.clone();
-
-                  wireframeModel.traverse( function ( child ) {
-
-                    if ( child instanceof THREE.Mesh ) {
-
-                      child.material = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe : true  }  );
-
-                    }
-
-                    } );
-
-                scene.add( model );
-
-              } );
-          } );
-
-            /* Renderer */
-            renderer = new THREE.WebGLRenderer();
-            //Shadows
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.BasicShadowMap; // default THREE.PCFShadowMap
-
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
-
-            container.appendChild(renderer.domElement);
-
-            /* Controls */
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.25;
-            controls.enableZoom = true;
-            controls.maxDistance = 1500;
-            controls.minDistance = 3;
-            controls.autoRotate = false;
-            controls.autoRotateSpeed = -0.5;
-            controls.maxPolarAngle = 1.5;
-
-            /* Events */
-            window.addEventListener('resize', onWindowResize, false);
-            window.addEventListener('keydown', onKeyboardEvent, false);
-
-            /* GUI */
-            var guiObject = function() {
-              this.Lighting = true;
-              this.AutoRotate = false;
-
-              //Model Folder
-              this.Reset = function() {
-                model.rotation.x = 0;
-                model.rotation.y = 0;
-                model.rotation.z = 0;
-                model.position.x = 0;
-                model.position.y = 0;
-                model.position.z = 0;
-                model.scale.x = 1;
-                model.scale.y = 1;
-                model.scale.z = 1;
-              }
-
-              this.WireFrame = false;
-
-              //Lights Folder
-              this.GridMode = false;
-              this.CameraReset = function(){ controls.reset(); };
-            };
-
-            var modelRotate = function() {
-              this.X = 0;
-              this.Y = 0;
-              this.Z = 0;
-            };
-            var modelTranslate = function() {
-              this.X = 0;
-              this.Y = 0;
-              this.Z = 0;
-            };
-            var modelScale = function() {
-              this.All = 1.0;
-              this.X = 1.0;
-              this.Y = 1.0;
-              this.Z = 1.0;
-            };
-
-            window.onload = function() {
-              var content = new guiObject();
-              var modelR = new modelRotate();
-              var modelT = new modelTranslate();
-              var modelS = new modelScale();
-
-              var gui = new dat.GUI();
-
-              //Enable Lighting
-              var lightController = gui.add(content, 'Lighting');
-              lightController.onChange(function(value){
-                if( value == false ) {
-                    scene.remove( shadowLight1, shadowLight2, shadowLight3, shadowLight4 );
-                    ambient.intensity = 1.0;
-                    shadows = false;
-                  }
-                  else {
-                    scene.add( shadowLight1, shadowLight2, shadowLight3, shadowLight4 );
-                    ambient.intensity = 0.5;
-                    shadows = true;
-                  }
-              });
-
-              //Auto Rotation
-              var aRController = gui.add(content, 'AutoRotate');
-              aRController.onChange(function(value){ controls.autoRotate = !controls.autoRotate; });
-
-              //model Folder
-              var modelFolder = gui.addFolder('Model');
-              var wFController = modelFolder.add(content, 'WireFrame');
-              wFController.onChange(function(value){
-                var tempRot = new THREE.Vector3( );
-                var tempSca = new THREE.Vector3( );
-                var tempTra = new THREE.Vector3( );
-                
-                tempRot.x = model.rotation.x;
-                tempRot.y = model.rotation.y;
-                tempRot.z = model.rotation.z;
-                tempTra.x = model.position.x;
-                tempTra.y = model.position.y;
-                tempTra.z = model.position.z;
-                tempSca.x = model.scale.x;
-                tempSca.y = model.scale.y;
-                tempSca.z = model.scale.z;
-
-                if (value == true){
-
-                  scene.remove(model);
-                  model = wireframeModel.clone();
-                  scene.add(model);
-
-                }
-                else {
-
-                  scene.remove(model);
-                  model = cloneModel.clone();
-                  scene.add(model);
-
-                }
-
-                model.rotation.x = tempRot.x;
-                model.rotation.y = tempRot.y;
-                model.rotation.z = tempRot.z;
-                model.position.x = tempTra.x;
-                model.position.y = tempTra.y;
-                model.position.z = tempTra.z;
-                model.scale.x = tempSca.x;
-                model.scale.y = tempSca.y;
-                model.scale.z = tempSca.z;
-
-
-              });
-              var transformationsFolder = modelFolder.addFolder('Transformations')
-              transformationsFolder.add(content, 'Reset');
-
-              var rotationFolder = transformationsFolder.addFolder('Rotation');
-              var mRX  = rotationFolder.add(modelR, 'X', -180, 180);
-              mRX.onChange(function(value){ model.rotation.x = toRadians(value); });
-              var mRY  = rotationFolder.add(modelR, 'Y', -180, 180);
-              mRY.onChange(function(value){ model.rotation.y = toRadians(value); });
-              var mRZ  = rotationFolder.add(modelR, 'Z', -180, 180);
-              mRZ.onChange(function(value){ model.rotation.z = toRadians(value); });
-
-
-              var translationFolder = transformationsFolder.addFolder('Translation');
-              var mTX  = translationFolder.add(modelT, 'X', planeSize.min.x, -planeSize.min.x);
-              mTX.onChange(function(value){ model.position.x = value; });
-              var mTY  = translationFolder.add(modelT, 'Y', -3, 25);
-              mTY.onChange(function(value){ model.position.y = value; });
-              var mTZ  = translationFolder.add(modelT, 'Z', planeSize.min.x, -planeSize.min.x);
-              mTZ.onChange(function(value){ model.position.z = value; });
-
-              var scaleFolder = transformationsFolder.addFolder('Scale');
-              var mSA = scaleFolder.add(modelS, 'All', 0.1, 10);
-              mSA.onChange(function(value){
-
-                model.scale.x = value;
-                model.scale.y = value;
-                model.scale.z = value;
-
-              });
-              var mSX  = scaleFolder.add(modelS, 'X', 0.1, 10);
-              mSX.onChange(function(value){ model.scale.x = value; });
-              var mSY  = scaleFolder.add(modelS, 'Y', 0.1, 10);
-              mSY.onChange(function(value){ model.scale.y = value; });
-              var mSZ  = scaleFolder.add(modelS, 'Z', 0.1, 10);
-              mSZ.onChange(function(value){ model.scale.z = value; });
-
-              //Grid Mode
-              var gridController = gui.add(content, 'GridMode');
-              gridController.onChange(function(value){
-                if (value === true) {
-
-                  scene.add ( gridHelper );
-                  scene.remove ( plane );
-                  scene.add ( lightHelper1, lightHelper2, lightHelper3, lightHelper4 );
-                  gridHelperOn = true;
-                  controls.maxPolarAngle = Math.PI;
-                }
-
-                else {
-
-                  scene.remove ( gridHelper );
-                  scene.add ( plane );
-                  scene.remove ( lightHelper1, lightHelper2, lightHelper3, lightHelper4 );
-                  gridHelperOn = false;
-                  controls.maxPolarAngle = 1.5;
-                }
-              });
-
-              gui.add(content, 'CameraReset');
-
-        }
+  <div id="SideBar">
+    <span class="slide">
+      <a href="#" onclick="openSlideMenu()">
+        <i class="fas fa-bars"></i>
+      </a>
+    </span>
+
+    <div id="SettingsMenu" class="nav">
+      <a href="#" class="close" onclick="closeSlideMenu()">
+        <i class="fas fa-times"></i>
+      </a>
+      <a href="#">Scene Settings</a>
+      <a href="#">Models</a>
+      <a href="#">Lighting</a>
+      <a href="#">Rendering Modes</a>
+      <a href="#">Skybox</a>
+    </div>
+  </div>
+
+  <!-- Includes -->
+  <script src="Imports/three.js"></script>
+  <script src="Imports/Detector.js"></script>
+  <script src="Imports/OrbitControls.js"></script>
+  <script src="Imports/OBJLoader.js"></script>
+  <script src="Imports/MTLLoader.js"></script>
+  <script src="Imports/dat.gui.js"></script>
+
+  <script>
+  //Displays message to the user if webGL is not supported in the browser.
+  if (!Detector.webgl) {
+    Detector.addGetWebGLMessage();
+  }
+
+  var container = document.createElement('div');
+  document.body.appendChild(container);
+
+  var camera, controls, renderer;
+  var shadowSwitch = true;
+  var ambientLight;
+  var pointLights = [];
+
+  var gridHelper, plane;
+  var lightHelpers = [];
+
+  var planeSize;
+
+  var model, wireframeModel, cloneModel;
+
+  var windowHalfX = window.innerWidth / 2;
+  var windowHalfY = window.innerHeight / 2;
+
+  var scene = new THREE.Scene();
+
+  init();
+  animate();
+  launchGUI();
+
+  function toRadians (angle) {
+    return angle * (Math.PI / 180);
+  }
+
+  function drawPlane(x,y) {
+    var planeGeometry = new THREE.PlaneGeometry( x, y, 1, 1 );
+    var planeMaterial = new THREE.MeshPhongMaterial( {color: 0x707070, side: THREE.DoubleSide} );
+    plane = new THREE.Mesh( planeGeometry, planeMaterial );
+    plane.rotation.x = toRadians(90);
+    plane.receiveShadow = true;
+    scene.add( plane );
+    planeSize = new THREE.Box3().setFromObject( plane );
+
+  }
+
+  function defaultLight(){
+    var light = new THREE.DirectionalLight(0xffe6b8, 1)
+    light.position.set(10,10,10)
+    var target = new THREE.Object3D()
+    target.position.set(0,0,0)
+    light.target = target
+    scene.add(light.target)
+
+    light.shadow.camera.left = -10
+    light.shadow.camera.right = 10
+    light.shadow.camera.top = 10
+    light.shadow.camera.bottom = -10
+    light.shadow.camera.near = 10
+    light.shadow.camera.far = 400
+    light.shadow.mapSize.width = 2048
+    light.shadow.mapSize.height = 2048
+    light.castShadow = true
+
+    //Create a helper for the shadow camera (optional)
+    var helper = new THREE.CameraHelper( light.shadow.camera );
+
+
+
+    ambient = new THREE.AmbientLight(0xffffff, 1.0);
+    ambient.intensity = 0.5;
+    scene.add(ambient);
+    scene.add(light);
+  }
+
+  function setupCamera(x, y, z, near, far) {
+    /* Camera */
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, near, far);
+    camera.position.x = x;
+    camera.position.y = y;
+    camera.position.z = z;
+
+    /* Renderer */
+    renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
+
+    container.appendChild(renderer.domElement);
+
+    /* Controls */
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.enableZoom = true;
+    controls.maxDistance = 1500;
+    controls.minDistance = 3;
+    controls.autoRotate = false;
+    controls.autoRotateSpeed = -0.5;
+    controls.maxPolarAngle = 1.5;
+  }
+
+  function defaultSkybox() {
+    var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
+    var skyboxMaterials =
+    [
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Front.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Back.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Up.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Down.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Right.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Left.png"), side: THREE.DoubleSide})
+    ];
+
+    var skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
+
+    scene.add (skybox);
+  }
+
+  function drawGrid(size, divs){
+    /* Grid */
+    var gridSize = size;
+    var divisions = divs;
+
+    gridHelper = new THREE.GridHelper(gridSize, divisions);
+  }
+
+  function loadDefaultModel() {
+    var mtlLoader = new THREE.MTLLoader();
+    mtlLoader.setPath('Assets/');
+    mtlLoader.load( 'Chubby Monkey.mtl', function( materials )
+    {
+      materials.preload();
+
+      var objLoader = new THREE.OBJLoader();
+
+      objLoader.setMaterials( materials );
+      objLoader.setPath('Assets/');
+      objLoader.load( 'Chubby Monkey.obj', function ( object ) {
+
+        model = object;
+
+        model.traverse( function ( child )
+        {
+          if (child instanceof THREE.Mesh)
+          {
+            child.castShadow = true;
+          }
+        });
+
+        wireframeModel = model.clone();
+        cloneModel = model.clone();
+
+        wireframeModel.traverse( function ( child )
+        {
+          if ( child instanceof THREE.Mesh )
+          {
+            child.material = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe : true  }  );
+          }
+        } );
+        scene.add( model );
+      } );
+    } );
+  }
+
+  function init() {
+    //Updated clean code section
+
+    drawPlane(50, 50);
+    defaultLight();
+    setupCamera(0, 7, 15, 0.1, 10000);
+    defaultSkybox();
+    drawGrid(50, 50);
+    loadDefaultModel();
+
+    /* Model */
+    
+
+    /* Events */
+    window.addEventListener('resize', onWindowResize, false);
+  }
+
+  function onWindowResize() {
+    windowHalfX = window.innerWidth / 2;
+    windowHalfY = window.innerHeight / 2;
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    render();
+  }
+
+  function render() {
+    renderer.render(scene, camera);
+  }
+
+  function launchGUI () {
+    var guiObject = function()
+    {
+      this.Lighting = true;
+      this.AutoRotate = false;
+
+      //Model Folder
+      this.Reset = function() {
+        model.rotation.x = 0;
+        model.rotation.y = 0;
+        model.rotation.z = 0;
+        model.position.x = 0;
+        model.position.y = 0;
+        model.position.z = 0;
+        model.scale.x = 1;
+        model.scale.y = 1;
+        model.scale.z = 1;
       }
 
-        function onWindowResize() {
+      this.WireFrame = false;
 
-            windowHalfX = window.innerWidth / 2;
-            windowHalfY = window.innerHeight / 2;
+      //Lights Folder
+      this.GridMode = false;
+      this.CameraReset = function() { controls.reset(); };
+    };
 
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
+    var modelRotate = function() {
+      this.X = 0;
+      this.Y = 0;
+      this.Z = 0;
+    };
+    var modelTranslate = function() {
+      this.X = 0;
+      this.Y = 0;
+      this.Z = 0;
+    };
+    var modelScale = function() {
+      this.All = 1.0;
+      this.X = 1.0;
+      this.Y = 1.0;
+      this.Z = 1.0;
+    };
 
-            renderer.setSize(window.innerWidth, window.innerHeight);
+    window.onload = function() {
+      var content = new guiObject();
+      var modelR = new modelRotate();
+      var modelT = new modelTranslate();
+      var modelS = new modelScale();
+
+      var gui = new dat.GUI();
+
+      //Enable Lighting
+      var lightController = gui.add(content, 'Lighting');
+      lightController.onChange(function(value){
+        if( value == false ) {
+          scene.remove(pointLights[0], pointLights[1], pointLights[2], pointLights[3]);
+          ambient.intensity = 1.0;
+          shadowSwitch = false;
+        }
+        else {
+          scene.add(pointLights[0], pointLights[1], pointLights[2], pointLights[3]);
+          ambient.intensity = 0.5;
+          shadowSwitch = true;
+        }
+      });
+
+      //Auto Rotation
+      var aRController = gui.add(content, 'AutoRotate');
+      aRController.onChange(function(value){ controls.autoRotate = !controls.autoRotate; });
+
+      //model Folder
+      var modelFolder = gui.addFolder('Model');
+      var wFController = modelFolder.add(content, 'WireFrame');
+      wFController.onChange(function(value){
+        var tempRot = new THREE.Vector3( );
+        var tempSca = new THREE.Vector3( );
+        var tempTra = new THREE.Vector3( );
+
+        tempRot.x = model.rotation.x;
+        tempRot.y = model.rotation.y;
+        tempRot.z = model.rotation.z;
+        tempTra.x = model.position.x;
+        tempTra.y = model.position.y;
+        tempTra.z = model.position.z;
+        tempSca.x = model.scale.x;
+        tempSca.y = model.scale.y;
+        tempSca.z = model.scale.z;
+
+        if (value == true){
+
+          scene.remove(model);
+          model = wireframeModel.clone();
+          scene.add(model);
+
+        }
+        else {
+
+          scene.remove(model);
+          model = cloneModel.clone();
+          scene.add(model);
 
         }
 
-        function onKeyboardEvent(e) {
+        model.rotation.x = tempRot.x;
+        model.rotation.y = tempRot.y;
+        model.rotation.z = tempRot.z;
+        model.position.x = tempTra.x;
+        model.position.y = tempTra.y;
+        model.position.z = tempTra.z;
+        model.scale.x = tempSca.x;
+        model.scale.y = tempSca.y;
+        model.scale.z = tempSca.z;
 
+
+      });
+      var transformationsFolder = modelFolder.addFolder('Transformations')
+      transformationsFolder.add(content, 'Reset');
+
+      var rotationFolder = transformationsFolder.addFolder('Rotation');
+      var mRX  = rotationFolder.add(modelR, 'X', -180, 180);
+      mRX.onChange(function(value){ model.rotation.x = toRadians(value); });
+      var mRY  = rotationFolder.add(modelR, 'Y', -180, 180);
+      mRY.onChange(function(value){ model.rotation.y = toRadians(value); });
+      var mRZ  = rotationFolder.add(modelR, 'Z', -180, 180);
+      mRZ.onChange(function(value){ model.rotation.z = toRadians(value); });
+
+
+      var translationFolder = transformationsFolder.addFolder('Translation');
+      var mTX  = translationFolder.add(modelT, 'X', planeSize.min.x, -planeSize.min.x);
+      mTX.onChange(function(value){ model.position.x = value; });
+      var mTY  = translationFolder.add(modelT, 'Y', -3, 25);
+      mTY.onChange(function(value){ model.position.y = value; });
+      var mTZ  = translationFolder.add(modelT, 'Z', planeSize.min.x, -planeSize.min.x);
+      mTZ.onChange(function(value){ model.position.z = value; });
+
+      var scaleFolder = transformationsFolder.addFolder('Scale');
+      var mSA = scaleFolder.add(modelS, 'All', 0.1, 10);
+      mSA.onChange(function(value){
+
+        model.scale.x = value;
+        model.scale.y = value;
+        model.scale.z = value;
+
+      });
+      var mSX  = scaleFolder.add(modelS, 'X', 0.1, 10);
+      mSX.onChange(function(value){ model.scale.x = value; });
+      var mSY  = scaleFolder.add(modelS, 'Y', 0.1, 10);
+      mSY.onChange(function(value){ model.scale.y = value; });
+      var mSZ  = scaleFolder.add(modelS, 'Z', 0.1, 10);
+      mSZ.onChange(function(value){ model.scale.z = value; });
+
+      //Grid Mode
+      var gridController = gui.add(content, 'GridMode');
+      gridController.onChange(function(value){
+        if (value === true) {
+
+          scene.add ( gridHelper );
+          scene.remove ( plane );
+          scene.add (lightHelpers[0], lightHelpers[1], lightHelpers[2], lightHelpers[3]);
+          gridHelperOn = true;
+          controls.maxPolarAngle = Math.PI;
         }
 
-        function animate() {
-
-            requestAnimationFrame(animate);
-            controls.update();
-            render();
-
+        else {
+          scene.remove ( gridHelper );
+          scene.add ( plane );
+          scene.remove (lightHelpers[0], lightHelpers[1], lightHelpers[2], lightHelpers[3]);
+          gridHelperOn = false;
+          controls.maxPolarAngle = 1.5;
         }
+      });
 
-        function render() {
+      gui.add(content, 'CameraReset');
+    }
+  }
 
-            renderer.render(scene, camera);
-
-        }
-
-    </script>
-
+  </script>
 </body>
 </html>
