@@ -35,11 +35,19 @@ body {
     top: 0;
     right: 22px;
     margin-left: 50px;
-    font-size: 30px;
+    font-size: 40px;
+  }
+  .nav .close i{
+
   }
   .slide a {
     color: #fff;
-    font-size: 35px;
+    font-size: 75px;
+    text-decoration: none;
+  }
+  .slide i {
+    color: #fff;
+    font-style: normal;
   }
   #SideBar {
     position: absolute;
