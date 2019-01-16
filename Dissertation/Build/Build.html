@@ -1,39 +1,51 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>WebGL 3D Model Viewer</title>
-
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
-  <script>
-  function openSlideMenu() {
-    document.getElementById('SettingsMenu').style.width = '250px';
-    document.getElementById('SideBar').style.marginLeft = '250px';
-  }
-  function closeSlideMenu() {
-    document.getElementById('SettingsMenu').style.width = '0px';
-    document.getElementById('SideBar').style.marginLeft = '0px';
-  }
-  </script>
 </head>
+
 <body>
+
+  <!-- GUI -->
   <div id="SideBar">
     <span class="slide">
       <a href="#" onclick="openSlideMenu()">
-        <i class="">≡</i>
+        <i>≡</i>
       </a>
     </span>
 
     <div id="SettingsMenu" class="nav">
       <a href="#" class="close" onclick="closeSlideMenu()">
-        <i class="">X</i>
+        <i>X</i>
       </a>
-      <a href="#">Scene</a>
-      <a href="#">Models</a>
-      <a href="#">Lighting</a>
-      <a href="#">Rendering</a>
-      <a href="#">Skybox</a>
+      <ul class="SideBarUl">
+        <li onclick="this.classList.toggle('clicked')"><a href="#">Camera</a><span></span>
+          <ul>
+            <li><a href="#" class="ListItem" onclick="toggleAutoRotate()">Auto Rotate</a></li>
+            <li><a href="#">Reset</a></li>
+          </ul>
+        </li>
+        <li onclick="this.classList.toggle('clicked')"><a href="#">Models</a><span></span>
+          <ul>
+            <li><a href="#" onclick="toggleModelWireframe()">Wireframe</a></li>
+            <li><a href="#">Load Model</a></li>
+          </ul>
+        </li>
+        <li onclick="this.classList.toggle('clicked')"><a href="#">Lighting</a><span></span>
+          <ul>
+            <li><a href="#">Toggle</a></li>
+            <li><a href="#">Item 2</a></li>
+            <li><a href="#">Item 3</a></li>
+          </ul>
+        </li>
+
+        <a href="#">Rendering</a>
+        <a href="#">Skybox</a>
+      </ul>
     </div>
   </div>
 
@@ -46,11 +58,18 @@
   <script src="Imports/dat.gui.js"></script>
 
   <script>
+
   //Displays message to the user if webGL is not supported in the browser.
   if (!Detector.webgl) {
     Detector.addGetWebGLMessage();
   }
 
+  //Structs
+  function ModelObject (path) {
+
+  }
+
+  //Globals
   var container = document.createElement('div');
   document.body.appendChild(container);
 
@@ -249,6 +268,70 @@
     renderer.render(scene, camera);
   }
 
+  /* GUI Functions */
+
+  //From HTML
+  function openSlideMenu() {
+    document.getElementById('SettingsMenu').style.width = '250px';
+    document.getElementById('SideBar').style.marginLeft = '250px';
+  }
+  function closeSlideMenu() {
+    document.getElementById('SettingsMenu').style.width = '0px';
+    document.getElementById('SideBar').style.marginLeft = '0px';
+  }
+
+  //SideBar Controls
+
+  function toggleAutoRotate () {
+    controls.autoRotate = !controls.autoRotate;
+  }
+  var WireFrameToggle = true;
+  function toggleModelWireframe () {
+      var tempRot = new THREE.Vector3( );
+      var tempSca = new THREE.Vector3( );
+      var tempTra = new THREE.Vector3( );
+
+      tempRot.x = model.rotation.x;
+      tempRot.y = model.rotation.y;
+      tempRot.z = model.rotation.z;
+      tempTra.x = model.position.x;
+      tempTra.y = model.position.y;
+      tempTra.z = model.position.z;
+      tempSca.x = model.scale.x;
+      tempSca.y = model.scale.y;
+      tempSca.z = model.scale.z;
+
+      if (WireFrameToggle == true){
+
+        scene.remove(model);
+        model = wireframeModel.clone;
+        scene.add(model);
+        wireframeModel = false;
+
+      }
+      else {
+
+        scene.remove(model);
+        model = cloneModel.clone();
+        scene.add(model);
+        WireFrameToggle = true;
+
+      }
+
+      model.rotation.x = tempRot.x;
+      model.rotation.y = tempRot.y;
+      model.rotation.z = tempRot.z;
+      model.position.x = tempTra.x;
+      model.position.y = tempTra.y;
+      model.position.z = tempTra.z;
+      model.scale.x = tempSca.x;
+      model.scale.y = tempSca.y;
+      model.scale.z = tempSca.z;
+
+
+    }
+
+
   function launchGUI () {
     var guiObject = function()
     {
@@ -322,48 +405,7 @@
       //model Folder
       var modelFolder = gui.addFolder('Model');
       var wFController = modelFolder.add(content, 'WireFrame');
-      wFController.onChange(function(value){
-        var tempRot = new THREE.Vector3( );
-        var tempSca = new THREE.Vector3( );
-        var tempTra = new THREE.Vector3( );
 
-        tempRot.x = model.rotation.x;
-        tempRot.y = model.rotation.y;
-        tempRot.z = model.rotation.z;
-        tempTra.x = model.position.x;
-        tempTra.y = model.position.y;
-        tempTra.z = model.position.z;
-        tempSca.x = model.scale.x;
-        tempSca.y = model.scale.y;
-        tempSca.z = model.scale.z;
-
-        if (value == true){
-
-          scene.remove(model);
-          model = wireframeModel.clone();
-          scene.add(model);
-
-        }
-        else {
-
-          scene.remove(model);
-          model = cloneModel.clone();
-          scene.add(model);
-
-        }
-
-        model.rotation.x = tempRot.x;
-        model.rotation.y = tempRot.y;
-        model.rotation.z = tempRot.z;
-        model.position.x = tempTra.x;
-        model.position.y = tempTra.y;
-        model.position.z = tempTra.z;
-        model.scale.x = tempSca.x;
-        model.scale.y = tempSca.y;
-        model.scale.z = tempSca.z;
-
-
-      });
       var transformationsFolder = modelFolder.addFolder('Transformations')
       transformationsFolder.add(content, 'Reset');
 
