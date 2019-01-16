@@ -26,22 +26,24 @@ body {
   text-decoration: none;
   color: #ccc;
 }
+
 .nav a:hover {
   color: #fff;
   transition: 0.4s;
-  font-style: normal;
 }
+
 .nav .close {
   position: absolute;
-  top: 0;
+  top: 6px;
   right: 22px;
   margin-left: 22px;
-  font-size: 40px;
+  font-size: 30px;
+  text-transform: lowercase;
 }
 
 .slide a {
   color: #fff;
-  font-size: 75px;
+  font-size: 60px;
   text-decoration: none;
 }
 
@@ -49,7 +51,7 @@ body {
   color: #ccc;
   font-style: normal;
   position: relative;
-  top: -50px;
+  top: -61px;
 }
 
 li {

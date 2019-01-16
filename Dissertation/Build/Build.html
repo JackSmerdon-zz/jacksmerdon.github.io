@@ -25,8 +25,8 @@
       <ul class="SideBarUl">
         <li onclick="this.classList.toggle('clicked')"><a href="#">Camera</a><span></span>
           <ul>
-            <li><a href="#" class="ListItem" onclick="toggleAutoRotate()">Auto Rotate</a></li>
-            <li><a href="#">Reset</a></li>
+            <li><a href="#" onclick="toggleAutoRotate()">Auto Rotate</a></li>
+            <li><a href="#" onclick="toggleCamReset()">Reset</a></li>
           </ul>
         </li>
         <li onclick="this.classList.toggle('clicked')"><a href="#">Models</a><span></span>
@@ -285,51 +285,56 @@
   function toggleAutoRotate () {
     controls.autoRotate = !controls.autoRotate;
   }
+
+  function toggleCamReset () {
+    controls.reset();
+  }
+  /* OLD Gui code for reference
   var WireFrameToggle = true;
   function toggleModelWireframe () {
-      var tempRot = new THREE.Vector3( );
-      var tempSca = new THREE.Vector3( );
-      var tempTra = new THREE.Vector3( );
+    var tempRot = new THREE.Vector3( );
+    var tempSca = new THREE.Vector3( );
+    var tempTra = new THREE.Vector3( );
 
-      tempRot.x = model.rotation.x;
-      tempRot.y = model.rotation.y;
-      tempRot.z = model.rotation.z;
-      tempTra.x = model.position.x;
-      tempTra.y = model.position.y;
-      tempTra.z = model.position.z;
-      tempSca.x = model.scale.x;
-      tempSca.y = model.scale.y;
-      tempSca.z = model.scale.z;
+    tempRot.x = model.rotation.x;
+    tempRot.y = model.rotation.y;
+    tempRot.z = model.rotation.z;
+    tempTra.x = model.position.x;
+    tempTra.y = model.position.y;
+    tempTra.z = model.position.z;
+    tempSca.x = model.scale.x;
+    tempSca.y = model.scale.y;
+    tempSca.z = model.scale.z;
 
-      if (WireFrameToggle == true){
+    if (WireFrameToggle == true){
 
-        scene.remove(model);
-        model = wireframeModel.clone;
-        scene.add(model);
-        wireframeModel = false;
-
-      }
-      else {
-
-        scene.remove(model);
-        model = cloneModel.clone();
-        scene.add(model);
-        WireFrameToggle = true;
-
-      }
-
-      model.rotation.x = tempRot.x;
-      model.rotation.y = tempRot.y;
-      model.rotation.z = tempRot.z;
-      model.position.x = tempTra.x;
-      model.position.y = tempTra.y;
-      model.position.z = tempTra.z;
-      model.scale.x = tempSca.x;
-      model.scale.y = tempSca.y;
-      model.scale.z = tempSca.z;
-
+      scene.remove(model);
+      model = wireframeModel.clone;
+      scene.add(model);
+      wireframeModel = false;
 
     }
+    else {
+
+      scene.remove(model);
+      model = cloneModel.clone();
+      scene.add(model);
+      WireFrameToggle = true;
+
+    }
+
+    model.rotation.x = tempRot.x;
+    model.rotation.y = tempRot.y;
+    model.rotation.z = tempRot.z;
+    model.position.x = tempTra.x;
+    model.position.y = tempTra.y;
+    model.position.z = tempTra.z;
+    model.scale.x = tempSca.x;
+    model.scale.y = tempSca.y;
+    model.scale.z = tempSca.z;
+
+
+  }
 
 
   function launchGUI () {
@@ -466,7 +471,7 @@
       gui.add(content, 'CameraReset');
     }
   }
-
+  */
   </script>
 </body>
 </html>
