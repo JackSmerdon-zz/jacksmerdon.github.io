@@ -22,23 +22,23 @@
         <i>X</i>
       </a>
       <ul class="SideBarUl">
-        <li onclick="this.classList.toggle('clicked')"><a href="#">Camera</a><span></span>
+        <li onclick="this.classList.toggle('clicked')"><a href="#">Camera</a>
           <ul>
             <li><a href="#" onclick="toggleAutoRotate()">Auto Rotate</a></li>
             <li><a href="#" onclick="toggleCamReset()">Reset</a></li>
           </ul>
         </li>
-        <li onclick="this.classList.toggle('clicked')"><a href="#">Models</a><span></span>
+        <li onclick="this.classList.toggle('clicked')"><a href="#">Models</a>
           <ul>
             <li><a href="#" onclick="toggleModelWireframe()">Wireframe</a></li>
             <li><a href="#">Load Model</a></li>
           </ul>
         </li>
-        <li onclick="this.classList.toggle('clicked')"><a href="#">Lighting</a><span></span>
-          <ul>
-            <li><a href="#" onclick="addLight()">Add Light</a></li>
-            <li><a href="#">Show Light Helpers</a></li>
-            <li><a href="#">Light 1</a></li>
+        <li onclick="this.classList.toggle('clicked')"><a href="#">Lighting</a>
+          <ul id="LightListTop">
+            <li><a href="#" onclick="addLight()">Add Light<div class="preview"></div></a></li>
+            <li id="LightListBottom"><a href="#" onclick="">Show Light Helpers</a></li>
+
           </ul>
         </li>
 
@@ -48,13 +48,27 @@
     </div>
   </div>
 
+  <!-- colorpicker element -->
+  <div class="colorpicker" style="display:none">
+    <canvas id="picker" width="150" height="150"></canvas>
+
+    <div class="controls">
+      <div><label>R</label> <input type="text" id="rVal" /></div>
+      <div><label>G</label> <input type="text" id="gVal" /></div>
+      <div><label>B</label> <input type="text" id="bVal" /></div>
+      <div><label>RGB</label> <input type="text" id="rgbVal" /></div>
+      <div><label>HEX</label> <input type="text" id="hexVal" /></div>
+    </div>
+  </div>
+
   <!-- Includes -->
   <script src="Imports/three.js"></script>
   <script src="Imports/Detector.js"></script>
   <script src="Imports/OrbitControls.js"></script>
   <script src="Imports/OBJLoader.js"></script>
   <script src="Imports/MTLLoader.js"></script>
-  <script src="Imports/dat.gui.js"></script>
+  <script src="Imports/jquery.js"></script>
+  <script src="Imports/ColourPicker.js"></script>
 
   <!-- Program -->
   <script>
@@ -128,8 +142,6 @@
 
     //Create a helper for the shadow camera (optional)
     var helper = new THREE.CameraHelper( light.shadow.camera );
-
-
 
     ambient = new THREE.AmbientLight(0xffffff, 1.0);
     ambient.intensity = 0.5;
@@ -234,7 +246,7 @@
     //Updated clean code section
 
     drawPlane(50, 50);
-    defaultLight();
+    //defaultLight();
     setupCamera(0, 7, 15, 0.1, 10000);
     defaultSkybox();
     drawGrid(50, 50);
@@ -280,6 +292,45 @@
   }
 
   function addLight () {
+    var light = new THREE.DirectionalLight(0xffe6b8, 1)
+    light.position.set(0,30,0)
+    var target = new THREE.Object3D()
+    target.position.set(0,0,0)
+    light.target = target
+    scene.add(light.target)
+
+    light.shadow.camera.left = -10
+    light.shadow.camera.right = 10
+    light.shadow.camera.top = 10
+    light.shadow.camera.bottom = -10
+    light.shadow.camera.near = 10
+    light.shadow.camera.far = 400
+    light.shadow.mapSize.width = 2048
+    light.shadow.mapSize.height = 2048
+    light.castShadow = true
+
+    //Create a helper for the shadow camera (optional)
+    var helper = new THREE.CameraHelper( light.shadow.camera );
+
+    ambient = new THREE.AmbientLight(0xffffff, 1.0);
+    ambient.intensity = 0.5;
+    scene.add(ambient);
+    scene.add(light);
+
+    var newLi = document.createElement("li");
+    var newA = document.createElement("a");
+    var newContent = document.createTextNode("");
+
+    var newDiv = document.createElement("div");
+    newDiv.className = "preview";
+
+    newA.appendChild(newDiv);
+    newA.appendChild(newContent);
+    newLi.appendChild(newA);
+
+    var parentLocation = document.getElementById("LightListTop");
+    var insertLocation = document.getElementById("LightListBottom");
+    parentLocation.insertBefore(newA, insertLocation);
 
   }
 
