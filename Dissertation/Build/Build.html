@@ -19,45 +19,66 @@
 
     <div id="SettingsMenu" class="nav">
       <a href="#" class="close" onclick="closeSlideMenu()">
-        <i>X</i>
+        <i id="X">X</i>
       </a>
       <ul class="SideBarUl">
-        <li onclick="this.classList.toggle('clicked')"><a href="#">Camera</a>
+        <!-- Camera Settings-->
+        <li onclick="show(this, false)"><a href="#">Camera</a>
           <ul>
-            <li><a href="#" onclick="toggleAutoRotate()">Auto Rotate</a></li>
+            <li onclick="show(this.parentElement.parentElement, true)"><a href="#" onclick="toggleAutoRotate()">Auto Rotate</a></li>
             <li><a href="#" onclick="toggleCamReset()">Reset</a></li>
           </ul>
         </li>
-        <li onclick="this.classList.toggle('clicked')"><a href="#">Models</a>
+
+        <!-- Model Settings -->
+        <li><a href="#" onclick="this.classList.toggle('clicked')">Models</a>
           <ul>
             <li><a href="#" onclick="toggleModelWireframe()">Wireframe</a></li>
             <li><a href="#">Load Model</a></li>
           </ul>
         </li>
+
+        <!-- Lighting Settings -->
         <li onclick="this.classList.toggle('clicked')"><a href="#">Lighting</a>
           <ul id="LightListTop">
-            <li><a href="#" onclick="addLight()">Add Light<div class="preview"></div></a></li>
-            <li id="LightListBottom"><a href="#" onclick="">Show Light Helpers</a></li>
-
+            <li id="LightListBottom"><a href="#" onclick="addLight()">New Light</a></li>
           </ul>
         </li>
 
-        <a href="#">Rendering</a>
-        <a href="#">Skybox</a>
+        <li onclick="this.classList.toggle('clicked')"><a href="#">Rendering</a>
+          <ul>
+            <li><a href="#" onclick=""></a></li>
+          </ul>
+        </li>
+
+        <li onclick="this.classList.toggle('clicked')"><a href="#">Skybox</a>
+          <ul>
+            <li><a href="#" onclick=""></a></li>
+          </ul>
+        </li>
+
+        <div class="preview"></div>
+
+        <ul class="Focus">
+          <!-- colorpicker element -->
+          <div class="colorpicker" style="display:none">
+            <a>Light Settings</a>
+            <canvas id="picker"></canvas>
+            <div class="controls">
+              <div><label>Type</label> <input type="text" id="lightType" /></div>
+              <div><label>R</label> <input type="text" id="rVal" /></div>
+              <div><label>G</label> <input type="text" id="gVal" /></div>
+              <div><label>B</label> <input type="text" id="bVal" /></div>
+              <div><label>HEX</label> <input type="text" id="hexVal" /></div>
+              <ul id="LightListTop">
+                <li id="LightListBottom"><a href="#" onclick="">Show Helper</a></li>
+                <li><a href="#" onclick="defaultLighting()">Reset to Default</a></li>
+              </ul>
+            </div>
+          </div>
+        </ul>
+
       </ul>
-    </div>
-  </div>
-
-  <!-- colorpicker element -->
-  <div class="colorpicker" style="display:none">
-    <canvas id="picker" width="150" height="150"></canvas>
-
-    <div class="controls">
-      <div><label>R</label> <input type="text" id="rVal" /></div>
-      <div><label>G</label> <input type="text" id="gVal" /></div>
-      <div><label>B</label> <input type="text" id="bVal" /></div>
-      <div><label>RGB</label> <input type="text" id="rgbVal" /></div>
-      <div><label>HEX</label> <input type="text" id="hexVal" /></div>
     </div>
   </div>
 
@@ -87,13 +108,21 @@
   var container = document.createElement('div');
   document.body.appendChild(container);
 
+  //Clean Variables
+  var Lights = [];
+  var LightHelpers = [];
+  var Models = [];
+
+
+
+  //Old
   var camera, controls, renderer;
   var shadowSwitch = true;
   var ambientLight;
   var pointLights = [];
 
   var gridHelper, plane;
-  var lightHelpers = [];
+
 
   var planeSize;
 
@@ -120,33 +149,6 @@
     scene.add( plane );
     planeSize = new THREE.Box3().setFromObject( plane );
 
-  }
-
-  function defaultLight(){
-    var light = new THREE.DirectionalLight(0xffe6b8, 1)
-    light.position.set(10,10,10)
-    var target = new THREE.Object3D()
-    target.position.set(0,0,0)
-    light.target = target
-    scene.add(light.target)
-
-    light.shadow.camera.left = -10
-    light.shadow.camera.right = 10
-    light.shadow.camera.top = 10
-    light.shadow.camera.bottom = -10
-    light.shadow.camera.near = 10
-    light.shadow.camera.far = 400
-    light.shadow.mapSize.width = 2048
-    light.shadow.mapSize.height = 2048
-    light.castShadow = true
-
-    //Create a helper for the shadow camera (optional)
-    var helper = new THREE.CameraHelper( light.shadow.camera );
-
-    ambient = new THREE.AmbientLight(0xffffff, 1.0);
-    ambient.intensity = 0.5;
-    scene.add(ambient);
-    scene.add(light);
   }
 
   function setupCamera(x, y, z, near, far) {
@@ -246,7 +248,7 @@
     //Updated clean code section
 
     drawPlane(50, 50);
-    //defaultLight();
+    addLight();
     setupCamera(0, 7, 15, 0.1, 10000);
     defaultSkybox();
     drawGrid(50, 50);
@@ -314,24 +316,19 @@
 
     ambient = new THREE.AmbientLight(0xffffff, 1.0);
     ambient.intensity = 0.5;
+    scene.add(helper);
     scene.add(ambient);
     scene.add(light);
 
     var newLi = document.createElement("li");
     var newA = document.createElement("a");
-    var newContent = document.createTextNode("");
-
-    var newDiv = document.createElement("div");
-    newDiv.className = "preview";
-
-    newA.appendChild(newDiv);
+    var newContent = document.createTextNode("Directional Light");
     newA.appendChild(newContent);
     newLi.appendChild(newA);
 
     var parentLocation = document.getElementById("LightListTop");
     var insertLocation = document.getElementById("LightListBottom");
     parentLocation.insertBefore(newA, insertLocation);
-
   }
 
   /* HTML JavaScript Extensions */
@@ -348,6 +345,21 @@
     document.getElementById('Hamburger').style.opacity = '1';
   }
 
+  var showBool = true;
+  function show (item, innerList) {
+    if(!innerList){
+      if (showBool)
+      {
+        item.classList.add('clicked');
+        showBool = false;
+      }
+      else
+      {
+        item.classList.remove('clicked');
+        showBool = true;
+      }
+    }
+  }
 
   </script>
 </body>

@@ -16,64 +16,60 @@ body {
   background-color: #111;
   opacity: 0.9;
   overflow-x: hidden;
-  padding-top: 20px;
+  padding-top: 2%;
   transition: 0.7s;
 }
+/*Headings*/
 .nav a {
   display: block;
-  padding: 5px 5px;
-  font-size: 20px;
+  padding: 2%;
+  font-size: 150%;
   text-decoration: none;
   color: #ccc;
+  margin-left: -10%;
 }
-
+/*Heading Hover*/
 .nav a:hover {
   color: #fff;
   transition: 0.4s;
 }
-
+/*Close Button*/
 .nav .close {
   position: absolute;
-  top: 6px;
-  right: 22px;
-  margin-left: 22px;
-  font-size: 30px;
+  top: -1%;
+  right: 10%;
+  font-size: 300%;
   text-transform: lowercase;
 }
-
+/*Hamburger*/
 .slide a {
   color: #fff;
-  font-size: 60px;
+  font-size: 300%;
   text-decoration: none;
 }
-
+/*Hamburger Settings*/
 .slide i {
   transition: opacity 0.5s ease-out;
   color: #ccc;
   font-style: normal;
-  position: relative;
-  top: -61px;
+  position: absolute;
+  left: 2%;
+  top: -5%;
 }
-
+/*Global List Settings*/
 li {
   list-style: none;
 }
-
-.SideBarUl ul{
-  transition: opacity 1s ease-out;
-  opacity: 0;
-  height: 0;
-  overflow: hidden;
-}
-/*
-.SideBarUl li ul{
-  opacity: 1;
-  height: auto;
-}
-*/
+/*Heading Click Settings*/
 .SideBarUl li.clicked ul{
   opacity: 1;
   height: auto;
+  transition: opacity 1s ease-out;
+}
+.SideBarUl li ul{
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
 }
 
 
@@ -94,23 +90,22 @@ input {
 /* Colour Picker */
 .colorpicker {
     background-color: #222222;
-    border-radius: 5px 5px 5px 5px;
-    box-shadow: 2px 2px 2px #444444;
-    color: #FFFFFF;
+    border-radius: 5px;
     font-size: 12px;
-    position: absolute;
-    left: 17.9%;
+    right: 39%;
     top: 0%;
-    width: 25%;
+    width: 130%;
+    color: #ccc;
+    position: relative;
 }
 #picker {
     cursor: crosshair;
-    float: left;
-    margin: 10px;
+    position: relative;
+    left: 7%;
+    margin: 10%;
     border: 0;
 }
 .controls {
-    float: right;
     margin: 10px;
 }
 .controls > div {
@@ -141,6 +136,18 @@ input {
     cursor: pointer;
     height: 30px;
     width: 30px;
-    position:relative;
-
+    float: left;
+    display: inline-block;
+    margin-right: 10px;
+}
+.Focus a {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 200%;
+  margin-left: 14%;
+  margin-top: 15%;
+}
+.Focus ul {
+  font-size: 70%;
+  margin-left: -38%;
+  margin-top: -10%;
 }
