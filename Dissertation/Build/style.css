@@ -59,6 +59,7 @@ body {
 /*Global List Settings*/
 li {
   list-style: none;
+  margin-left: 0%;
 }
 /*Heading Click Settings*/
 .SideBarUl li.clicked ul{
@@ -70,7 +71,19 @@ li {
   opacity: 0;
   height: 0;
   overflow: hidden;
+  font-size: 75%;
+
 }
+.SideBarUl li ul li {
+    margin-left: -10%;
+}
+.SideBarUl input {
+  background-color: #222222;
+  border-radius: 5px;
+  font-size: 75%;
+  width: 95%;
+}
+
 
 
 #SideBar {

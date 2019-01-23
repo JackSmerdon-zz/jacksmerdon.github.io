@@ -40,7 +40,8 @@
 
         <!-- Lighting Settings -->
         <li onclick="this.classList.toggle('clicked')"><a href="#">Lighting</a>
-          <ul id="LightListTop">
+          <ul  id="LightListTop">
+            <li><a>Existing Lights:</a></li>
             <li id="LightListBottom"><a href="#" onclick="addLight()">New Light</a></li>
           </ul>
         </li>
@@ -53,7 +54,20 @@
 
         <li onclick="this.classList.toggle('clicked')"><a href="#">Skybox</a>
           <ul>
-            <li><a href="#" onclick=""></a></li>
+            <li><a>Textures:</a></li>
+              <a href="#" onclick="">Front:</a>
+              <input type="file" name="pic" accept="image/*">
+              <a href="#" onclick="">Back:</a>
+              <input type="file" name="pic" accept="image/*">
+              <a href="#" onclick="">Up:</a>
+              <input type="file" name="pic" accept="image/*">
+              <a href="#" onclick="">Down:</a>
+              <input type="file" name="pic" accept="image/*">
+              <a href="#" onclick="">Right:</a>
+              <input type="file" name="pic" accept="image/*">
+              <a href="#" onclick="">Left:</a>
+              <input type="file" name="pic" accept="image/*">
+            <li><a href="#" onclick="">Reload</a></li>
           </ul>
         </li>
 
@@ -65,15 +79,14 @@
             <a>Light Settings</a>
             <canvas id="picker"></canvas>
             <div class="controls">
+              <div><label>Name</label> <input type="text" id="lightName" /></div>
               <div><label>Type</label> <input type="text" id="lightType" /></div>
               <div><label>R</label> <input type="text" id="rVal" /></div>
               <div><label>G</label> <input type="text" id="gVal" /></div>
               <div><label>B</label> <input type="text" id="bVal" /></div>
               <div><label>HEX</label> <input type="text" id="hexVal" /></div>
-              <ul id="LightListTop">
-                <li id="LightListBottom"><a href="#" onclick="">Show Helper</a></li>
-                <li><a href="#" onclick="defaultLighting()">Reset to Default</a></li>
-              </ul>
+              <li><a href="#" onclick="">Show Helper</a></li>
+              <li><a href="#" onclick="defaultLighting()">Reset to Default</a></li>
             </div>
           </div>
         </ul>
@@ -112,6 +125,7 @@
   var Lights = [];
   var LightHelpers = [];
   var Models = [];
+  var Skybox;
 
 
 
@@ -193,9 +207,8 @@
       new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Left.png"), side: THREE.DoubleSide})
     ];
 
-    var skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
-
-    scene.add (skybox);
+    Skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
+    scene.add (Skybox);
   }
 
   function drawGrid(size, divs){
@@ -295,6 +308,7 @@
 
   function addLight () {
     var light = new THREE.DirectionalLight(0xffe6b8, 1)
+    light.name = "Directional Light";
     light.position.set(0,30,0)
     var target = new THREE.Object3D()
     target.position.set(0,0,0)
@@ -322,7 +336,7 @@
 
     var newLi = document.createElement("li");
     var newA = document.createElement("a");
-    var newContent = document.createTextNode("Directional Light");
+    var newContent = document.createTextNode(light.name);
     newA.appendChild(newContent);
     newLi.appendChild(newA);
 
