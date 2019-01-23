@@ -23,15 +23,15 @@
       </a>
       <ul class="SideBarUl">
         <!-- Camera Settings-->
-        <li onclick="show(this, false)"><a href="#">Camera</a>
+        <li onclick="this.classList.toggle('clicked')"><a href="#">Camera</a>
           <ul>
-            <li onclick="show(this.parentElement.parentElement, true)"><a href="#" onclick="toggleAutoRotate()">Auto Rotate</a></li>
+            <li><a href="#" onclick="toggleAutoRotate()">Auto Rotate</a></li>
             <li><a href="#" onclick="toggleCamReset()">Reset</a></li>
           </ul>
         </li>
 
         <!-- Model Settings -->
-        <li><a href="#" onclick="this.classList.toggle('clicked')">Models</a>
+        <li onclick="this.classList.toggle('clicked')"><a  href="#">Models</a>
           <ul>
             <li><a href="#" onclick="toggleModelWireframe()">Wireframe</a></li>
             <li><a href="#">Load Model</a></li>
@@ -54,20 +54,29 @@
 
         <li onclick="this.classList.toggle('clicked')"><a href="#">Skybox</a>
           <ul>
-            <li><a>Textures:</a></li>
-              <a href="#" onclick="">Front:</a>
-              <input type="file" name="pic" accept="image/*">
-              <a href="#" onclick="">Back:</a>
-              <input type="file" name="pic" accept="image/*">
-              <a href="#" onclick="">Up:</a>
-              <input type="file" name="pic" accept="image/*">
-              <a href="#" onclick="">Down:</a>
-              <input type="file" name="pic" accept="image/*">
-              <a href="#" onclick="">Right:</a>
-              <input type="file" name="pic" accept="image/*">
-              <a href="#" onclick="">Left:</a>
-              <input type="file" name="pic" accept="image/*">
-            <li><a href="#" onclick="">Reload</a></li>
+            <li onclick="this.classList.toggle('clicked')"><a href="#">Textures:</a>
+              <ul>
+                <a href="#" onclick="">Front:</a>
+                <input type="file" id="NewFrontIMG" accept="image/*">
+
+                <a href="#" onclick="">Back:</a>
+                <input type="file" id="NewBackIMG" accept="image/*">
+
+                <a href="#" onclick="">Up:</a>
+                <input type="file" id="NewUpIMG" accept="image/*">
+
+                <a href="#" onclick="">Down:</a>
+                <input type="file" id="NewDownIMG" accept="image/*">
+
+                <a href="#" onclick="">Right:</a>
+                <input type="file" id="NewRightIMG" accept="image/*">
+
+                <a href="#" onclick="">Left:</a>
+                <input type="file" id="NewLeftIMG" accept="image/*">
+              </ul>
+            </li>
+
+            <li><a href="#" onclick="updateSkybox()">Reload</a></li>
           </ul>
         </li>
 
@@ -345,6 +354,43 @@
     parentLocation.insertBefore(newA, insertLocation);
   }
 
+  function updateSkybox(){
+
+    scene.remove(Skybox);
+
+    var front = document.getElementById('NewFrontIMG').files[0];
+    var frontURL = URL.createObjectURL( front );
+
+    var back = document.getElementById('NewBackIMG').files[0];
+    var backURL = URL.createObjectURL( back );
+
+    var up = document.getElementById('NewUpIMG').files[0];
+    var upURL = URL.createObjectURL( up );
+
+    var down = document.getElementById('NewDownIMG').files[0];
+    var downURL = URL.createObjectURL( down );
+
+    var right = document.getElementById('NewRightIMG').files[0];
+    var rightURL = URL.createObjectURL( right );
+
+    var left = document.getElementById('NewLeftIMG').files[0];
+    var leftURL = URL.createObjectURL( left );
+
+    var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
+    var skyboxMaterials =
+    [
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load(frontURL), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load(backURL), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load(upURL), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load(downURL), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load(rightURL), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load(leftURL), side: THREE.DoubleSide})
+    ];
+
+    Skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
+    scene.add(Skybox);
+  }
+
   /* HTML JavaScript Extensions */
 
   //Sliding Nav Bar
@@ -357,22 +403,6 @@
     document.getElementById('SettingsMenu').style.width = '0px';
     document.getElementById('SideBar').style.marginLeft = '0px';
     document.getElementById('Hamburger').style.opacity = '1';
-  }
-
-  var showBool = true;
-  function show (item, innerList) {
-    if(!innerList){
-      if (showBool)
-      {
-        item.classList.add('clicked');
-        showBool = false;
-      }
-      else
-      {
-        item.classList.remove('clicked');
-        showBool = true;
-      }
-    }
   }
 
   </script>
