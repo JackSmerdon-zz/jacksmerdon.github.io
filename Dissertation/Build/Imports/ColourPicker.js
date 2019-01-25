@@ -9,7 +9,8 @@
  * http://www.script-tutorials.com/
  */
 
- //Changes to the base code from the author have been made.
+ //Changes to the base code from the author have been made and used in the main script.
+ //Document remains here for reference.
 
 $(function(){
     var bCanPreview = true; // can preview

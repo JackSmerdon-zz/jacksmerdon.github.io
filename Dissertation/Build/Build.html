@@ -25,16 +25,37 @@
         <!-- Camera Settings-->
         <li onclick="this.classList.toggle('clicked')"><a href="#">Camera</a>
           <ul>
-            <li><a href="#" onclick="toggleAutoRotate()">Auto Rotate</a></li>
-            <li><a href="#" onclick="toggleCamReset()">Reset</a></li>
-          </ul>
+            <li><a>Auto Rotate
+              <label class="switch">
+                <input type="checkbox"  onclick="toggleAutoRotate()">
+                <span class="slider round"></span>
+              </label></a></li>
+              <li><a href="#" onclick="toggleCamReset()">Reset</a></li>
+            </ul>
         </li>
 
         <!-- Model Settings -->
         <li onclick="this.classList.toggle('clicked')"><a  href="#">Models</a>
           <ul>
-            <li><a href="#" onclick="toggleModelWireframe()">Wireframe</a></li>
-            <li><a href="#">Load Model</a></li>
+            <li><a href="#">Load New Model:</a>
+              <ul>
+                <a>Model:</a>
+                <input type="file" id="NewModel" accept=".obj">
+
+                <a>Material:</a>
+                <input type="file" id="NewMaterial" accept=".mtl">
+
+                <a>Texture:</a>
+                <input type="file" id="NewTexture" accept="image/*">
+
+                <a href='#' onClick="loadNewModel()">Load Model</a>
+              </ul>
+            </li>
+            <li><a>Models in Scene:</a>
+              <ul id="ModelListTop">
+                <li id="ModelListBottom"></li>
+              </ul>
+            </li>
           </ul>
         </li>
 
@@ -56,22 +77,22 @@
           <ul>
             <li onclick="this.classList.toggle('clicked')"><a href="#">Textures:</a>
               <ul>
-                <a href="#" onclick="">Front:</a>
+                <a>Front:</a>
                 <input type="file" id="NewFrontIMG" accept="image/*">
 
-                <a href="#" onclick="">Back:</a>
+                <a>Back:</a>
                 <input type="file" id="NewBackIMG" accept="image/*">
 
-                <a href="#" onclick="">Up:</a>
+                <a>Up:</a>
                 <input type="file" id="NewUpIMG" accept="image/*">
 
-                <a href="#" onclick="">Down:</a>
+                <a>Down:</a>
                 <input type="file" id="NewDownIMG" accept="image/*">
 
-                <a href="#" onclick="">Right:</a>
+                <a>Right:</a>
                 <input type="file" id="NewRightIMG" accept="image/*">
 
-                <a href="#" onclick="">Left:</a>
+                <a>Left:</a>
                 <input type="file" id="NewLeftIMG" accept="image/*">
               </ul>
             </li>
@@ -111,7 +132,7 @@
   <script src="Imports/OBJLoader.js"></script>
   <script src="Imports/MTLLoader.js"></script>
   <script src="Imports/jquery.js"></script>
-  <script src="Imports/ColourPicker.js"></script>
+  <!-- <script src="Imports/ColourPicker.js"></script> -->
 
   <!-- Program -->
   <script>
@@ -122,8 +143,11 @@
   }
 
   //Structs
-  function ModelObject (path) {
-
+  function ModelObject (modelIn, materialIn, textureIn, wireframeIn) {
+    this.Model = modelIn;
+    this.Material = materialIn;
+    this.Texture = textureIn;
+    this.Wireframe = wireframeIn;
   }
 
   //Globals
@@ -318,28 +342,28 @@
   function addLight () {
     var light = new THREE.DirectionalLight(0xffe6b8, 1)
     light.name = "Directional Light";
-    light.position.set(0,30,0)
-    var target = new THREE.Object3D()
-    target.position.set(0,0,0)
-    light.target = target
-    scene.add(light.target)
+    light.position.set(0,30,0);
+    var target = new THREE.Object3D();
+    target.position.set(0,0,0);
+    light.target = target;
+    scene.add(light.target);
 
-    light.shadow.camera.left = -10
-    light.shadow.camera.right = 10
-    light.shadow.camera.top = 10
-    light.shadow.camera.bottom = -10
-    light.shadow.camera.near = 10
-    light.shadow.camera.far = 400
-    light.shadow.mapSize.width = 2048
-    light.shadow.mapSize.height = 2048
-    light.castShadow = true
+    light.shadow.camera.left = -10;
+    light.shadow.camera.right = 10;
+    light.shadow.camera.top = 10;
+    light.shadow.camera.bottom = -10;
+    light.shadow.camera.near = 10;
+    light.shadow.camera.far = 400;
+    light.shadow.mapSize.width = 2048;
+    light.shadow.mapSize.height = 2048;
+    light.castShadow = true;
 
     //Create a helper for the shadow camera (optional)
     var helper = new THREE.CameraHelper( light.shadow.camera );
 
     ambient = new THREE.AmbientLight(0xffffff, 1.0);
     ambient.intensity = 0.5;
-    scene.add(helper);
+    //scene.add(helper);
     scene.add(ambient);
     scene.add(light);
 
@@ -404,6 +428,58 @@
     document.getElementById('SideBar').style.marginLeft = '0px';
     document.getElementById('Hamburger').style.opacity = '1';
   }
+
+  /* ColourPicker */
+  $(function(){
+      var bCanPreview = true; // can preview
+
+      // create canvas and context objects
+      var canvas = document.getElementById('picker');
+      var ctx = canvas.getContext('2d');
+
+      // drawing active image
+      var image = new Image();
+      image.onload = function () {
+          ctx.drawImage(image, 0, 0, image.width, image.height); // draw the image on the canvas
+      }
+
+      // select desired colorwheel
+      var imageSrc = 'Assets/ColourWheel.png';
+      image.src = imageSrc;
+
+      $('#picker').mousemove(function(e) { // mouse move handler
+          if (bCanPreview) {
+              // get coordinates of current position
+              var canvasOffset = $(canvas).offset();
+              var canvasX = Math.floor(e.pageX - canvasOffset.left);
+              var canvasY = Math.floor(e.pageY - canvasOffset.top);
+
+              // get current pixel
+              var imageData = ctx.getImageData(canvasX, canvasY, 1, 1);
+              var pixel = imageData.data;
+
+              // update preview color
+              var pixelColor = "rgb("+pixel[0]+", "+pixel[1]+", "+pixel[2]+")";
+              $('.preview').css('backgroundColor', pixelColor);
+
+              // update controls
+              $('#rVal').val(pixel[0]);
+              $('#gVal').val(pixel[1]);
+              $('#bVal').val(pixel[2]);
+              $('#rgbVal').val(pixel[0]+','+pixel[1]+','+pixel[2]);
+
+              var dColor = pixel[2] + 256 * pixel[1] + 65536 * pixel[0];
+              $('#hexVal').val('#' + ('0000' + dColor.toString(16)).substr(-6));
+          }
+      });
+      $('#picker').click(function(e) { // click event handler
+          bCanPreview = !bCanPreview;
+      });
+      $('.preview').click(function(e) { // preview click
+          $('.colorpicker').fadeToggle("slow", "linear");
+          bCanPreview = true;
+      });
+  });
 
   </script>
 </body>
