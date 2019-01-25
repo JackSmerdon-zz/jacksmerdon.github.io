@@ -111,7 +111,13 @@ li {
   font-size: 75%;
 }
 .SideBarUl li ul li {
+    margin-left: -15%;
+}
+.SideBarUl li ul li ul {
     margin-left: -10%;
+}
+.SideBarUl li ul li ul input{
+    margin-left: 2%;
 }
 .SideBarUl input {
   font-family: 'Quicksand', sans-serif;
@@ -193,7 +199,7 @@ li {
   display: inline-block;
   width: 46px;
   height: 20px;
-  margin-left: 10%;
+  margin-left: 22%;
   top: 3px;
 }
 
