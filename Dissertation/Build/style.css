@@ -54,7 +54,7 @@ body {
   font-style: normal;
   position: absolute;
   left: 2%;
-  top: -5%;
+  top: -10px;
 }
 /*Global List Settings*/
 li {
