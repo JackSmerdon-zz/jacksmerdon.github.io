@@ -1,16 +1,25 @@
+@import url('https://fonts.googleapis.com/css?family=Quicksand');
 body, html{
   height: 100%;
   margin:0;
   font-size: 16px;
-  font-family: "Lato", sans-serif;
+  font-family: "Quicksand", sans-serif;
   font-weight: 400;
   line-height: 1.8em;
   color: #666;
+  background-color: #282e34;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+  font-weight: bolder;
+}
+a:hover {
+  color: #666;
 }
 
-.coverimg, .cnmimg, .brainsimg, .dissimg, .mcimg{
+.coverimg, .UnityDevelopment, .GameJams, .GraphicsProgramming, .PersonalProjects, .Dissertation{
   position: relative;
-  opacity: 0.70;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -22,24 +31,32 @@ body, html{
   min-height: 100%;
 }
 
-.cnmimg{
+.UnityDevelopment{
+  opacity: 0.7;
   background-image:url('../img/cnm.jpg');
-  min-height: 425px;
+  min-height: 50%;
 }
 
-.brainsimg{
-  background-image:url('../img/brains.jpg');
-  min-height: 425px;
+.GraphicsProgramming{
+  background-image:url('../img/graphics.jpg');
+  min-height: 50%;
+  opacity: 0.7;
 }
 
-.dissimg{
+.Dissertation{
   background-image:url('../img/diss.jpg');
-  min-height: 425px;
+  min-height: 50%;
 }
 
-.mcimg{
+.GameJams{
+  background-image:url('../img/brains.jpg');
+  min-height: 50%;
+  opacity: 0.6;
+}
+
+.PersonalProjects{
   background-image:url('../img/mc.gif');
-  min-height: 425px;
+  min-height: 50%;
 }
 
 .section .heading{
@@ -47,8 +64,9 @@ body, html{
 }
 
 .section{
-  text-align: justify;
-  padding: 50px 80px;
+  text-align: center;
+  padding: 1% 0%;
+
 }
 
 .section .heading{
@@ -68,6 +86,20 @@ body, html{
 .section-dark{
   background-color: #282e34;
   color: #ddd;
+  width: 100%;
+}
+.section-dark .TwoSplit{
+  width: 40%;
+  margin: 2%;
+  text-align: justify;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.section-dark .One{
+  width: 90%;
+  margin: 5% 5%;
+  text-align: justify;
 }
 
 .ptext{
@@ -82,7 +114,7 @@ body, html{
 }
 
 .ptext .border{
-  background-color: #111;
+  background-color: #333;
   color: #fff;
   padding: 20px;
 }
@@ -94,5 +126,12 @@ body, html{
 @media(max-width:568px){
   .coverimg, .cnmimg, .brainsimg, .dissimg, .mcimg{
     background-attachment: scroll;
+  }
+  .section-dark .TwoSplit{
+    width: 90%;
+    margin: 5%;
+    text-align: justify;
+    display: block;
+    vertical-align: top;
   }
 }
