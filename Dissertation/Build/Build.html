@@ -41,12 +41,13 @@
               <ul>
                 <a>Model:</a>
                 <input type="file" id="NewModel" accept=".obj">
-
                 <a>Material:</a>
                 <input type="file" id="NewMaterial" accept=".mtl">
 
+                <!-- Not Yet Implemented
                 <a>Texture:</a>
                 <input type="file" id="NewTexture" accept="image/*">
+                -->
 
                 <a href='#' onClick="loadNewModel()">Load Model</a>
               </ul>
@@ -98,6 +99,8 @@
             </li>
 
             <li><a href="#" onclick="updateSkybox()">Reload</a></li>
+            <li><a href="#" onclick="defaultSkybox()">Default</a></li>
+            <li><a href="#" onclick="helperSkybox()">Helper Textures</a></li>
           </ul>
         </li>
 
@@ -143,10 +146,10 @@
   }
 
   //Structs
-  function ModelObject (modelIn, materialIn, textureIn, wireframeIn) {
+  function ModelObject (modelIn, materialIn, wireframeIn) {
     this.Model = modelIn;
     this.Material = materialIn;
-    this.Texture = textureIn;
+    //this.Texture = textureIn;
     this.Wireframe = wireframeIn;
   }
 
@@ -229,6 +232,7 @@
   }
 
   function defaultSkybox() {
+    scene.remove(Skybox);
     var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
     var skyboxMaterials =
     [
@@ -238,6 +242,23 @@
       new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Down.png"), side: THREE.DoubleSide}),
       new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Right.png"), side: THREE.DoubleSide}),
       new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Left.png"), side: THREE.DoubleSide})
+    ];
+
+    Skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
+    scene.add (Skybox);
+  }
+
+  function helperSkybox() {
+    scene.remove(Skybox);
+    var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
+    var skyboxMaterials =
+    [
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Test/Front.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Test/Back.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Test/Up.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Test/Down.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Test/Right.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Test/Left.png"), side: THREE.DoubleSide})
     ];
 
     Skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
@@ -276,7 +297,6 @@
         });
 
         wireframeModel = model.clone();
-        cloneModel = model.clone();
 
         wireframeModel.traverse( function ( child )
         {
@@ -285,7 +305,10 @@
             child.material = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe : true  }  );
           }
         } );
-        scene.add( model );
+
+        Models.push(new ModelObject(model, materials, wireframeModel));
+
+        scene.add(Models[0].Model);
       } );
     } );
   }
@@ -298,10 +321,7 @@
     setupCamera(0, 7, 15, 0.1, 10000);
     defaultSkybox();
     drawGrid(50, 50);
-    loadDefaultModel();
-
-    /* Model */
-
+    //loadDefaultModel();
 
     /* Events */
     window.addEventListener('resize', onWindowResize, false);
@@ -330,6 +350,51 @@
   /* GUI Functions */
 
   //SideBar Controls
+
+  function loadNewModel() {
+
+    var newModel = document.getElementById('NewModel').files[0];
+    var modelURL = URL.createObjectURL( newModel );
+
+    var newMaterial = document.getElementById('NewMaterial').files[0];
+    var materialURL = URL.createObjectURL( newMaterial );
+
+    var mtlLoader = new THREE.MTLLoader();
+    mtlLoader.load(materialURL , function( materials )
+    {
+      materials.preload();
+
+      var objLoader = new THREE.OBJLoader();
+
+      objLoader.setMaterials( materials );
+      objLoader.load(modelURL, function ( object ) {
+
+        model = object;
+
+        model.traverse( function ( child )
+        {
+          if (child instanceof THREE.Mesh)
+          {
+            child.castShadow = true;
+          }
+        });
+
+        wireframeModel = model.clone();
+
+        wireframeModel.traverse( function ( child )
+        {
+          if ( child instanceof THREE.Mesh )
+          {
+            child.material = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe : true  }  );
+          }
+        } );
+
+        Models.push(new ModelObject(model, materials, wireframeModel));
+
+        scene.add(Models[0].Wireframe);
+      } );
+    } );
+  }
 
   function toggleAutoRotate () {
     controls.autoRotate = !controls.autoRotate;
@@ -401,7 +466,7 @@
     var leftURL = URL.createObjectURL( left );
 
     var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
-    var skyboxMaterials =
+    skyboxMaterials =
     [
       new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load(frontURL), side: THREE.DoubleSide}),
       new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load(backURL), side: THREE.DoubleSide}),
