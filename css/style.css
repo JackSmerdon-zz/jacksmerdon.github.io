@@ -24,6 +24,7 @@ a:hover {
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
+  min-height: 50%;
 }
 
 .coverimg{
@@ -34,29 +35,24 @@ a:hover {
 .UnityDevelopment{
   opacity: 0.7;
   background-image:url('../img/cnm.jpg');
-  min-height: 50%;
 }
 
 .GraphicsProgramming{
   background-image:url('../img/graphics.jpg');
-  min-height: 50%;
   opacity: 0.7;
 }
 
 .Dissertation{
   background-image:url('../img/diss.jpg');
-  min-height: 50%;
 }
 
 .GameJams{
   background-image:url('../img/brains.jpg');
-  min-height: 50%;
   opacity: 0.6;
 }
 
 .PersonalProjects{
   background-image:url('../img/mc.gif');
-  min-height: 50%;
 }
 
 .section .heading{
@@ -126,6 +122,7 @@ a:hover {
 @media(max-width:568px){
   .coverimg, .cnmimg, .brainsimg, .dissimg, .mcimg{
     background-attachment: scroll;
+    min-width: 100%;
   }
   .section-dark .TwoSplit{
     width: 90%;
