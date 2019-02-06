@@ -34,11 +34,11 @@ a:hover {
 
 .UnityDevelopment{
   opacity: 0.7;
-  background-image:url('../img/cnm.jpg');
+  background-image:url('../img/unity.gif');
 }
 
 .GraphicsProgramming{
-  background-image:url('../img/graphics.jpg');
+  background-image:url('../img/opengl.gif');
   opacity: 0.7;
 }
 
@@ -121,9 +121,6 @@ a:hover {
 @media(max-width:568px){
   .coverimg, .UnityDevelopment, .GameJams, .GraphicsProgramming, .PersonalProjects, .Dissertation{
     background-attachment: scroll;
-  }
-  .UnityDevelopment, .GameJams, .GraphicsProgramming, .PersonalProjects, .Dissertation{
-    min-height: 1%;
   }
 
   .section-dark .TwoSplit{
