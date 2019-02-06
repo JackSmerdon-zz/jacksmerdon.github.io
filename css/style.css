@@ -119,9 +119,8 @@ a:hover {
 }
 
 @media(max-width:568px){
-  .coverimg, .cnmimg, .brainsimg, .dissimg, .mcimg{
+.coverimg, .UnityDevelopment, .GameJams, .GraphicsProgramming, .PersonalProjects, .Dissertation{
     background-attachment: scroll;
-    min-width: 100%;
   }
   .section-dark .TwoSplit{
     width: 90%;
@@ -129,5 +128,9 @@ a:hover {
     text-align: justify;
     display: block;
     vertical-align: top;
+  }
+  .ptext{
+    font-size: 90%;
+    letter-spacing: 3px;
   }
 }
