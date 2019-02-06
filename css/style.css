@@ -119,9 +119,13 @@ a:hover {
 }
 
 @media(max-width:568px){
-.coverimg, .UnityDevelopment, .GameJams, .GraphicsProgramming, .PersonalProjects, .Dissertation{
+  .coverimg, .UnityDevelopment, .GameJams, .GraphicsProgramming, .PersonalProjects, .Dissertation{
     background-attachment: scroll;
   }
+  .UnityDevelopment, .GameJams, .GraphicsProgramming, .PersonalProjects, .Dissertation{
+    min-height: 1%;
+  }
+
   .section-dark .TwoSplit{
     width: 90%;
     margin: 5%;
