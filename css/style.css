@@ -18,7 +18,7 @@ a:hover {
   color: #666;
 }
 
-.coverimg, .UnityDevelopment, .GameJams, .GraphicsProgramming, .PersonalProjects, .Dissertation{
+.coverimg, .UnityDevelopment, .GameJams, .GraphicsProgramming, .Dissertation{
   position: relative;
   background-position: center;
   background-size: cover;
@@ -49,10 +49,6 @@ a:hover {
 .GameJams{
   background-image:url('../img/brains.jpg');
   opacity: 0.6;
-}
-
-.PersonalProjects{
-  background-image:url('../img/mc.gif');
 }
 
 .section .heading{
@@ -119,7 +115,7 @@ a:hover {
 }
 
 @media(max-width:568px){
-  .coverimg, .UnityDevelopment, .GameJams, .GraphicsProgramming, .PersonalProjects, .Dissertation{
+  .coverimg, .UnityDevelopment, .GameJams, .GraphicsProgramming, .Dissertation{
     background-attachment: scroll;
   }
 
