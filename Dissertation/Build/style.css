@@ -8,16 +8,14 @@ body {
 }
 .nav {
   height: 100%;
-  width: 0;
   position: fixed;
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #111;
-  opacity: 0.9;
+  background-color: #282828;
+  opacity: 1.0;
   overflow-x: hidden;
-  padding-top: 2%;
-  transition: 0.7s;
+  transition: 0.5s;
 }
 /*Headings*/
 .nav a {
@@ -25,21 +23,15 @@ body {
   padding: 2%;
   font-size: 150%;
   text-decoration: none;
-  color: #ccc;
-  margin-left: -10%;
+  color: #555555;
+  margin-left: 0%;
+  transition: 0.5s;
 }
 /*Heading Hover*/
 .nav a:hover {
-  color: #fff;
-  transition: 0.4s;
-}
-/*Close Button*/
-.nav .close {
-  position: absolute;
-  top: -1%;
-  right: 10%;
-  font-size: 300%;
-  text-transform: lowercase;
+  letter-spacing: 1px;
+  font-weight:lighter;
+  transition: 0.5s;
 }
 /*Hamburger*/
 .slide a {
@@ -59,8 +51,82 @@ body {
 /*Global List Settings*/
 li {
   list-style: none;
-  margin-left: 0%;
+  margin-left: -20%;
+  padding: 1.5%;
 }
+.close {
+  font-size: 150%;
+  text-transform: lowercase;
+  text-align: center;
+}
+.close div {
+  background-color: #6b6b6b;
+  padding: 1%;
+  margin-left: 3%;
+  margin-right: 3%;
+}
+.close h1 {
+  font-size: 100%;
+  color: #ffffff;
+  font-weight: normal;
+  text-transform: none;
+  text-align: center;
+}
+.close h2 {
+  font-size: 50%;
+  color: #ffffff;
+  font-weight: normal;
+  text-transform: none;
+  text-align: center;
+}
+.close a:hover {
+  font-size: 150%;
+  color: #ffffff;
+}
+
+
+.camera {
+  background-color: #fff9bf;
+}
+.cameraDark {
+  background-color: #fff5b2;
+}
+
+.models {
+  background-color: #ffe8ad;
+}
+.modelsDark {
+  background-color: #ffe0a1;
+}
+
+.lighting {
+  background-color: #ffd0b5;
+}
+.lightingDark {
+  background-color: #ffc8a8;
+}
+
+.rendering {
+  background-color: #ffb2b2;
+}
+.renderingDark {
+  background-color: #ffa6a6;
+}
+
+.skybox {
+  background-color: #6dc9c9;
+}
+.skyboxDark {
+  background-color: #66bdbd;
+}
+
+.scene {
+  background-color: #a5d8d8;
+}
+.sceneDark {
+  background-color: #9bcccc;
+}
+
 /*Heading Click Settings*/
 /*
 .SideBarUl li.clicked ul{
@@ -122,12 +188,22 @@ li {
 .SideBarUl input {
   font-family: 'Quicksand', sans-serif;
   font-size: 20px;
-  color: #ccc;
-  background-color: #222222;
+  color: #fff;
   border-radius: 2px;
   font-size: 100%;
   width: 88%;
 }
+
+.SideBarUl .models input {
+    background-color: #ffdb94;
+}
+.SideBarUl .skybox input {
+    background-color: #5fb0b0;
+}
+.SideBarUl .scene input {
+    background-color: #91bfbf;
+}
+
 
 /* Colour Picker */
 .colorpicker {
@@ -252,4 +328,24 @@ input:checked + .slider:before {
 
 .slider.round:before {
   border-radius: 50%;
+}
+
+#SettingsMenu::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 30px;
+	background-color: #282828;
+}
+
+#SettingsMenu::-webkit-scrollbar
+{
+	width: 8px;
+	background-color: #282828;
+}
+
+#SettingsMenu::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #9e9e9e;
 }
