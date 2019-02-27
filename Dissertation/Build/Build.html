@@ -13,7 +13,7 @@
   <div id="SideBar">
     <span class="slide">
       <a href="#" onclick="openSlideMenu()">
-        <i id="Hamburger">≡</i>
+        <i id="Hamburger">≡ Phone Fix</i>
       </a>
     </span>
 
@@ -180,6 +180,7 @@
   <!-- <script src="Imports/ColourPicker.js"></script> -->
 
   <!-- Program -->
+    <div class="container"></div>
   <script>
 
   //Displays message to the user if webGL is not supported in the browser.
@@ -197,7 +198,7 @@
 
   //Globals
   var container = document.createElement('div');
-  document.body.appendChild(container);
+  document.getElementsByClassName("container")[0].appendChild(container);
 
   //Clean Variables
   var Lights = [];
