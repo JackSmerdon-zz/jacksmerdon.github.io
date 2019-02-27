@@ -7,7 +7,7 @@ body {
   background: hsl(0, 0%, 10%);
 }
 .container {
-  overflow-y: hidden;
+  position: sticky;
 }
 .nav {
   height: 100%;
