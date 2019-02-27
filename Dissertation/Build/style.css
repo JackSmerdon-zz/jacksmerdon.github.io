@@ -6,6 +6,9 @@ body {
   padding: 0;
   background: hsl(0, 0%, 10%);
 }
+.container {
+  overflow-y: hidden;
+}
 .nav {
   height: 100%;
   position: fixed;
