@@ -8,6 +8,7 @@ body {
 }
 .container {
   position: sticky;
+  overflow-y: hidden;
 }
 .nav {
   height: 100%;
