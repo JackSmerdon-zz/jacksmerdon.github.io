@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>WebGL 3D Model Viewer</title>
+  <title>3D Level Design Tool</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
@@ -13,7 +13,7 @@
   <div id="SideBar">
     <span class="slide">
       <a href="#" onclick="openSlideMenu()">
-        <i id="Hamburger">≡ Phone</i>
+        <i id="Hamburger">≡</i>
       </a>
     </span>
 
@@ -47,11 +47,8 @@
                 <input type="file" id="NewModel" accept=".obj">
                 <a>Material:</a>
                 <input type="file" id="NewMaterial" accept=".mtl">
-
-                <!-- Not Yet Implemented
                 <a>Texture:</a>
-                <input type="file" id="NewTexture" accept="image/*">
-                -->
+                <input type="file" id="NewTexture" accept=".png">
 
                 <a href='#' onClick="loadNewModel()">Load Model</a>
               </ul>
@@ -59,6 +56,27 @@
             <li><a>Models in Scene:</a>
               <ul id="ModelListTop">
                 <li id="ModelListBottom"></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+
+        <!-- Prefab Settings -->
+        <li onclick="this.classList.toggle('clicked')" class="prefab"><a  href="#">Prefabs</a>
+          <ul class="prefabDark">
+            <li><a>Generate Primative:</a>
+              <ul>
+                <a href="#" onclick="">Box</a>
+                <a href="#" onclick="">Cylinder</a>
+                <a href="#" onclick="">Plane</a>
+                <a href="#" onclick="">Sphere</a>
+                <a href="#" onclick="">Text</a>
+              </ul>
+            </li>
+            <li><a>Other:</a>
+              <ul>
+                <a href="#" onclick="">Water</a>
+                <a href="#" onclick="loadDefaultModel()">Monkey</a>
               </ul>
             </li>
           </ul>
@@ -134,16 +152,19 @@
                 <a>Sample 3</a>
               </ul>
             </li>
-            <li>
-                <a>Files:</a>
-                  <ul>
-                  <a>Load Scene:</a>
-                  <input type="file" id="Load Scene" accept=".gltf">
-                  <a>Save Scene</a>
+            <li><a>Load Scene:</a>
+              <ul>
+                  <a><input type="file" id="NewGLTF" accept=".gltf" style="font-size: 10px;"></a>
+                  <a href="#" onclick="loadScene()" style="padding: 7px;">Load GLTF</a>
+              </ul>
+            </li>
+            <li><a>Save Scene:</a>
+              <ul>
+                  <a href="#" onclick="saveScene()">Save as GLTF</a>
+                  <a href="#" onclick="saveScene()">Save as OBJ</a>
               </ul>
             </li>
           </ul>
-
         </li>
 
         <!-- Picker -->
@@ -173,14 +194,20 @@
   <!-- Includes -->
   <script src="Imports/three.js"></script>
   <script src="Imports/Detector.js"></script>
+  <script src="Imports/TransformControls.js"></script>
   <script src="Imports/OrbitControls.js"></script>
+
   <script src="Imports/OBJLoader.js"></script>
   <script src="Imports/MTLLoader.js"></script>
+  <script src="Imports/GLTFLoader.js"></script>
+  <script src="Imports/GLTFExporter.js"></script>
+
+
   <script src="Imports/jquery.js"></script>
   <!-- <script src="Imports/ColourPicker.js"></script> -->
 
   <!-- Program -->
-    <div class="container"></div>
+  <div class="container"></div>
   <script>
 
   //Displays message to the user if webGL is not supported in the browser.
@@ -188,17 +215,18 @@
     Detector.addGetWebGLMessage();
   }
 
-  //Structs
-  function ModelObject (modelIn, materialIn, wireframeIn) {
-    this.Model = modelIn;
-    this.Material = materialIn;
-    //this.Texture = textureIn;
-    this.Wireframe = wireframeIn;
-  }
-
   //Globals
   var container = document.createElement('div');
   document.getElementsByClassName("container")[0].appendChild(container);
+  var scene = new THREE.Scene();
+
+  //Raycasting
+  var Raycasts = [];
+  var raycaster = new THREE.Raycaster();
+  var mouse = new THREE.Vector2(), INTERSECTED;
+  var raycastEnabled = true;
+
+  var eventBool;
 
   //Clean Variables
   var Lights = [];
@@ -206,16 +234,13 @@
   var Models = [];
   var Skybox;
 
-
-
   //Old
-  var camera, controls, renderer;
+  var camera, control, orbit, renderer, shadowRenderer;
   var shadowSwitch = true;
   var ambientLight;
   var pointLights = [];
 
   var gridHelper, plane;
-
 
   var planeSize;
 
@@ -223,8 +248,6 @@
 
   var windowHalfX = window.innerWidth / 2;
   var windowHalfY = window.innerHeight / 2;
-
-  var scene = new THREE.Scene();
 
   init();
   animate();
@@ -239,41 +262,50 @@
     plane = new THREE.Mesh( planeGeometry, planeMaterial );
     plane.rotation.x = toRadians(90);
     plane.receiveShadow = true;
+    plane.name = "Plane";
     scene.add( plane );
+    //Raycasts.push(plane);
     planeSize = new THREE.Box3().setFromObject( plane );
 
   }
-
   function setupCamera(x, y, z, near, far) {
     /* Camera */
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, near, far);
     camera.position.x = x;
     camera.position.y = y;
     camera.position.z = z;
+    camera.target = camera.position;
 
     /* Renderer */
     renderer = new THREE.WebGLRenderer({antialias: true});
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
+    //shadowRenderer.shadowMap.enabled = true;
+    //shadowRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
-
     container.appendChild(renderer.domElement);
 
-    /* Controls */
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.25;
-    controls.enableZoom = true;
-    controls.maxDistance = 1500;
-    controls.minDistance = 3;
-    controls.autoRotate = false;
-    controls.autoRotateSpeed = -0.5;
-    controls.maxPolarAngle = 1.5;
-  }
+    orbit = new THREE.OrbitControls(camera, renderer.domElement);
+    orbit.enableDamping = true;
+    orbit.dampingFactor = 0.08;
+    orbit.enableZoom = true;
+    orbit.maxDistance = 250;
+    orbit.minDistance = 3;
+    orbit.autoRotate = false;
+    orbit.autoRotateSpeed = -0.5;
+    orbit.maxPolarAngle = 1.5;
+    orbit.panSpeed = 100;
+    orbit.keyPanSpeed = 5;
+		orbit.update();
+		orbit.addEventListener( 'change', render );
 
+		control = new THREE.TransformControls( camera, renderer.domElement );
+		control.addEventListener( 'change', render );
+		control.addEventListener( 'dragging-changed', function ( event ) {
+		  orbit.enabled = ! event.value;
+      raycastEnabled =! event.value;
+		} );
+  }
   function defaultSkybox() {
     scene.remove(Skybox);
     var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
@@ -288,9 +320,9 @@
     ];
 
     Skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
+    Skybox.name = "Skybox";
     scene.add (Skybox);
   }
-
   function helperSkybox() {
     scene.remove(Skybox);
     var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
@@ -305,9 +337,9 @@
     ];
 
     Skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
+    Skybox.name = "Skybox";
     scene.add (Skybox);
   }
-
   function drawGrid(size, divs){
     /* Grid */
     var gridSize = size;
@@ -315,7 +347,6 @@
 
     gridHelper = new THREE.GridHelper(gridSize, divisions);
   }
-
   function loadDefaultModel() {
     var mtlLoader = new THREE.MTLLoader();
     mtlLoader.setPath('Assets/');
@@ -331,36 +362,26 @@
 
         model = object;
 
-        model.traverse( function ( child )
-        {
+        var group = new THREE.Object3D();
+        model.traverse( function ( child ) {
           if (child instanceof THREE.Mesh)
           {
-            child.castShadow = true;
+              child.castShadow = true;
           }
         });
 
-        wireframeModel = model.clone();
-
-        wireframeModel.traverse( function ( child )
-        {
-          if ( child instanceof THREE.Mesh )
-          {
-            child.material = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe : true  }  );
-          }
-        } );
-
-        Models.push(new ModelObject(model, materials, wireframeModel));
-
-        scene.add(Models[0].Model);
+        model.name = 'Monkey';
+        scene.add(model);
+        Raycasts.push(model);
       } );
     } );
   }
-
   function init() {
     //Updated clean code section
     closeSlideMenu();
     drawPlane(50, 50);
     addLight();
+    addAmbient();
     setupCamera(0, 7, 15, 0.1, 10000);
     defaultSkybox();
     drawGrid(50, 50);
@@ -368,8 +389,60 @@
 
     /* Events */
     window.addEventListener('resize', onWindowResize, false);
-  }
+    window.addEventListener( 'mousedown', onDocumentMouseDown, false );
+    window.addEventListener( 'mousemove', onMouseMove, false );
+    window.addEventListener( 'resize', onWindowResize, false );
+		window.addEventListener( 'keydown', function ( event ) {
+		  switch ( event.keyCode ) {
+						case 81: // Q
+							control.setSpace( control.space === "local" ? "world" : "local" );
+							break;
+						case 17: // Ctrl
+							control.setTranslationSnap( 100 );
+							control.setRotationSnap( THREE.Math.degToRad( 15 ) );
+							break;
+						case 87: // W
+							control.setMode( "translate" );
+							break;
+						case 69: // E
+							control.setMode( "rotate" );
+							break;
+						case 82: // R
+							control.setMode( "scale" );
+							break;
+						case 187:
+						case 107: // +, =, num+
+							control.setSize( control.size + 0.1 );
+							break;
+						case 189:
+						case 109: // -, _, num-
+							control.setSize( Math.max( control.size - 0.1, 0.1 ) );
+							break;
+						case 88: // X
+							control.showX = ! control.showX;
+							break;
+						case 89: // Y
+							control.showY = ! control.showY;
+							break;
+						case 90: // Z
+							control.showZ = ! control.showZ;
+							break;
+						case 32: // Spacebar
+							control.enabled = ! control.enabled;
+							break;
+				}
+			} );
+    window.addEventListener( 'keyup', function ( event ) {
+		  switch ( event.keyCode ) {
+						case 17: // Ctrl
+							control.setTranslationSnap( null );
+							control.setRotationSnap( null );
+							break;
+			}
+		} );
 
+    console.log("Default Scene Hierarchy", scene);
+  }
   function onWindowResize() {
     windowHalfX = window.innerWidth / 2;
     windowHalfY = window.innerHeight / 2;
@@ -379,15 +452,79 @@
 
     renderer.setSize(window.innerWidth, window.innerHeight);
   }
+  function onMouseMove( event ) {
+	  //calculate mouse position in normalized device coordinates
+	  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+  }
+  function onDocumentMouseDown( e ) {
+    e.preventDefault();
 
+    if(raycastEnabled)
+    {
+      control.detach();
+      scene.remove( control );
+    }
+
+    raycaster.setFromCamera( mouse, camera );
+    var intersects = raycaster.intersectObjects( Raycasts, true );
+
+    if ( intersects.length > 0 ) {
+    	if ( INTERSECTED != intersects[ 0 ].object ) {
+        for (var i = 0; i < Raycasts.length; i++) {
+            if (intersects[ 0 ].object.parent === Raycasts[ i ]) {
+              control.attach( Raycasts[i] );
+              scene.add( control );
+            }
+          }
+        }
+      }
+    /*//Old code with model highlight
+  if ( intersects.length > 0 ) {
+    if ( INTERSECTED != intersects[ 0 ].object ) {
+      var outlineMaterial = new THREE.MeshBasicMaterial( { color: 0x00ffff, side: THREE.BackSide } );
+
+      for (var i = 0; i < Raycasts.length; i++) {
+          if (intersects[ 0 ].object.parent === Raycasts[ i ]) {
+            SelectedObject.position = Raycasts[i].position;
+            SelectedObject.add(Raycasts[i]);
+            var group = new THREE.Object3D();      //create an empty container
+
+            Raycasts[i].traverse( function ( child ) {
+              if (child instanceof THREE.Mesh)
+              {
+                var outlineMesh = new THREE.Mesh(child.geometry, outlineMaterial);
+                outlineMesh.scale.multiplyScalar(1.01);
+                outlineMesh.position = child.position;
+                outlineMesh.name = "outlineMesh";
+                group.add(outlineMesh);
+              }
+            });
+
+            SelectedObject.add(group);
+            var axesHelper = new THREE.AxesHelper( 5 );
+            SelectedObject.add(axesHelper);
+          }
+        }
+        SelectedObject.translateZ(1);
+        console.log(scene);
+        //scene.add(SelectedObject);
+      }
+    }
+  }
+  */}
   function animate() {
     requestAnimationFrame(animate);
-    controls.update();
+    orbit.update();
     render();
   }
-
   function render() {
     renderer.render(scene, camera);
+    /*// Stops user from refreshing the page
+    window.onbeforeunload = function() {
+        return "Leaving the page without saving will result in loss of data. Do you wish to continue?";
+    }
+    */
   }
 
   /* GUI Functions */
@@ -395,58 +532,79 @@
   //SideBar Controls
 
   function loadNewModel() {
-
-    var newModel = document.getElementById('NewModel').files[0];
-    var modelURL = URL.createObjectURL( newModel );
-
-    var newMaterial = document.getElementById('NewMaterial').files[0];
-    var materialURL = URL.createObjectURL( newMaterial );
-
+    var objLoader = new THREE.OBJLoader();
     var mtlLoader = new THREE.MTLLoader();
-    mtlLoader.load(materialURL , function( materials )
+
+    if(typeof document.getElementById('NewModel').files[0] !== 'undefined')
     {
-      materials.preload();
+      var newModel = document.getElementById('NewModel').files[0];
+      var modelURL = URL.createObjectURL( newModel );
 
-      var objLoader = new THREE.OBJLoader();
+      if(typeof document.getElementById('NewMaterial').files[0] !== 'undefined')
+      {
+        var newMaterial = document.getElementById('NewMaterial').files[0];
+        var materialURL = URL.createObjectURL( newMaterial );
 
-      objLoader.setMaterials( materials );
-      objLoader.load(modelURL, function ( object ) {
-
-        model = object;
-
-        model.traverse( function ( child )
+        mtlLoader.load(materialURL , function( materials )
         {
-          if (child instanceof THREE.Mesh)
-          {
-            child.castShadow = true;
-          }
-        });
+          materials.preload();
+          objLoader.setMaterials( materials );
 
-        wireframeModel = model.clone();
-
-        wireframeModel.traverse( function ( child )
-        {
-          if ( child instanceof THREE.Mesh )
+          objLoader.load(modelURL, function ( object )
           {
-            child.material = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe : true  }  );
-          }
+            var newTexture = document.getElementById('NewTexture').files[0];
+            var textureURL = URL.createObjectURL( newTexture );
+
+            console.log(textureURL);
+
+            var texture = new THREE.TextureLoader();
+            texture.load(textureURL);
+
+            model = object;
+
+            model.traverse( function ( child )
+            {
+              if (child instanceof THREE.Mesh)
+              {
+                child.castShadow = true;
+                child.material.map = texture;
+              }
+            });
+
+            model.name = 'Loaded Model';
+            scene.add(model);
+            Raycasts.push(model);
+
+          } );
         } );
+      }
+      else {
 
-        Models.push(new ModelObject(model, materials, wireframeModel));
+        objLoader.load(modelURL, function ( object ) {
 
-        scene.add(Models[0].Wireframe);
-      } );
-    } );
+          model = object;
+
+          model.traverse( function ( child )
+          {
+            if (child instanceof THREE.Mesh)
+            {
+              child.castShadow = true;
+            }
+          });
+
+          model.name = 'Loaded Model';
+          scene.add(model);
+          Raycasts.push(model);
+        });
+      }
+    }
   }
-
   function toggleAutoRotate () {
-    controls.autoRotate = !controls.autoRotate;
+    orbit.autoRotate = !orbit.autoRotate;
   }
-
   function toggleCamReset () {
-    controls.reset();
+    orbit.reset();
   }
-
   function addLight () {
     var light = new THREE.DirectionalLight(0xffe6b8, 1)
     light.name = "Directional Light";
@@ -454,7 +612,6 @@
     var target = new THREE.Object3D();
     target.position.set(0,0,0);
     light.target = target;
-    scene.add(light.target);
 
     light.shadow.camera.left = -10;
     light.shadow.camera.right = 10;
@@ -469,10 +626,7 @@
     //Create a helper for the shadow camera (optional)
     var helper = new THREE.CameraHelper( light.shadow.camera );
 
-    ambient = new THREE.AmbientLight(0xffffff, 1.0);
-    ambient.intensity = 0.5;
     //scene.add(helper);
-    scene.add(ambient);
     scene.add(light);
 
     var newLi = document.createElement("li");
@@ -485,7 +639,12 @@
     var insertLocation = document.getElementById("LightListBottom");
     parentLocation.insertBefore(newA, insertLocation);
   }
-
+  function addAmbient() {
+    ambient = new THREE.AmbientLight(0xffffff, 1.0);
+    ambient.intensity = 0.5;
+    ambient.name = "Ambient Light";
+    scene.add(ambient);
+  }
   function updateSkybox(){
 
     scene.remove(Skybox);
@@ -522,9 +681,61 @@
     Skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
     scene.add(Skybox);
   }
+  function loadScene(){
+    var loader = new THREE.GLTFLoader();
+    var newGLTF = document.getElementById('NewGLTF').files[0];
+    var gltfURL = URL.createObjectURL( newGLTF );
+
+    loader.load( gltfURL, function ( gltf ) {
+      scene = gltf.scene;
+		  gltf.animations; // Array<THREE.AnimationClip>
+		  gltf.scene; // THREE.Scene
+		  gltf.scenes; // Array<THREE.Scene>
+		  gltf.cameras; // Array<THREE.Camera>
+		  gltf.asset; // Object
+
+      gltf.scene.traverse( function ( child )
+      {
+        if (child instanceof THREE.Mesh)
+        {
+          Raycasts.push(child);
+        }
+      });
+	  },
+	  // called while loading is progressing
+	  function ( xhr ) { console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' ); },
+	  // called when loading has errors
+	  function ( error ) { console.log( 'An error happened' ); }
+  );}
+  function saveScene(){
+    var gltfExporter = new THREE.GLTFExporter();
+
+    var options = {
+      trs: false,
+      onlyVisible: true,
+      truncateDrawRange: true,
+      binary: false,
+      forceIndices: false,
+      forcePowerOfTwoTextures: false
+    };
+    gltfExporter.parse( scene, function ( result ) {
+
+      if ( result instanceof ArrayBuffer ) {
+
+        saveArrayBuffer( result, 'scene.glb' );
+
+      } else {
+
+        var output = JSON.stringify( result, null, 2 );
+        console.log( output );
+        saveString( output, 'scene.gltf' );
+
+      }
+
+    }, options );
+  }
 
   /* HTML JavaScript Extensions */
-
   //Sliding Nav Bar
   function openSlideMenu() {
     document.getElementById('SettingsMenu').style.width = '250px';
@@ -535,11 +746,24 @@
   }
   function closeSlideMenu() {
     document.getElementById('SettingsMenu').style.width = '0px';
-    document.getElementById('SettingsMenu').style.fontSize = '0%'
+    document.getElementById('SettingsMenu').style.fontSize = '0px'
     document.getElementById('SettingsMenu').style.opacity = '0';
     document.getElementById('SideBar').style.marginLeft = '0px';
     document.getElementById('Hamburger').style.opacity = '1';
   }
+
+  //Export Functions from https://threejs.org/examples/misc_exporter_gltf.html
+  var link = document.createElement( 'a' );
+  link.style.display = 'none';
+  document.body.appendChild( link );
+
+  function save( blob, filename ) {
+    link.href = URL.createObjectURL( blob );
+    link.download = filename;
+    link.click();
+  }
+  function saveString( text, filename ) { save( new Blob( [ text ], { type: 'text/plain' } ), filename ); }
+  function saveArrayBuffer( buffer, filename ) { save( new Blob( [ buffer ], { type: 'application/octet-stream' } ), filename ); }
 
   /* ColourPicker */
   $(function(){

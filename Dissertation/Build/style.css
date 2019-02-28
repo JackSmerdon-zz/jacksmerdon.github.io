@@ -27,7 +27,7 @@ body {
   padding: 2%;
   font-size: 150%;
   text-decoration: none;
-  color: #555555;
+  color: #eeeeee;
   margin-left: 0%;
   transition: 0.5s;
 }
@@ -41,6 +41,7 @@ body {
 .slide a {
   color: #fff;
   font-size: 300%;
+  letter-spacing: 1px;
   text-decoration: none;
 }
 /*Hamburger Settings*/
@@ -50,7 +51,7 @@ body {
   font-style: normal;
   position: absolute;
   left: 2%;
-  top: -10px;
+  top: 2%;
 }
 /*Global List Settings*/
 li {
@@ -85,51 +86,30 @@ li {
 }
 .close a:hover {
   font-size: 150%;
-  color: #ffffff;
+  color: #f6bda7;
 }
 
 
-.camera {
-  background-color: #fff9bf;
-}
-.cameraDark {
-  background-color: #fff5b2;
-}
+.cameraDark        { background-color: #f6b9a2; }
+.camera            { background-color: #f6bda7; }
 
-.models {
-  background-color: #ffe8ad;
-}
-.modelsDark {
-  background-color: #ffe0a1;
-}
+.modelsDark        { background-color: #f8ab8d; }
+.models            { background-color: #f8b195; }
 
-.lighting {
-  background-color: #ffd0b5;
-}
-.lightingDark {
-  background-color: #ffc8a8;
-}
+.prefabDark        { background-color: #dc8e95 }
+.prefab            { background-color: #dc9399 }
 
-.rendering {
-  background-color: #ffb2b2;
-}
-.renderingDark {
-  background-color: #ffa6a6;
-}
+.lightingDark      { background-color: #b27797; }
+.lighting          { background-color: #b27e9a; }
 
-.skybox {
-  background-color: #6dc9c9;
-}
-.skyboxDark {
-  background-color: #66bdbd;
-}
+.renderingDark     { background-color: #7e688f; }
+.rendering         { background-color: #806d8f; }
 
-.scene {
-  background-color: #a5d8d8;
-}
-.sceneDark {
-  background-color: #9bcccc;
-}
+.skyboxDark        { background-color: #4d5877; }
+.skybox            { background-color: #525c77; }
+
+.sceneDark         { background-color: #2a4658; }
+.scene             { background-color: #2f4858; }
 
 /*Heading Click Settings*/
 /*
