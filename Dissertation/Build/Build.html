@@ -21,25 +21,27 @@
       <ul class="SideBarUl">
         <li href="#" class="close">
           <div>
-          <h1>3D Level Design Tool
-            <h2>Jack Smerdon</h2>
-          </h1>
-        </div>
-          <a = href="#" onclick="closeSlideMenu()">X</a></li>
+            <h1>3D Level Design Tool
+              <h2>Jack Smerdon</h2>
+            </h1>
+          </div>
+          <a = href="#" onclick="closeSlideMenu()">X</a>
+        </li>
         <!-- Camera Settings-->
-        <li onclick="this.classList.toggle('clicked')"class="camera"><a href="#">Camera</a>
+        <li onclick="this.classList.toggle('clicked')"class="camera"><a>Camera</a>
           <ul class="cameraDark">
             <li><a>Auto Rotate
               <label class="switch">
                 <input type="checkbox"  onclick="toggleAutoRotate()">
                 <span class="slider round"></span>
-              </label></a></li>
-              <li><a href="#" onclick="toggleCamReset()">Reset</a></li>
-            </ul>
+              </label></a>
+            </li>
+            <li><a href="#" onclick="toggleCamReset()">Reset</a></li>
+          </ul>
         </li>
 
         <!-- Model Settings -->
-        <li onclick="this.classList.toggle('clicked')" class="models"><a  href="#">Models</a>
+        <li onclick="this.classList.toggle('clicked')" class="models"><a>Models</a>
           <ul class="modelsDark">
             <li><a href="#">Load New Model:</a>
               <ul>
@@ -62,28 +64,41 @@
         </li>
 
         <!-- Prefab Settings -->
-        <li onclick="this.classList.toggle('clicked')" class="prefab"><a  href="#">Prefabs</a>
+        <li onclick="this.classList.toggle('clicked')" class="prefab"><a>Prefabs</a>
           <ul class="prefabDark">
             <li><a>Generate Primative:</a>
               <ul>
-                <a href="#" onclick="">Box</a>
-                <a href="#" onclick="">Cylinder</a>
-                <a href="#" onclick="">Plane</a>
-                <a href="#" onclick="">Sphere</a>
-                <a href="#" onclick="">Text</a>
+                <a href="#" onclick="spawnBox()">Box</a>
+                <a href="#" onclick="spawnCylinder()">Cylinder</a>
+                <a href="#" onclick="spawnPlane()">Plane</a>
+                <a href="#" onclick="spawnSphere()">Sphere</a>
+                <a href="#" onclick="spawnText()">Text</a>
               </ul>
             </li>
             <li><a>Other:</a>
               <ul>
-                <a href="#" onclick="">Water</a>
-                <a href="#" onclick="loadDefaultModel()">Monkey</a>
+                <a href="#" onclick="loadMonkey()">Monkey</a>
+                <a href="#" onclick="loadDonut()">Donut</a>
               </ul>
             </li>
+            <li><a>Water
+              <label class="switch">
+                <input type="checkbox"  onclick="toggleWater()">
+                <span class="slider round"></span>
+              </label></a>
+            </li>
+            <li><a>Grid
+              <label class="switch">
+                <input type="checkbox" onclick="toggleGrid()"checked>
+                <span class="slider round"></span>
+              </label></a>
+            </li>
+
           </ul>
         </li>
 
         <!-- Lighting Settings -->
-        <li onclick="this.classList.toggle('clicked')" class="lighting"><a href="#">Lighting</a>
+        <li onclick="this.classList.toggle('clicked')" class="lighting"><a>Lighting</a>
           <ul class="lightingDark">
             <li><a>Existing Lights:</a>
               <ul id="LightListTop">
@@ -94,14 +109,14 @@
         </li>
 
         <!-- Rendering Settings -->
-        <li onclick="this.classList.toggle('clicked')" class="rendering"><a href="#">Rendering</a>
+        <li onclick="this.classList.toggle('clicked')" class="rendering"><a>Rendering</a>
           <ul class="renderingDark">
             <li><a href="#" onclick=""></a></li>
           </ul>
         </li>
 
         <!-- Skybox Settings -->
-        <li onclick="this.classList.toggle('clicked')" class="skybox"><a href="#">Skybox</a>
+        <li onclick="this.classList.toggle('clicked')" class="skybox"><a>Skybox</a>
           <ul class="skyboxDark">
             <li><a>Textures:</a>
               <ul>
@@ -128,34 +143,45 @@
 
             <li><a>Help:</a>
               <ul>
-                <a href="#" onclick="defaultSkybox()">Reset to Default</a>
-                <a href="#" onclick="helperSkybox()">Helper Textures</a>
+                <a href="#" onclick="loadSkybox('Default')">Reset to Default</a>
+                <a href="#" onclick="loadSkybox('Helper')">Helper Textures</a>
+              </ul>
+            </li>
+            <li><a>Sample:</a>
+              <ul>
+                <a href="#" onclick="loadSkybox('Jungle')">Jungle</a>
+                <a href="#" onclick="loadSkybox('Sky')">Sky</a>
+              </ul>
+            </li>
+            <li><a>Settings:</a>
+              <ul>
+                <a href="#" onclick="">Size</a>
               </ul>
             </li>
           </ul>
         </li>
 
         <!-- Scene Settings -->
-        <li onclick="this.classList.toggle('clicked')" class="scene"><a href="#">Scene</a>
+        <li onclick="this.classList.toggle('clicked')" class="scene"><a>Scene</a>
           <ul class="sceneDark">
             <li><a>Settings:</a>
               <ul>
-                <a>Some Setting</a>
+                <a>Fog</a>
                 <a>Some Setting</a>
                 <a>Some Setting</a>
               </ul>
             </li>
             <li><a>Sample Scenes:</a>
               <ul>
-                <a>Sample 1</a>
-                <a>Sample 2</a>
-                <a>Sample 3</a>
+                <a>Jungle</a>
+                <a>Island</a>
+                <a>Sky</a>
               </ul>
             </li>
             <li><a>Load Scene:</a>
               <ul>
                   <a><input type="file" id="NewGLTF" accept=".gltf" style="font-size: 10px;"></a>
-                  <a href="#" onclick="loadScene()" style="padding: 7px;">Load GLTF</a>
+                  <a href="#" onclick="loadScene()">Load GLTF</a>
               </ul>
             </li>
             <li><a>Save Scene:</a>
@@ -168,25 +194,22 @@
         </li>
 
         <!-- Picker -->
-        <li>
+        <li onclick="this.classList.toggle('clicked')" class="properties"><a>Properties</a>
           <ul class="Focus">
-          <div class="colorpicker" style="display:none">
+          <div class="colorpicker">
             <a>Light Settings</a>
             <canvas id="picker"></canvas>
               <div class="controls">
-                <div><label>Name</label> <input type="text" id="lightName" /></div>
-                <div><label>Type</label> <input type="text" id="lightType" /></div>
                 <div><label>R</label> <input type="text" id="rVal" /></div>
                 <div><label>G</label> <input type="text" id="gVal" /></div>
                 <div><label>B</label> <input type="text" id="bVal" /></div>
                 <div><label>HEX</label> <input type="text" id="hexVal" /></div>
                 <li><a href="#" onclick="">Show Helper</a></li>
-                <li><a href="#" onclick="defaultLighting()">Reset to Default</a></li>
+                <li><a href="#" onclick="">Reset to Default</a></li>
               </div>
             </div>
           </ul>
         </li>
-
       </ul>
     </div>
   </div>
@@ -196,24 +219,19 @@
   <script src="Imports/Detector.js"></script>
   <script src="Imports/TransformControls.js"></script>
   <script src="Imports/OrbitControls.js"></script>
-
   <script src="Imports/OBJLoader.js"></script>
   <script src="Imports/MTLLoader.js"></script>
   <script src="Imports/GLTFLoader.js"></script>
   <script src="Imports/GLTFExporter.js"></script>
-
-
+  <script src="Imports/Water.js"></script>
   <script src="Imports/jquery.js"></script>
-  <!-- <script src="Imports/ColourPicker.js"></script> -->
 
   <!-- Program -->
   <div class="container"></div>
   <script>
 
   //Displays message to the user if webGL is not supported in the browser.
-  if (!Detector.webgl) {
-    Detector.addGetWebGLMessage();
-  }
+  if (!Detector.webgl) { Detector.addGetWebGLMessage(); }
 
   //Globals
   var container = document.createElement('div');
@@ -222,29 +240,19 @@
 
   //Raycasting
   var Raycasts = [];
+  var selectedObject;
   var raycaster = new THREE.Raycaster();
   var mouse = new THREE.Vector2(), INTERSECTED;
   var raycastEnabled = true;
-
-  var eventBool;
 
   //Clean Variables
   var Lights = [];
   var LightHelpers = [];
   var Models = [];
-  var Skybox;
 
-  //Old
-  var camera, control, orbit, renderer, shadowRenderer;
-  var shadowSwitch = true;
-  var ambientLight;
-  var pointLights = [];
-
-  var gridHelper, plane;
-
-  var planeSize;
-
-  var model, wireframeModel, cloneModel;
+  //Only 1 permitted per scene
+  var skybox, grid, water;
+  var camera, control, orbit, renderer;
 
   var windowHalfX = window.innerWidth / 2;
   var windowHalfY = window.innerHeight / 2;
@@ -252,21 +260,101 @@
   init();
   animate();
 
+  /* Utils */
   function toRadians (angle) {
     return angle * (Math.PI / 180);
   }
 
-  function drawPlane(x,y) {
-    var planeGeometry = new THREE.PlaneGeometry( x, y, 1, 1 );
-    var planeMaterial = new THREE.MeshPhongMaterial( {color: 0x707070, side: THREE.DoubleSide} );
-    plane = new THREE.Mesh( planeGeometry, planeMaterial );
-    plane.rotation.x = toRadians(90);
-    plane.receiveShadow = true;
-    plane.name = "Plane";
-    scene.add( plane );
-    //Raycasts.push(plane);
-    planeSize = new THREE.Box3().setFromObject( plane );
+  /* Init */
+  function animate() {
+    requestAnimationFrame(animate);
+    orbit.update();
+    render();
+  }
+  function render() {
+    if(scene.getObjectByName("Water"))
+    {
+        water.material.uniforms[ "time" ].value += 1.0 / 600.0;
+    }
 
+    renderer.render(scene, camera);
+    /*// Stops user from refreshing the page
+    window.onbeforeunload = function() {
+        return "Leaving the page without saving will result in loss of data. Do you wish to continue?";
+    }
+    */
+  }
+  function init() {
+    closeSlideMenu();
+    setupCamera(0, 7, 15, 0.1, 10000);
+
+    //Events
+    window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener( 'mousedown', onDocumentMouseDown, false );
+    window.addEventListener( 'mousemove', onMouseMove, false );
+    window.addEventListener( 'resize', onWindowResize, false );
+    window.addEventListener( 'keydown', function ( event ) {
+      switch ( event.keyCode ) {
+            case 81: // Q
+              control.setSpace( control.space === "local" ? "world" : "local" );
+              break;
+            case 17: // Ctrl
+              control.setTranslationSnap( 100 );
+              control.setRotationSnap( THREE.Math.degToRad( 15 ) );
+              break;
+            case 87: // W
+              control.setMode( "translate" );
+              break;
+            case 69: // E
+              control.setMode( "rotate" );
+              break;
+            case 82: // R
+              control.setMode( "scale" );
+              break;
+            case 187:
+            case 107: // +, =, num+
+              control.setSize( control.size + 0.1 );
+              break;
+            case 189:
+            case 109: // -, _, num-
+              control.setSize( Math.max( control.size - 0.1, 0.1 ) );
+              break;
+            case 88: // X
+              control.showX = ! control.showX;
+              break;
+            case 89: // Y
+              control.showY = ! control.showY;
+              break;
+            case 90: // Z
+              control.showZ = ! control.showZ;
+              break;
+            case 32: // Spacebar
+              control.enabled = ! control.enabled;
+              break;
+        }
+      } );
+    window.addEventListener( 'keyup', function ( event ) {
+      switch ( event.keyCode ) {
+            case 17: // Ctrl
+              control.setTranslationSnap( null );
+              control.setRotationSnap( null );
+              break;
+      }
+    } );
+
+    //To be replaced by GLTF load
+    //spawnPlane();
+    spawnGrid();
+    spawnWater();
+    addLight();
+    addAmbient();
+    loadSkybox("Default");
+    loadMonkey();
+    toggleGrid()
+    //scene.fog = new THREE.FogExp2(0xffffff, 0.0001);
+
+    //Log for debugging
+    console.log("Default Scene Hierarchy", scene);
   }
   function setupCamera(x, y, z, near, far) {
     /* Camera */
@@ -278,8 +366,6 @@
 
     /* Renderer */
     renderer = new THREE.WebGLRenderer({antialias: true});
-    //shadowRenderer.shadowMap.enabled = true;
-    //shadowRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
@@ -294,7 +380,6 @@
     orbit.autoRotate = false;
     orbit.autoRotateSpeed = -0.5;
     orbit.maxPolarAngle = 1.5;
-    orbit.panSpeed = 100;
     orbit.keyPanSpeed = 5;
 		orbit.update();
 		orbit.addEventListener( 'change', render );
@@ -305,143 +390,6 @@
 		  orbit.enabled = ! event.value;
       raycastEnabled =! event.value;
 		} );
-  }
-  function defaultSkybox() {
-    scene.remove(Skybox);
-    var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
-    var skyboxMaterials =
-    [
-      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Front.png"), side: THREE.DoubleSide}),
-      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Back.png"), side: THREE.DoubleSide}),
-      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Up.png"), side: THREE.DoubleSide}),
-      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Down.png"), side: THREE.DoubleSide}),
-      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Right.png"), side: THREE.DoubleSide}),
-      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Left.png"), side: THREE.DoubleSide})
-    ];
-
-    Skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
-    Skybox.name = "Skybox";
-    scene.add (Skybox);
-  }
-  function helperSkybox() {
-    scene.remove(Skybox);
-    var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
-    var skyboxMaterials =
-    [
-      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Test/Front.png"), side: THREE.DoubleSide}),
-      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Test/Back.png"), side: THREE.DoubleSide}),
-      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Test/Up.png"), side: THREE.DoubleSide}),
-      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Test/Down.png"), side: THREE.DoubleSide}),
-      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Test/Right.png"), side: THREE.DoubleSide}),
-      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/Test/Left.png"), side: THREE.DoubleSide})
-    ];
-
-    Skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
-    Skybox.name = "Skybox";
-    scene.add (Skybox);
-  }
-  function drawGrid(size, divs){
-    /* Grid */
-    var gridSize = size;
-    var divisions = divs;
-
-    gridHelper = new THREE.GridHelper(gridSize, divisions);
-  }
-  function loadDefaultModel() {
-    var mtlLoader = new THREE.MTLLoader();
-    mtlLoader.setPath('Assets/');
-    mtlLoader.load( 'Chubby Monkey.mtl', function( materials )
-    {
-      materials.preload();
-
-      var objLoader = new THREE.OBJLoader();
-
-      objLoader.setMaterials( materials );
-      objLoader.setPath('Assets/');
-      objLoader.load( 'Chubby Monkey.obj', function ( object ) {
-
-        model = object;
-
-        var group = new THREE.Object3D();
-        model.traverse( function ( child ) {
-          if (child instanceof THREE.Mesh)
-          {
-              child.castShadow = true;
-          }
-        });
-
-        model.name = 'Monkey';
-        scene.add(model);
-        Raycasts.push(model);
-      } );
-    } );
-  }
-  function init() {
-    //Updated clean code section
-    closeSlideMenu();
-    drawPlane(50, 50);
-    addLight();
-    addAmbient();
-    setupCamera(0, 7, 15, 0.1, 10000);
-    defaultSkybox();
-    drawGrid(50, 50);
-    loadDefaultModel();
-
-    /* Events */
-    window.addEventListener('resize', onWindowResize, false);
-    window.addEventListener( 'mousedown', onDocumentMouseDown, false );
-    window.addEventListener( 'mousemove', onMouseMove, false );
-    window.addEventListener( 'resize', onWindowResize, false );
-		window.addEventListener( 'keydown', function ( event ) {
-		  switch ( event.keyCode ) {
-						case 81: // Q
-							control.setSpace( control.space === "local" ? "world" : "local" );
-							break;
-						case 17: // Ctrl
-							control.setTranslationSnap( 100 );
-							control.setRotationSnap( THREE.Math.degToRad( 15 ) );
-							break;
-						case 87: // W
-							control.setMode( "translate" );
-							break;
-						case 69: // E
-							control.setMode( "rotate" );
-							break;
-						case 82: // R
-							control.setMode( "scale" );
-							break;
-						case 187:
-						case 107: // +, =, num+
-							control.setSize( control.size + 0.1 );
-							break;
-						case 189:
-						case 109: // -, _, num-
-							control.setSize( Math.max( control.size - 0.1, 0.1 ) );
-							break;
-						case 88: // X
-							control.showX = ! control.showX;
-							break;
-						case 89: // Y
-							control.showY = ! control.showY;
-							break;
-						case 90: // Z
-							control.showZ = ! control.showZ;
-							break;
-						case 32: // Spacebar
-							control.enabled = ! control.enabled;
-							break;
-				}
-			} );
-    window.addEventListener( 'keyup', function ( event ) {
-		  switch ( event.keyCode ) {
-						case 17: // Ctrl
-							control.setTranslationSnap( null );
-							control.setRotationSnap( null );
-							break;
-			}
-		} );
-
-    console.log("Default Scene Hierarchy", scene);
   }
   function onWindowResize() {
     windowHalfX = window.innerWidth / 2;
@@ -457,28 +405,38 @@
 	  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   }
-  function onDocumentMouseDown( e ) {
+  function onDocumentMouseDown( e ) { //Raycasting
     e.preventDefault();
-
-    if(raycastEnabled)
-    {
-      control.detach();
-      scene.remove( control );
-    }
 
     raycaster.setFromCamera( mouse, camera );
     var intersects = raycaster.intersectObjects( Raycasts, true );
 
-    if ( intersects.length > 0 ) {
-    	if ( INTERSECTED != intersects[ 0 ].object ) {
-        for (var i = 0; i < Raycasts.length; i++) {
-            if (intersects[ 0 ].object.parent === Raycasts[ i ]) {
+    if(intersects.length === 0)
+    {
+      if(raycastEnabled)
+      {
+        control.detach();
+        scene.remove( control );
+      }
+    }
+    else if(raycastEnabled)
+    {
+      if ( intersects.length > 0 ) {
+        if ( INTERSECTED != intersects[0].object ) {
+          for (var i = 0; i < Raycasts.length; i++) {
+            if (intersects[0].object.parent === Raycasts[ i ]) {
+              control.attach( Raycasts[i] );
+              scene.add( control );
+            }
+            else if (intersects[0].object === Raycasts[ i ]) {
               control.attach( Raycasts[i] );
               scene.add( control );
             }
           }
         }
       }
+    }
+
     /*//Old code with model highlight
   if ( intersects.length > 0 ) {
     if ( INTERSECTED != intersects[ 0 ].object ) {
@@ -513,24 +471,16 @@
     }
   }
   */}
-  function animate() {
-    requestAnimationFrame(animate);
-    orbit.update();
-    render();
+
+  /* SideBar Controls */
+  //Camera
+  function toggleAutoRotate () {
+    orbit.autoRotate = !orbit.autoRotate;
   }
-  function render() {
-    renderer.render(scene, camera);
-    /*// Stops user from refreshing the page
-    window.onbeforeunload = function() {
-        return "Leaving the page without saving will result in loss of data. Do you wish to continue?";
-    }
-    */
+  function toggleCamReset () {
+    orbit.reset();
   }
-
-  /* GUI Functions */
-
-  //SideBar Controls
-
+  //Models
   function loadNewModel() {
     var objLoader = new THREE.OBJLoader();
     var mtlLoader = new THREE.MTLLoader();
@@ -599,12 +549,165 @@
       }
     }
   }
-  function toggleAutoRotate () {
-    orbit.autoRotate = !orbit.autoRotate;
+  //Prefabs
+  function spawnBox() {
+    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var material = new THREE.MeshPhongMaterial( {color: 0xaaaaaa} );
+    var cube = new THREE.Mesh( geometry, material );
+    cube.name = "Cube";
+    scene.add(cube);
+    Raycasts.push(cube);
   }
-  function toggleCamReset () {
-    orbit.reset();
+  function spawnCylinder() {
+    var geometry = new THREE.CylinderGeometry( 5, 5, 20, 32 );
+    var material = new THREE.MeshPhongMaterial( {color: 0xaaaaaa} );
+    var cylinder = new THREE.Mesh( geometry, material );
+    scene.add( cylinder );
+    cylinder.name = "Cylinder";
+    Raycasts.push(cylinder);
   }
+  function spawnPlane(x = 50, y = 50) {
+    var planeGeometry = new THREE.PlaneGeometry( x, y, 1, 1 );
+    var planeMaterial = new THREE.MeshPhongMaterial( {color: 0x707070, side: THREE.DoubleSide} );
+    var plane = new THREE.Mesh( planeGeometry, planeMaterial );
+    plane.rotation.x = toRadians(90);
+    plane.receiveShadow = true;
+    plane.name = "Plane";
+    scene.add( plane );
+    Raycasts.push(plane);
+    planeSize = new THREE.Box3().setFromObject( plane );
+
+  }
+  function spawnSphere() {
+    var geometry = new THREE.SphereGeometry( 5, 32, 32 );
+    var material = new THREE.MeshPhongMaterial( {color: 0xaaaaaa} );
+    var sphere = new THREE.Mesh( geometry, material );
+    sphere.name = "Sphere";
+    scene.add( sphere );
+    Raycasts.push(sphere);
+  }
+  function spawnText() {
+    var loader = new THREE.FontLoader();
+				loader.load( 'Assets/Fonts/helvetiker_regular.typeface.json', function ( font ) {
+					var textGeo = new THREE.TextBufferGeometry( "THREE.JS", {
+						font: font,
+						size: 200,
+						height: 50,
+						curveSegments: 12,
+						bevelThickness: 2,
+						bevelSize: 5,
+						bevelEnabled: true
+					} );
+					textGeo.computeBoundingBox();
+					var centerOffset = - 0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
+					var textMaterial = new THREE.MeshPhongMaterial( { color: 0xff0000, specular: 0xffffff } );
+					var mesh = new THREE.Mesh( textGeo, textMaterial );
+					mesh.position.x = centerOffset;
+					mesh.position.y = 0;
+					mesh.castShadow = true;
+					mesh.receiveShadow = true;
+					scene.add( mesh );
+				} );
+
+  }
+  function loadMonkey() {
+    var mtlLoader = new THREE.MTLLoader();
+    mtlLoader.setPath('Assets/Models/');
+    mtlLoader.load( 'Chubby Monkey.mtl', function( materials )
+    {
+      materials.preload();
+
+      var objLoader = new THREE.OBJLoader();
+
+      objLoader.setMaterials( materials );
+      objLoader.setPath('Assets/Models/');
+      objLoader.load( 'Chubby Monkey.obj', function ( object ) {
+
+        model = object;
+
+        var group = new THREE.Object3D();
+        model.traverse( function ( child ) {
+          if (child instanceof THREE.Mesh)
+          {
+              child.castShadow = true;
+          }
+        });
+
+        model.name = 'Monkey';
+        scene.add(model);
+        Raycasts.push(model);
+      } );
+    } );
+  }
+  function loadDonut() {
+
+  }
+  function spawnGrid(size = 50, divs = 20) {
+    var gridSize = size;
+    var divisions = divs;
+    grid = new THREE.GridHelper(gridSize, divisions);
+    grid.name = "Grid";
+  }
+  function toggleGrid() {
+    if(scene.getObjectByName("Grid"))
+    {
+      control.detach();
+      scene.remove( control );
+      scene.remove(grid);
+      for( var i = 0; i < Raycasts.length; i++){
+       if ( Raycasts[i].name === "Grid") {
+         Raycasts.splice(i, 1);
+       }
+      }
+    }
+    else {
+      scene.add(grid);
+      Raycasts.push(grid);
+    }
+  }
+  function spawnWater() {
+    var waterGeometry = new THREE.PlaneBufferGeometry( 50, 50 );
+
+    water = new THREE.Water(
+      waterGeometry,
+      {
+        textureWidth: 512,
+        textureHeight: 512,
+        waterNormals: new THREE.TextureLoader().load( 'Assets/Water.png', function ( texture ) {
+
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+
+        } ),
+        alpha: 1.0,
+        sunDirection: new THREE.Vector3(10,10,10).normalize(),
+        sunColor: 0x000000,
+        waterColor: 0x5b696e,
+        distortionScale: 25,
+        fog: scene.fog !== undefined
+      }
+    );
+    water.rotation.x = -Math.PI / 2;
+    water.name = "Water";
+    water.material.transparent = true;
+  }
+  function toggleWater() {
+    if(scene.getObjectByName("Water"))
+    {
+      control.detach();
+      scene.remove( control );
+      scene.remove(water);
+      for( var i = 0; i < Raycasts.length; i++){
+       if ( Raycasts[i].name === "Water") {
+         Raycasts.splice(i, 1);
+       }
+      }
+    }
+    else {
+      scene.add(water);
+      Raycasts.push(water);
+    }
+  }
+  //Lighting
   function addLight () {
     var light = new THREE.DirectionalLight(0xffe6b8, 1)
     light.name = "Directional Light";
@@ -645,9 +748,11 @@
     ambient.name = "Ambient Light";
     scene.add(ambient);
   }
+  //Rendering
+  //Skybox
   function updateSkybox(){
 
-    scene.remove(Skybox);
+    scene.remove(skybox);
 
     var front = document.getElementById('NewFrontIMG').files[0];
     var frontURL = URL.createObjectURL( front );
@@ -678,9 +783,27 @@
       new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load(leftURL), side: THREE.DoubleSide})
     ];
 
-    Skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
-    scene.add(Skybox);
+    skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
+    scene.add(skybox);
   }
+  function loadSkybox(name) {
+    scene.remove(skybox);
+    var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
+    var skyboxMaterials =
+    [
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/" + name + "/Front.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/" + name + "/Back.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/" + name + "/Up.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/" + name + "/Down.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/" + name + "/Right.png"), side: THREE.DoubleSide}),
+      new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/" + name + "/Left.png"), side: THREE.DoubleSide})
+    ];
+
+    skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
+    skybox.name = "Skybox";
+    scene.add (skybox);
+  }
+  //Scene
   function loadScene(){
     var loader = new THREE.GLTFLoader();
     var newGLTF = document.getElementById('NewGLTF').files[0];
@@ -753,6 +876,7 @@
   }
 
   //Export Functions from https://threejs.org/examples/misc_exporter_gltf.html
+  //Not working correctly
   var link = document.createElement( 'a' );
   link.style.display = 'none';
   document.body.appendChild( link );
@@ -762,8 +886,12 @@
     link.download = filename;
     link.click();
   }
-  function saveString( text, filename ) { save( new Blob( [ text ], { type: 'text/plain' } ), filename ); }
-  function saveArrayBuffer( buffer, filename ) { save( new Blob( [ buffer ], { type: 'application/octet-stream' } ), filename ); }
+  function saveString( text, filename ) {
+     save( new Blob( [ text ], { type: 'text/plain' } ), filename );
+   }
+  function saveArrayBuffer( buffer, filename ) {
+     save( new Blob( [ buffer ], { type: 'application/octet-stream' } ), filename );
+   }
 
   /* ColourPicker */
   $(function(){
@@ -775,13 +903,14 @@
 
       // drawing active image
       var image = new Image();
-      image.onload = function () {
-          ctx.drawImage(image, 0, 0, image.width, image.height); // draw the image on the canvas
-      }
 
       // select desired colorwheel
       var imageSrc = 'Assets/ColourWheel.png';
       image.src = imageSrc;
+
+      image.onload = function () {
+          ctx.drawImage(image, 0, 0, image.width, image.height); // draw the image on the canvas
+      }
 
       $('#picker').mousemove(function(e) { // mouse move handler
           if (bCanPreview) {
@@ -811,12 +940,7 @@
       $('#picker').click(function(e) { // click event handler
           bCanPreview = !bCanPreview;
       });
-      $('.preview').click(function(e) { // preview click
-          $('.colorpicker').fadeToggle("slow", "linear");
-          bCanPreview = true;
-      });
   });
-
   </script>
 </body>
 </html>

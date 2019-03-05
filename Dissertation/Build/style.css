@@ -111,7 +111,10 @@ li {
 .sceneDark         { background-color: #2a4658; }
 .scene             { background-color: #2f4858; }
 
-/*Heading Click Settings*/
+/*.propertiesDark  { background-color: #202c36; }*/
+.properties        { background-color: #23323c; }
+
+/*Heading Click Settings - Old code used to minimise sections*/
 /*
 .SideBarUl li.clicked ul{
   opacity: 1;
@@ -154,6 +157,7 @@ li {
   width: 100%;
 }
 */
+
 .SideBarUl li ul{
   opacity: 1;
   height: auto;
@@ -189,29 +193,29 @@ li {
 }
 
 
-/* Colour Picker */
+/* ----------- Colour Picker ----------- */
+  /* Title */
 .colorpicker {
-    background-color: #222222;
-    border-radius: 5px;
     font-size: 77%;
-    right: 39%;
     top: 0%;
-    width: 130%;
+    width: 100%;
     color: #ccc;
     position: relative;
+    margin-left: -20%;
+}
+.colorpicker a {
+  text-align: center;
 }
 #picker {
     cursor: crosshair;
-    position: relative;
-    left: 7%;
-    margin: 10%;
-    border: 0;
+    size: 150 150;
 }
 .controls {
-    margin: -5% 5%;
+  display: inline-block;
+  text-align: center;
 }
 .controls > div {
-    border: 1px solid #2F2F2F;
+    border: 1px solid #FFFFFF;
     margin-bottom: 2%;
     overflow: hidden;
     padding: 2%
@@ -222,7 +226,7 @@ li {
 }
 /* Input Values */
 .controls > div input {
-    background-color: #121212;
+    /*background-color: #121212;*/
     border: 1px solid #2F2F2F;
     color: #DDDDDD;
     float: right;
@@ -230,46 +234,31 @@ li {
     text-align: center;
     width: 40%;
 }
-/*Not used (Hopefully)*/
-.preview {
-    background: url("Assets/select.png") repeat scroll center center transparent;
-    border-radius: 3px;
-    box-shadow: 2px 2px 2px #444444;
-    cursor: pointer;
-    height: 30px;
-    width: 30px;
-    float: left;
-    display: inline-block;
-    margin-right: 10px;
+.Focus {
+  font-family: 'Quicksand', sans-serif;
+  background-color: #202c36;
 }
 .Focus a {
-  font-family: 'Quicksand', sans-serif;
   font-size: 200%;
-  margin-left: 14%;
-  margin-top: 15%;
+  text-align: center;
 }
-.Focus ul {
-  font-size: 70%;
-  margin-left: -38%;
-  margin-top: -10%;
-}
+
+/* ----------- iOS Style Sliders ----------- */
 /*Box around the slider */
 .switch {
   position: relative;
   display: inline-block;
   width: 46px;
   height: 20px;
-  margin-left: 22%;
+  float:right;
   top: 3px;
 }
-
 /* Hide default HTML checkbox */
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 /* The slider */
 .slider {
   position: absolute;
@@ -282,7 +271,6 @@ li {
   -webkit-transition: .4s;
   transition: .4s;
 }
-
 .slider:before {
   position: absolute;
   content: "";
@@ -294,26 +282,23 @@ li {
   -webkit-transition: .4s;
   transition: .4s;
 }
-
 input:checked + .slider {
   background-color: #1DDB28;
 }
-
 input:checked + .slider:before {
   -webkit-transform: translateX(26px);
   -ms-transform: translateX(26px);
   transform: translateX(26px);
 }
-
 /* Rounded sliders */
 .slider.round {
   border-radius: 34px;
 }
-
 .slider.round:before {
   border-radius: 50%;
 }
 
+/* ----------- Custom Scrollbar ----------- */
 #SettingsMenu::-webkit-scrollbar-track
 {
 	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
