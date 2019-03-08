@@ -10,13 +10,19 @@
 </head>
 <body>
   <!-- GUI -->
+  <span class="slide">
+    <a href="#" onclick="openSlideMenu()">
+      <i id="Hamburger">≡</i>
+    </a>
+    <a class="icons">
+      <img src='Assets/Icons/Snap.png' onmouseover="this.src='Assets/Icons/SnapHover.png';" onmouseout="this.src='Assets/Icons/Snap.png';" href="#" onclick="toggleSnap()" alt="T" id="icon" />
+      <img src='Assets/Icons/Translate.png' onmouseover="this.src='Assets/Icons/TranslateHover.png';" onmouseout="this.src='Assets/Icons/Translate.png';" href="#" onclick="toggleTransform('translate')" alt="T" id="icon" />
+      <img src='Assets/Icons/Rotate.png' onmouseover="this.src='Assets/Icons/RotateHover.png';" onmouseout="this.src='Assets/Icons/Rotate.png';" href="#" onclick="toggleTransform('rotate')" alt="R" id="icon" />
+      <img src='Assets/Icons/Scale.png' onmouseover="this.src='Assets/Icons/ScaleHover.png';" onmouseout="this.src='Assets/Icons/Scale.png';" href="#" onclick="toggleTransform('scale')" alt="S" id="icon" />
+      <img src='Assets/Icons/Info.png' onmouseover="this.src='Assets/Icons/InfoHover.png';" onmouseout="this.src='Assets/Icons/Info.png';" href="#" onclick="showInfo()" alt="I" id="icon" />
+    </a>
+  </span>
   <div id="SideBar">
-    <span class="slide">
-      <a href="#" onclick="openSlideMenu()">
-        <i id="Hamburger">≡</i>
-      </a>
-    </span>
-
     <div id="SettingsMenu" class="nav">
       <ul class="SideBarUl">
         <li href="#" class="close">
@@ -33,6 +39,12 @@
             <li><a>Auto Rotate
               <label class="switch">
                 <input type="checkbox"  onclick="toggleAutoRotate()">
+                <span class="slider round"></span>
+              </label></a>
+            </li>
+            <li><a>Rotation Lock
+              <label class="switch">
+                <input type="checkbox"  onclick="toggleRotationLock()" checked>
                 <span class="slider round"></span>
               </label></a>
             </li>
@@ -55,7 +67,7 @@
                 <a href='#' onClick="loadNewModel()">Load Model</a>
               </ul>
             </li>
-            <li><a>Models in Scene:</a>
+            <li><a>Objects in Scene:</a>
               <ul id="ModelListTop">
                 <li id="ModelListBottom"></li>
               </ul>
@@ -77,8 +89,9 @@
             </li>
             <li><a>Other:</a>
               <ul>
-                <a href="#" onclick="loadMonkey()">Monkey</a>
-                <a href="#" onclick="loadDonut()">Donut</a>
+                <a href="#" onclick="loadFromFile('Monkey')">Monkey</a>
+                <a href="#" onclick="loadFromFile('Donut')">Donut</a>
+                <a href="#" onclick="loadFromFile('Planet')">Planet</a>
               </ul>
             </li>
             <li><a>Water
@@ -151,6 +164,7 @@
               <ul>
                 <a href="#" onclick="loadSkybox('Jungle')">Jungle</a>
                 <a href="#" onclick="loadSkybox('Sky')">Sky</a>
+                <a href="#" onclick="loadSkybox('Space')">Space</a>
               </ul>
             </li>
             <li><a>Settings:</a>
@@ -196,18 +210,14 @@
         <!-- Picker -->
         <li onclick="this.classList.toggle('clicked')" class="properties"><a>Properties</a>
           <ul class="Focus">
-          <div class="colorpicker">
-            <a>Light Settings</a>
-            <canvas id="picker"></canvas>
+              <h1 id="header">Select Object</h1>
+              <canvas id="picker"></canvas>
               <div class="controls">
                 <div><label>R</label> <input type="text" id="rVal" /></div>
                 <div><label>G</label> <input type="text" id="gVal" /></div>
                 <div><label>B</label> <input type="text" id="bVal" /></div>
                 <div><label>HEX</label> <input type="text" id="hexVal" /></div>
-                <li><a href="#" onclick="">Show Helper</a></li>
-                <li><a href="#" onclick="">Reset to Default</a></li>
               </div>
-            </div>
           </ul>
         </li>
       </ul>
@@ -237,9 +247,11 @@
   var container = document.createElement('div');
   document.getElementsByClassName("container")[0].appendChild(container);
   var scene = new THREE.Scene();
+  var snap = false;
 
   //Raycasting
   var Raycasts = [];
+  var raycastCount = 0;
   var selectedObject;
   var raycaster = new THREE.Raycaster();
   var mouse = new THREE.Vector2(), INTERSECTED;
@@ -269,6 +281,11 @@
   function animate() {
     requestAnimationFrame(animate);
     orbit.update();
+    if(Raycasts.length != raycastCount)
+    {
+      raycastCount = Raycasts.length;
+      updateObjectList();
+    }
     render();
   }
   function render() {
@@ -293,54 +310,6 @@
     window.addEventListener( 'mousedown', onDocumentMouseDown, false );
     window.addEventListener( 'mousemove', onMouseMove, false );
     window.addEventListener( 'resize', onWindowResize, false );
-    window.addEventListener( 'keydown', function ( event ) {
-      switch ( event.keyCode ) {
-            case 81: // Q
-              control.setSpace( control.space === "local" ? "world" : "local" );
-              break;
-            case 17: // Ctrl
-              control.setTranslationSnap( 100 );
-              control.setRotationSnap( THREE.Math.degToRad( 15 ) );
-              break;
-            case 87: // W
-              control.setMode( "translate" );
-              break;
-            case 69: // E
-              control.setMode( "rotate" );
-              break;
-            case 82: // R
-              control.setMode( "scale" );
-              break;
-            case 187:
-            case 107: // +, =, num+
-              control.setSize( control.size + 0.1 );
-              break;
-            case 189:
-            case 109: // -, _, num-
-              control.setSize( Math.max( control.size - 0.1, 0.1 ) );
-              break;
-            case 88: // X
-              control.showX = ! control.showX;
-              break;
-            case 89: // Y
-              control.showY = ! control.showY;
-              break;
-            case 90: // Z
-              control.showZ = ! control.showZ;
-              break;
-            case 32: // Spacebar
-              control.enabled = ! control.enabled;
-              break;
-        }
-      } );
-    window.addEventListener( 'keyup', function ( event ) {
-      switch ( event.keyCode ) {
-            case 17: // Ctrl
-              control.setTranslationSnap( null );
-              control.setRotationSnap( null );
-              break;
-      }
-    } );
 
     //To be replaced by GLTF load
     //spawnPlane();
@@ -349,8 +318,9 @@
     addLight();
     addAmbient();
     loadSkybox("Default");
-    loadMonkey();
+    loadFromFile("Monkey");
     toggleGrid()
+    updateObjectList();
     //scene.fog = new THREE.FogExp2(0xffffff, 0.0001);
 
     //Log for debugging
@@ -473,9 +443,29 @@
   */}
 
   /* SideBar Controls */
+  function showInfo() {
+
+  }
+  function toggleTransform(type) {
+    control.setMode( type );
+  }
+  function toggleSnap() {
+    snap = !snap;
+    if(snap) {
+      control.setTranslationSnap( 2.5 );
+      control.setRotationSnap( THREE.Math.degToRad( 15 ) );
+    }
+    else {
+      control.setTranslationSnap( null );
+      control.setRotationSnap( null );
+    }
+  }
   //Camera
   function toggleAutoRotate () {
     orbit.autoRotate = !orbit.autoRotate;
+  }
+  function toggleRotationLock() {
+
   }
   function toggleCamReset () {
     orbit.reset();
@@ -549,6 +539,28 @@
       }
     }
   }
+  function updateObjectList(){
+
+    var myNode = document.getElementById("ModelListTop");
+    while (myNode.firstChild) {
+      myNode.removeChild(myNode.firstChild);
+}
+
+    Raycasts.forEach(function(element) {
+    {
+        var newLi = document.createElement("li");
+        newLi.setAttribute('id', element.name);
+        var newA = document.createElement("a");
+        var newContent = document.createTextNode(element.name);
+        newA.appendChild(newContent);
+        newLi.appendChild(newA);
+
+        var parentLocation = document.getElementById("ModelListTop");
+        var insertLocation = document.getElementById("ModelListBottom");
+        parentLocation.insertBefore(newA, insertLocation);
+      }
+    });
+  }
   //Prefabs
   function spawnBox() {
     var geometry = new THREE.BoxGeometry( 1, 1, 1 );
@@ -589,14 +601,14 @@
   function spawnText() {
     var loader = new THREE.FontLoader();
 				loader.load( 'Assets/Fonts/helvetiker_regular.typeface.json', function ( font ) {
-					var textGeo = new THREE.TextBufferGeometry( "THREE.JS", {
+					var textGeo = new THREE.TextBufferGeometry( "Made with Jack's Tool", {
 						font: font,
-						size: 200,
-						height: 50,
-						curveSegments: 12,
-						bevelThickness: 2,
-						bevelSize: 5,
-						bevelEnabled: true
+						size: 8,
+						height: 2,
+						curveSegments: 5,
+						bevelThickness: 1,
+						bevelSize: 1,
+						bevelEnabled: false
 					} );
 					textGeo.computeBoundingBox();
 					var centerOffset = - 0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
@@ -607,13 +619,14 @@
 					mesh.castShadow = true;
 					mesh.receiveShadow = true;
 					scene.add( mesh );
+          Raycasts.push(mesh);
 				} );
 
   }
-  function loadMonkey() {
+  function loadFromFile(name) {
     var mtlLoader = new THREE.MTLLoader();
     mtlLoader.setPath('Assets/Models/');
-    mtlLoader.load( 'Chubby Monkey.mtl', function( materials )
+    mtlLoader.load( (name + '.mtl'), function( materials )
     {
       materials.preload();
 
@@ -621,7 +634,7 @@
 
       objLoader.setMaterials( materials );
       objLoader.setPath('Assets/Models/');
-      objLoader.load( 'Chubby Monkey.obj', function ( object ) {
+      objLoader.load( (name + '.obj'), function ( object ) {
 
         model = object;
 
@@ -633,7 +646,7 @@
           }
         });
 
-        model.name = 'Monkey';
+        model.name = name;
         scene.add(model);
         Raycasts.push(model);
       } );
@@ -893,7 +906,7 @@
      save( new Blob( [ buffer ], { type: 'application/octet-stream' } ), filename );
    }
 
-  /* ColourPicker */
+  /* jquery */
   $(function(){
       var bCanPreview = true; // can preview
 
@@ -935,10 +948,18 @@
 
               var dColor = pixel[2] + 256 * pixel[1] + 65536 * pixel[0];
               $('#hexVal').val('#' + ('0000' + dColor.toString(16)).substr(-6));
+              $('#hexVal').css('backgroundColor', pixelColor);
           }
       });
       $('#picker').click(function(e) { // click event handler
           bCanPreview = !bCanPreview;
+      });
+
+      $('#SideBar').mouseover(function(e) {
+        raycastEnabled = false;
+      });
+      $('#SideBar').mouseout(function(e) {
+        raycastEnabled = true;
       });
   });
   </script>
