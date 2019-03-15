@@ -7,14 +7,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
   <!-- GUI -->
   <span class="slide">
-    <a href="#" onclick="openSlideMenu()">
-      <i id="Hamburger">≡</i>
-    </a>
-    <a class="icons">
+    <a id="burgerHeader">
+        <img src='Assets/Icons/Burger.png' onmouseover="this.src='Assets/Icons/BurgerHover.png';" onmouseout="this.src='Assets/Icons/Burger.png';" href="#" onclick="openSlideMenu()" alt="T" id="burger"/>
+    <a/>
+    <a id="icons">
       <img src='Assets/Icons/Snap.png' onmouseover="this.src='Assets/Icons/SnapHover.png';" onmouseout="this.src='Assets/Icons/Snap.png';" href="#" onclick="toggleSnap()" alt="T" id="icon" />
       <img src='Assets/Icons/Translate.png' onmouseover="this.src='Assets/Icons/TranslateHover.png';" onmouseout="this.src='Assets/Icons/Translate.png';" href="#" onclick="toggleTransform('translate')" alt="T" id="icon" />
       <img src='Assets/Icons/Rotate.png' onmouseover="this.src='Assets/Icons/RotateHover.png';" onmouseout="this.src='Assets/Icons/Rotate.png';" href="#" onclick="toggleTransform('rotate')" alt="R" id="icon" />
@@ -181,7 +182,7 @@
             <li><a>Settings:</a>
               <ul>
                 <a>Fog</a>
-                <a>Some Setting</a>
+                <a>Grid Size</a>
                 <a>Some Setting</a>
               </ul>
             </li>
@@ -207,10 +208,18 @@
           </ul>
         </li>
 
-        <!-- Picker -->
+        <!-- Properties -->
         <li onclick="this.classList.toggle('clicked')" class="properties"><a>Properties</a>
           <ul class="Focus">
               <h1 id="header">Select Object</h1>
+              <div class="dropdown">
+                <button id="dropbtn">Select Material</button>
+                <div class="dropdown-content">
+                  <ul id="MatListTop">
+                    <ul id="MatListBottom"></ul>
+                  </ul>
+                </div>
+              </div>
               <canvas id="picker"></canvas>
               <div class="controls">
                 <div><label>R</label> <input type="text" id="rVal" /></div>
@@ -218,6 +227,7 @@
                 <div><label>B</label> <input type="text" id="bVal" /></div>
                 <div><label>HEX</label> <input type="text" id="hexVal" /></div>
               </div>
+              <li ><a href="#" onclick="removeObject()">Remove Object</a></li>
           </ul>
         </li>
       </ul>
@@ -252,10 +262,14 @@
   //Raycasting
   var Raycasts = [];
   var raycastCount = 0;
-  var selectedObject;
   var raycaster = new THREE.Raycaster();
   var mouse = new THREE.Vector2(), INTERSECTED;
   var raycastEnabled = true;
+
+  //Object Selection & Modification
+  var selectedObject;
+  var objectMaterials = [];
+  var selectedMaterial;
 
   //Clean Variables
   var Lights = [];
@@ -280,12 +294,7 @@
   /* Init */
   function animate() {
     requestAnimationFrame(animate);
-    orbit.update();
-    if(Raycasts.length != raycastCount)
-    {
-      raycastCount = Raycasts.length;
-      updateObjectList();
-    }
+    update();
     render();
   }
   function render() {
@@ -326,6 +335,31 @@
     //Log for debugging
     console.log("Default Scene Hierarchy", scene);
   }
+  function update() {
+    orbit.update();
+
+    if(Raycasts.length != raycastCount)
+    {
+      raycastCount = Raycasts.length;
+      updateObjectList();
+    }
+
+    if (selectedObject != control.object)
+    {
+      var header = document.getElementById("header");
+      selectedObject = control.object;
+      if(selectedObject)
+      {
+        header.textContent = selectedObject.name;
+        updateProperties(selectedObject);
+      }
+      else {
+        header.textContent = "Select Object";
+      }
+      var btn = document.getElementById("dropbtn");
+      btn.textContent = "Select Material";
+    }
+  }
   function setupCamera(x, y, z, near, far) {
     /* Camera */
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, near, far);
@@ -348,7 +382,7 @@
     orbit.maxDistance = 250;
     orbit.minDistance = 3;
     orbit.autoRotate = false;
-    orbit.autoRotateSpeed = -0.5;
+    orbit.autoRotateSpeed = -0.1;
     orbit.maxPolarAngle = 1.5;
     orbit.keyPanSpeed = 5;
 		orbit.update();
@@ -465,7 +499,14 @@
     orbit.autoRotate = !orbit.autoRotate;
   }
   function toggleRotationLock() {
-
+    if (orbit.maxPolarAngle === 1.5)
+    {
+      orbit.maxPolarAngle = Math.PI;
+    }
+    else {
+      orbit.maxPolarAngle = 1.5;
+    }
+    orbit.update();
   }
   function toggleCamReset () {
     orbit.reset();
@@ -541,16 +582,18 @@
   }
   function updateObjectList(){
 
-    var myNode = document.getElementById("ModelListTop");
-    while (myNode.firstChild) {
-      myNode.removeChild(myNode.firstChild);
-}
+    var list = document.getElementById("ModelListTop");
+    while (list.firstChild) {
+      list.removeChild(list.firstChild);
+    }
 
     Raycasts.forEach(function(element) {
     {
         var newLi = document.createElement("li");
         newLi.setAttribute('id', element.name);
         var newA = document.createElement("a");
+        newA.setAttribute('href', "#");
+        newA.setAttribute('onclick', "selectItem('" + element.name + "')");
         var newContent = document.createTextNode(element.name);
         newA.appendChild(newContent);
         newLi.appendChild(newA);
@@ -560,6 +603,17 @@
         parentLocation.insertBefore(newA, insertLocation);
       }
     });
+  }
+  function selectItem(item){
+    for (var i = 0; i < Raycasts.length; i++) {
+      if (item === Raycasts[ i ].name) {
+        control.attach( Raycasts[i] );
+        scene.add( control );
+        i = Raycasts.length;
+      }
+      closeSlideMenu();
+    }
+
   }
   //Prefabs
   function spawnBox() {
@@ -619,7 +673,7 @@
 					mesh.castShadow = true;
 					mesh.receiveShadow = true;
 					scene.add( mesh );
-          Raycasts.push(mesh);
+          Raycasts.push( mesh );
 				} );
 
   }
@@ -646,14 +700,14 @@
           }
         });
 
+        //Needs to find bottom of object and set point to 0
+        model.translateY(1.5);
+
         model.name = name;
         scene.add(model);
         Raycasts.push(model);
       } );
     } );
-  }
-  function loadDonut() {
-
   }
   function spawnGrid(size = 50, divs = 20) {
     var gridSize = size;
@@ -870,6 +924,54 @@
 
     }, options );
   }
+  //Properties
+  function removeObject(){
+    control.detach();
+    scene.remove( control );
+    scene.remove(selectedObject);
+    for( var i = 0; i < Raycasts.length; i++){
+     if ( Raycasts[i].name === selectedObject.name) {
+       Raycasts.splice(i, 1);
+     }
+    }
+  }
+  function updateProperties (obj) {
+    //dynamically add materials to List
+    //give them materialClick fnction
+    //change picker code to affect selected material
+
+    objectMaterials = [];
+
+    var parentLocation = document.getElementById("MatListTop");
+    while (parentLocation.firstChild) {
+      parentLocation.removeChild(parentLocation.firstChild);
+    }
+
+    obj.traverse( function ( child )
+    {
+      if (child instanceof THREE.Mesh)
+      {
+        objectMaterials = child.material;
+        console.log(objectMaterials);
+        for(var idx = 0; idx < objectMaterials.length; idx++)
+        {
+          var newA = document.createElement("a");
+          newA.setAttribute('href', "#");
+          newA.setAttribute("onclick","materialClick('" + idx + "')");
+          var newContent = document.createTextNode(objectMaterials[idx].name);
+          newA.appendChild(newContent);
+
+          var insertLocation = document.getElementById("MatListBottom");
+          parentLocation.insertBefore(newA, insertLocation);
+        }
+      }
+    });
+  }
+  function materialClick(materialIdx) {
+    selectedMaterial = objectMaterials[materialIdx];
+    var header = document.getElementById("dropbtn");
+    header.textContent = objectMaterials[materialIdx].name;
+  }
 
   /* HTML JavaScript Extensions */
   //Sliding Nav Bar
@@ -878,14 +980,14 @@
     document.getElementById('SettingsMenu').style.fontSize = '100%';
     document.getElementById('SettingsMenu').style.opacity = '1';
     document.getElementById('SideBar').style.marginLeft = '250px';
-    document.getElementById('Hamburger').style.opacity = '0';
+    document.getElementById('burger').style.opacity = '0';
   }
   function closeSlideMenu() {
     document.getElementById('SettingsMenu').style.width = '0px';
     document.getElementById('SettingsMenu').style.fontSize = '0px'
     document.getElementById('SettingsMenu').style.opacity = '0';
     document.getElementById('SideBar').style.marginLeft = '0px';
-    document.getElementById('Hamburger').style.opacity = '1';
+    document.getElementById('burger').style.opacity = '1';
   }
 
   //Export Functions from https://threejs.org/examples/misc_exporter_gltf.html
@@ -908,6 +1010,8 @@
 
   /* jquery */
   $(function(){
+
+    /* Picker */
       var bCanPreview = true; // can preview
 
       // create canvas and context objects
@@ -949,18 +1053,22 @@
               var dColor = pixel[2] + 256 * pixel[1] + 65536 * pixel[0];
               $('#hexVal').val('#' + ('0000' + dColor.toString(16)).substr(-6));
               $('#hexVal').css('backgroundColor', pixelColor);
+
+              if(selectedMaterial){
+                selectedMaterial.color = new THREE.Color(pixelColor);
+              }
           }
       });
-      $('#picker').click(function(e) { // click event handler
-          bCanPreview = !bCanPreview;
-      });
 
-      $('#SideBar').mouseover(function(e) {
-        raycastEnabled = false;
-      });
-      $('#SideBar').mouseout(function(e) {
-        raycastEnabled = true;
-      });
+      /* Misc */
+      $('#picker').click(function(e) { bCanPreview = !bCanPreview; });
+      $('#SideBar').mouseover(function(e) { raycastEnabled = false; });
+      $('#SideBar').mouseout(function(e) { raycastEnabled = true; });
+      $('#icons').mouseover(function(e) { raycastEnabled = false; });
+      $('#icons').mouseout(function(e) { raycastEnabled = true; });
+      $('#burgerHeader').mouseover(function(e) { raycastEnabled = false; });
+      $('#burgerHeader').mouseout(function(e) { raycastEnabled = true; });
+
   });
   </script>
 </body>
