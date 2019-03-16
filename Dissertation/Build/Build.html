@@ -13,7 +13,7 @@
   <!-- GUI -->
   <span class="slide">
     <a id="burgerHeader">
-        <img src='Assets/Icons/Burger.png' onmouseover="this.src='Assets/Icons/BurgerHover.png';" onmouseout="this.src='Assets/Icons/Burger.png';" href="#" onclick="openSlideMenu()" alt="T" id="burger"/>
+        <img src='Assets/Icons/Burger.png' onmouseover="this.src='Assets/Icons/BurgerHover.png';" onmouseout="this.src='Assets/Icons/Burger.png';" href="#" onclick="openSideMenu()" alt="T" id="burger"/>
     <a/>
     <a id="icons">
       <img src='Assets/Icons/Snap.png' onmouseover="this.src='Assets/Icons/SnapHover.png';" onmouseout="this.src='Assets/Icons/Snap.png';" href="#" onclick="toggleSnap()" alt="T" id="icon" />
@@ -22,7 +22,7 @@
       <img src='Assets/Icons/Scale.png' onmouseover="this.src='Assets/Icons/ScaleHover.png';" onmouseout="this.src='Assets/Icons/Scale.png';" href="#" onclick="toggleTransform('scale')" alt="S" id="icon" />
       <img src='Assets/Icons/Info.png' onmouseover="this.src='Assets/Icons/InfoHover.png';" onmouseout="this.src='Assets/Icons/Info.png';" href="#" onclick="showInfo()" alt="I" id="icon" />
     </a>
-  </span>
+   </span>
   <div id="SideBar">
     <div id="SettingsMenu" class="nav">
       <ul class="SideBarUl">
@@ -32,10 +32,10 @@
               <h2>Jack Smerdon</h2>
             </h1>
           </div>
-          <a = href="#" onclick="closeSlideMenu()">X</a>
+          <a = href="#" onclick="closeSideMenu()">X</a>
         </li>
         <!-- Camera Settings-->
-        <li onclick="this.classList.toggle('clicked')"class="camera"><a>Camera</a>
+        <li class="camera"><a>Camera</a>
           <ul class="cameraDark">
             <li><a>Auto Rotate
               <label class="switch">
@@ -54,7 +54,7 @@
         </li>
 
         <!-- Model Settings -->
-        <li onclick="this.classList.toggle('clicked')" class="models"><a>Models</a>
+        <li class="models"><a>Models</a>
           <ul class="modelsDark">
             <li><a href="#">Load New Model:</a>
               <ul>
@@ -77,7 +77,7 @@
         </li>
 
         <!-- Prefab Settings -->
-        <li onclick="this.classList.toggle('clicked')" class="prefab"><a>Prefabs</a>
+        <li class="prefab"><a>Prefabs</a>
           <ul class="prefabDark">
             <li><a>Generate Primative:</a>
               <ul>
@@ -97,7 +97,7 @@
             </li>
             <li><a>Water
               <label class="switch">
-                <input type="checkbox"  onclick="toggleWater()">
+                <input type="checkbox" onclick="toggleWater()">
                 <span class="slider round"></span>
               </label></a>
             </li>
@@ -112,7 +112,7 @@
         </li>
 
         <!-- Lighting Settings -->
-        <li onclick="this.classList.toggle('clicked')" class="lighting"><a>Lighting</a>
+        <li class="lighting"><a>Lighting</a>
           <ul class="lightingDark">
             <li><a>Existing Lights:</a>
               <ul id="LightListTop">
@@ -123,7 +123,7 @@
         </li>
 
         <!-- Rendering Settings -->
-        <li onclick="this.classList.toggle('clicked')" class="rendering"><a>Rendering</a>
+        <li class="rendering"><a>Rendering</a>
           <ul class="renderingDark">
             <li><a href="#" onclick=""></a></li>
           </ul>
@@ -177,13 +177,19 @@
         </li>
 
         <!-- Scene Settings -->
-        <li onclick="this.classList.toggle('clicked')" class="scene"><a>Scene</a>
+        <li class="scene"><a>Scene</a>
           <ul class="sceneDark">
             <li><a>Settings:</a>
               <ul>
                 <a>Fog</a>
+                <div class="slidecontainer">
+                  <input type="range" min="0" max="0.085" value="0" class="rangeSlider" id="fog" step="0.0001">
+                </div>
                 <a>Grid Size</a>
-                <a>Some Setting</a>
+                <div class="slidecontainer">
+                  <input type="range" min="2" max="499" value="50" class="rangeSlider" id="grid" step="2">
+                  <output  id="range_weight_disp"></output>
+                </div>
               </ul>
             </li>
             <li><a>Sample Scenes:</a>
@@ -205,6 +211,7 @@
                   <a href="#" onclick="saveScene()">Save as OBJ</a>
               </ul>
             </li>
+            <li><a href="#" onclick="clearScene()">New Scene</a></li>
           </ul>
         </li>
 
@@ -212,6 +219,7 @@
         <li onclick="this.classList.toggle('clicked')" class="properties"><a>Properties</a>
           <ul class="Focus">
               <h1 id="header">Select Object</h1>
+              <canvas id="picker"></canvas>
               <div class="dropdown">
                 <button id="dropbtn">Select Material</button>
                 <div class="dropdown-content">
@@ -220,7 +228,6 @@
                   </ul>
                 </div>
               </div>
-              <canvas id="picker"></canvas>
               <div class="controls">
                 <div><label>R</label> <input type="text" id="rVal" /></div>
                 <div><label>G</label> <input type="text" id="gVal" /></div>
@@ -271,6 +278,8 @@
   var objectMaterials = [];
   var selectedMaterial;
 
+  var gridSize = 50;
+
   //Clean Variables
   var Lights = [];
   var LightHelpers = [];
@@ -311,12 +320,12 @@
     */
   }
   function init() {
-    closeSlideMenu();
+    closeSideMenu();
     setupCamera(0, 7, 15, 0.1, 10000);
 
     //Events
     window.addEventListener('resize', onWindowResize, false);
-    window.addEventListener( 'mousedown', onDocumentMouseDown, false );
+    window.addEventListener( 'mousedown',onDocumentMouseDown, false );
     window.addEventListener( 'mousemove', onMouseMove, false );
     window.addEventListener( 'resize', onWindowResize, false );
 
@@ -327,10 +336,9 @@
     addLight();
     addAmbient();
     loadSkybox("Default");
-    loadFromFile("Monkey");
+    //loadFromFile("Monkey");
     toggleGrid()
     updateObjectList();
-    //scene.fog = new THREE.FogExp2(0xffffff, 0.0001);
 
     //Log for debugging
     console.log("Default Scene Hierarchy", scene);
@@ -358,6 +366,21 @@
       }
       var btn = document.getElementById("dropbtn");
       btn.textContent = "Select Material";
+      selectedMaterial = null;
+    }
+
+    var gridslider = document.getElementById("grid");
+    gridslider.oninput = function () {
+      toggleGrid();
+      gridSize = this.value;
+      grid = null;
+      spawnGrid();
+      toggleGrid();
+    }
+
+    var fogslider = document.getElementById("fog");
+    fogslider.oninput = function () {
+      scene.fog = new THREE.FogExp2(0xffffff, this.value);
     }
   }
   function setupCamera(x, y, z, near, far) {
@@ -410,7 +433,6 @@
 	  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   }
   function onDocumentMouseDown( e ) { //Raycasting
-    e.preventDefault();
 
     raycaster.setFromCamera( mouse, camera );
     var intersects = raycaster.intersectObjects( Raycasts, true );
@@ -481,12 +503,13 @@
 
   }
   function toggleTransform(type) {
+
     control.setMode( type );
   }
   function toggleSnap() {
     snap = !snap;
     if(snap) {
-      control.setTranslationSnap( 2.5 );
+      control.setTranslationSnap( (gridSize/2) / (gridSize/2 + 1) );
       control.setRotationSnap( THREE.Math.degToRad( 15 ) );
     }
     else {
@@ -513,70 +536,56 @@
   }
   //Models
   function loadNewModel() {
+    var newModel = document.getElementById('NewModel').files[0];
+    var OBJFile = URL.createObjectURL( newModel );
+
+    var newMat = document.getElementById('NewMaterial').files[0];
+    var MTLFile = URL.createObjectURL( newMat );
+
+    var newTex = document.getElementById('NewTexture').files[0];
+    var JPGFile = URL.createObjectURL( newTex );
+
     var objLoader = new THREE.OBJLoader();
     var mtlLoader = new THREE.MTLLoader();
+
+    //var OBJFile = 'Assets/Models/Donut.obj';
+    //var MTLFile = 'Assets/Models/Donut.mtl';
+    //var JPGFile = 'Assets/Models/Donut.png';
 
     if(typeof document.getElementById('NewModel').files[0] !== 'undefined')
     {
       var newModel = document.getElementById('NewModel').files[0];
       var modelURL = URL.createObjectURL( newModel );
 
-      if(typeof document.getElementById('NewMaterial').files[0] !== 'undefined')
+      if(typeof document.getElementById('NewTexture').files[0] !== 'undefined')
       {
-        var newMaterial = document.getElementById('NewMaterial').files[0];
-        var materialURL = URL.createObjectURL( newMaterial );
-
-        mtlLoader.load(materialURL , function( materials )
-        {
+        //Loads model with texture
+        mtlLoader.setResourcePath(JPGFile);
+        mtlLoader.load(MTLFile, function (materials) {
           materials.preload();
-          objLoader.setMaterials( materials );
+          objLoader.setMaterials(materials)
+          objLoader.load(OBJFile, function (object) {
+            var texture = new THREE.TextureLoader().load(JPGFile);
 
-          objLoader.load(modelURL, function ( object )
-          {
-            var newTexture = document.getElementById('NewTexture').files[0];
-            var textureURL = URL.createObjectURL( newTexture );
-
-            console.log(textureURL);
-
-            var texture = new THREE.TextureLoader();
-            texture.load(textureURL);
-
-            model = object;
-
-            model.traverse( function ( child )
-            {
-              if (child instanceof THREE.Mesh)
-              {
-                child.castShadow = true;
+            object.traverse(function (child) {   // aka setTexture
+            if (child instanceof THREE.Mesh) {
                 child.material.map = texture;
-              }
-            });
-
-            model.name = 'Loaded Model';
-            scene.add(model);
-            Raycasts.push(model);
-
-          } );
-        } );
-      }
-      else {
-
-        objLoader.load(modelURL, function ( object ) {
-
-          model = object;
-
-          model.traverse( function ( child )
-          {
-            if (child instanceof THREE.Mesh)
-            {
-              child.castShadow = true;
             }
           });
-
-          model.name = 'Loaded Model';
-          scene.add(model);
-          Raycasts.push(model);
+          scene.add(object);
+          });
         });
+
+      }
+      else if(typeof document.getElementById('NewMaterial').files[0] !== 'undefined')
+      {
+        //Loads model with materials
+
+
+      }
+      else
+      {
+        //Loads with white material
       }
     }
   }
@@ -611,7 +620,7 @@
         scene.add( control );
         i = Raycasts.length;
       }
-      closeSlideMenu();
+      closeSideMenu();
     }
 
   }
@@ -709,10 +718,8 @@
       } );
     } );
   }
-  function spawnGrid(size = 50, divs = 20) {
-    var gridSize = size;
-    var divisions = divs;
-    grid = new THREE.GridHelper(gridSize, divisions);
+  function spawnGrid() {
+    grid = new THREE.GridHelper(gridSize, gridSize/2 + 1);
     grid.name = "Grid";
   }
   function toggleGrid() {
@@ -924,6 +931,16 @@
 
     }, options );
   }
+  function clearScene() {
+    while(scene.children.length > 0)
+    {
+      scene.remove(scene.children[0]);
+      Raycasts = [];
+    }
+    toggleGrid();
+    addAmbient();
+    addLight();
+  }
   //Properties
   function removeObject(){
     control.detach();
@@ -975,14 +992,14 @@
 
   /* HTML JavaScript Extensions */
   //Sliding Nav Bar
-  function openSlideMenu() {
+  function openSideMenu() {
     document.getElementById('SettingsMenu').style.width = '250px';
     document.getElementById('SettingsMenu').style.fontSize = '100%';
     document.getElementById('SettingsMenu').style.opacity = '1';
     document.getElementById('SideBar').style.marginLeft = '250px';
     document.getElementById('burger').style.opacity = '0';
   }
-  function closeSlideMenu() {
+  function closeSideMenu() {
     document.getElementById('SettingsMenu').style.width = '0px';
     document.getElementById('SettingsMenu').style.fontSize = '0px'
     document.getElementById('SettingsMenu').style.opacity = '0';
@@ -1016,6 +1033,8 @@
 
       // create canvas and context objects
       var canvas = document.getElementById('picker');
+      canvas.width /= 2;
+      canvas.height = canvas.width;
       var ctx = canvas.getContext('2d');
 
       // drawing active image
@@ -1026,7 +1045,7 @@
       image.src = imageSrc;
 
       image.onload = function () {
-          ctx.drawImage(image, 0, 0, image.width, image.height); // draw the image on the canvas
+          ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height); // draw the image on the canvas
       }
 
       $('#picker').mousemove(function(e) { // mouse move handler
@@ -1068,6 +1087,8 @@
       $('#icons').mouseout(function(e) { raycastEnabled = true; });
       $('#burgerHeader').mouseover(function(e) { raycastEnabled = false; });
       $('#burgerHeader').mouseout(function(e) { raycastEnabled = true; });
+
+
 
   });
   </script>
