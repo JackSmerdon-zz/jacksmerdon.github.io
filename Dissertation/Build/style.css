@@ -37,45 +37,31 @@ body {
   font-weight:lighter;
   transition: 0.5s;
 }
-/*Hamburger*/
+/*Icons*/
 
-.slide a {
-  color: #ffffff;
-  font-size: 300%;
-  letter-spacing: 1px;
-  text-decoration: none;
-}
-/*Hamburger Settings*/
-.slide i {
-  transition: opacity 0.5s ease-out;
-  color: #919191;
-  background: none;
-  font-style: normal;
-  padding: 1%;
-}
-.slide i:hover {
-  color: #fcfcfc;
-}
-
-#icons {
+.icons {
   position: absolute;
-  right: 2%;
-  text-align: right;
-  top: 0.5%;
-  width: 50%;
+  z-index: 1;
+  width: 100%;
 }
+
 #icon {
+  padding-top: 0.5%;
   width: 5%;
   height: auto;
-}
-#burgerHeader {
-  text-align: left;
-  padding-left: 2%;
-  width: 50%;
+  max-height: 50px;
+  max-width: 50px;
+  float: right;
+  padding-right: 1%;
 }
 #burger {
-  width: 2%;
-  padding-left: 2%;
+  width: 5%;
+  height: auto;
+  padding-right: 60%;
+  padding-left: 1%;
+  max-height: 50px;
+  max-width: 50px;
+  padding-top: 0.5%;
 }
 
 /*Global List Settings*/

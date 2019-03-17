@@ -11,18 +11,14 @@
 </head>
 <body>
   <!-- GUI -->
-  <span class="slide">
-    <a id="burgerHeader">
-        <img src='Assets/Icons/Burger.png' onmouseover="this.src='Assets/Icons/BurgerHover.png';" onmouseout="this.src='Assets/Icons/Burger.png';" href="#" onclick="openSideMenu()" alt="T" id="burger"/>
-    <a/>
-    <a id="icons">
-      <img src='Assets/Icons/Snap.png' onmouseover="this.src='Assets/Icons/SnapHover.png';" onmouseout="this.src='Assets/Icons/Snap.png';" href="#" onclick="toggleSnap()" alt="T" id="icon" />
-      <img src='Assets/Icons/Translate.png' onmouseover="this.src='Assets/Icons/TranslateHover.png';" onmouseout="this.src='Assets/Icons/Translate.png';" href="#" onclick="toggleTransform('translate')" alt="T" id="icon" />
-      <img src='Assets/Icons/Rotate.png' onmouseover="this.src='Assets/Icons/RotateHover.png';" onmouseout="this.src='Assets/Icons/Rotate.png';" href="#" onclick="toggleTransform('rotate')" alt="R" id="icon" />
-      <img src='Assets/Icons/Scale.png' onmouseover="this.src='Assets/Icons/ScaleHover.png';" onmouseout="this.src='Assets/Icons/Scale.png';" href="#" onclick="toggleTransform('scale')" alt="S" id="icon" />
-      <img src='Assets/Icons/Info.png' onmouseover="this.src='Assets/Icons/InfoHover.png';" onmouseout="this.src='Assets/Icons/Info.png';" href="#" onclick="showInfo()" alt="I" id="icon" />
-    </a>
-   </span>
+  <div class="icons">
+    <img src='Assets/Icons/Burger.png' onmouseover="this.src='Assets/Icons/BurgerHover.png';" onmouseout="this.src='Assets/Icons/Burger.png';" href="#" onclick="openSideMenu()" alt="T" id="burger"/>
+    <img src='Assets/Icons/Snap.png' onmouseover="this.src='Assets/Icons/SnapHover.png';" onmouseout="this.src='Assets/Icons/Snap.png';" href="#" onclick="toggleSnap()" alt="T" id="icon" />
+    <img src='Assets/Icons/Translate.png' onmouseover="this.src='Assets/Icons/TranslateHover.png';" onmouseout="this.src='Assets/Icons/Translate.png';" href="#" onclick="toggleTransform('translate')" alt="T" id="icon" />
+    <img src='Assets/Icons/Rotate.png' onmouseover="this.src='Assets/Icons/RotateHover.png';" onmouseout="this.src='Assets/Icons/Rotate.png';" href="#" onclick="toggleTransform('rotate')" alt="R" id="icon" />
+    <img src='Assets/Icons/Scale.png' onmouseover="this.src='Assets/Icons/ScaleHover.png';" onmouseout="this.src='Assets/Icons/Scale.png';" href="#" onclick="toggleTransform('scale')" alt="S" id="icon" />
+    <img src='Assets/Icons/Info.png' onmouseover="this.src='Assets/Icons/InfoHover.png';" onmouseout="this.src='Assets/Icons/Info.png';" href="#" onclick="showInfo()" alt="I" id="icon" />
+  </div>
   <div id="SideBar">
     <div id="SettingsMenu" class="nav">
       <ul class="SideBarUl">
@@ -170,7 +166,10 @@
             </li>
             <li><a>Settings:</a>
               <ul>
-                <a href="#" onclick="">Size</a>
+                <a>Size</a>
+                <div class="slidecontainer">
+                  <input type="range" min="0" max="15000" value="10000" class="rangeSlider" id="skybox" step="1">
+                </div>
               </ul>
             </li>
           </ul>
@@ -234,7 +233,7 @@
                 <div><label>B</label> <input type="text" id="bVal" /></div>
                 <div><label>HEX</label> <input type="text" id="hexVal" /></div>
               </div>
-              <li ><a href="#" onclick="removeObject()">Remove Object</a></li>
+              <a href="#" onclick="removeObject()">Remove Object</a>
           </ul>
         </li>
       </ul>
@@ -270,6 +269,7 @@
   var Raycasts = [];
   var raycastCount = 0;
   var raycaster = new THREE.Raycaster();
+  raycaster.far = 10000;
   var mouse = new THREE.Vector2(), INTERSECTED;
   var raycastEnabled = true;
 
@@ -279,6 +279,7 @@
   var selectedMaterial;
 
   var gridSize = 50;
+  var skyboxSize = new THREE.Vector3(100,100,100);
 
   //Clean Variables
   var Lights = [];
@@ -369,8 +370,8 @@
       selectedMaterial = null;
     }
 
-    var gridslider = document.getElementById("grid");
-    gridslider.oninput = function () {
+    var gridSlider = document.getElementById("grid");
+    gridSlider.oninput = function () {
       toggleGrid();
       gridSize = this.value;
       grid = null;
@@ -378,9 +379,15 @@
       toggleGrid();
     }
 
-    var fogslider = document.getElementById("fog");
-    fogslider.oninput = function () {
+    var fogSlider = document.getElementById("fog");
+    fogSlider.oninput = function () {
       scene.fog = new THREE.FogExp2(0xffffff, this.value);
+    }
+
+    var skyboxSlider = document.getElementById("skybox");
+    skyboxSlider.oninput = function () {
+      skyboxSize = this.value;
+      updateSkyboxSize();
     }
   }
   function setupCamera(x, y, z, near, far) {
@@ -402,7 +409,6 @@
     orbit.enableDamping = true;
     orbit.dampingFactor = 0.08;
     orbit.enableZoom = true;
-    orbit.maxDistance = 250;
     orbit.minDistance = 3;
     orbit.autoRotate = false;
     orbit.autoRotateSpeed = -0.1;
@@ -429,8 +435,10 @@
   }
   function onMouseMove( event ) {
 	  //calculate mouse position in normalized device coordinates
+
 	  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
   }
   function onDocumentMouseDown( e ) { //Raycasting
 
@@ -548,10 +556,6 @@
     var objLoader = new THREE.OBJLoader();
     var mtlLoader = new THREE.MTLLoader();
 
-    //var OBJFile = 'Assets/Models/Donut.obj';
-    //var MTLFile = 'Assets/Models/Donut.mtl';
-    //var JPGFile = 'Assets/Models/Donut.png';
-
     if(typeof document.getElementById('NewModel').files[0] !== 'undefined')
     {
       var newModel = document.getElementById('NewModel').files[0];
@@ -559,7 +563,6 @@
 
       if(typeof document.getElementById('NewTexture').files[0] !== 'undefined')
       {
-        //Loads model with texture
         mtlLoader.setResourcePath(JPGFile);
         mtlLoader.load(MTLFile, function (materials) {
           materials.preload();
@@ -567,7 +570,7 @@
           objLoader.load(OBJFile, function (object) {
             var texture = new THREE.TextureLoader().load(JPGFile);
 
-            object.traverse(function (child) {   // aka setTexture
+            object.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
                 child.material.map = texture;
             }
@@ -575,17 +578,6 @@
           scene.add(object);
           });
         });
-
-      }
-      else if(typeof document.getElementById('NewMaterial').files[0] !== 'undefined')
-      {
-        //Loads model with materials
-
-
-      }
-      else
-      {
-        //Loads with white material
       }
     }
   }
@@ -846,7 +838,7 @@
     var left = document.getElementById('NewLeftIMG').files[0];
     var leftURL = URL.createObjectURL( left );
 
-    var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
+    var skyboxGeometry = new THREE.CubeGeometry(skyboxSize);
     skyboxMaterials =
     [
       new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load(frontURL), side: THREE.DoubleSide}),
@@ -876,6 +868,13 @@
     skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
     skybox.name = "Skybox";
     scene.add (skybox);
+  }
+  function updateSkyboxSize(){
+    scene.remove(skybox);
+    var materials = skybox.material;
+    var skyboxGeometry = new THREE.CubeGeometry(skyboxSize, skyboxSize, skyboxSize);
+    skybox = new THREE.Mesh(skyboxGeometry, materials);
+    scene.add(skybox);
   }
   //Scene
   function loadScene(){
@@ -907,15 +906,7 @@
   function saveScene(){
     var gltfExporter = new THREE.GLTFExporter();
 
-    var options = {
-      trs: false,
-      onlyVisible: true,
-      truncateDrawRange: true,
-      binary: false,
-      forceIndices: false,
-      forcePowerOfTwoTextures: false
-    };
-    gltfExporter.parse( scene, function ( result ) {
+    gltfExporter.parse( Raycasts, function ( result ) {
 
       if ( result instanceof ArrayBuffer ) {
 
@@ -929,7 +920,7 @@
 
       }
 
-    }, options );
+    });
   }
   function clearScene() {
     while(scene.children.length > 0)
