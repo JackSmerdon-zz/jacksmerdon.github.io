@@ -563,6 +563,7 @@
 
     manager.setURLModifier (function ( url ) {
       url = JPGFile;
+      return url;
     });
 
     var objLoader = new THREE.OBJLoader();
@@ -573,20 +574,19 @@
     {
       if(typeof document.getElementById('NewTexture').files[0] !== 'undefined')
       {
-        mtlLoader.setResourcePath(JPGFile);
+        //mtlLoader.setResourcePath(JPGFile);
         mtlLoader.load(MTLFile, function (materials) {
-          console.log(mtlLoader);
           materials.preload();
           objLoader.setMaterials(materials)
           objLoader.load(OBJFile, function (object) {
             var texture = texLoader.load(JPGFile);
-            console.log(texture);
             object.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
                 child.material.map = texture;
             }
           });
           scene.add(object);
+          Raycasts.push(object);
           });
         });
       }
