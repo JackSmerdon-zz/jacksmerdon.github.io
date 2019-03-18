@@ -22,6 +22,7 @@
   <div id="SideBar">
     <div id="SettingsMenu" class="nav">
       <ul class="SideBarUl">
+        <!-- Header -->
         <li href="#" class="close">
           <div>
             <h1>3D Level Design Tool
@@ -30,7 +31,8 @@
           </div>
           <a = href="#" onclick="closeSideMenu()">X</a>
         </li>
-        <!-- Camera Settings-->
+
+        <!-- Camera Settings -->
         <li class="camera"><a>Camera</a>
           <ul class="cameraDark">
             <li><a>Auto Rotate
@@ -65,8 +67,8 @@
               </ul>
             </li>
             <li><a>Objects in Scene:</a>
-              <ul id="ModelListTop">
-                <li id="ModelListBottom"></li>
+              <ul id="Objects">
+                <li id="ObjectsBottom"></li>
               </ul>
             </li>
           </ul>
@@ -111,10 +113,10 @@
         <li class="lighting"><a>Lighting</a>
           <ul class="lightingDark">
             <li><a>Existing Lights:</a>
-              <ul id="LightListTop">
-              <ul id="LightListBottom"></ul>
+              <ul id="Lights">
+              <ul id="LightsBottom"></ul>
             </ul>
-            <li ><a href="#" onclick="addLight()">Spawn Light</a></li>
+            <li ><a href="#" onclick="addLight('Point')">Spawn Light</a></li>
           </ul>
         </li>
 
@@ -126,7 +128,7 @@
         </li>
 
         <!-- Skybox Settings -->
-        <li onclick="this.classList.toggle('clicked')" class="skybox"><a>Skybox</a>
+        <li class="skybox"><a>Skybox</a>
           <ul class="skyboxDark">
             <li><a>Textures:</a>
               <ul>
@@ -215,7 +217,7 @@
         </li>
 
         <!-- Properties -->
-        <li onclick="this.classList.toggle('clicked')" class="properties"><a>Properties</a>
+        <li class="properties"><a>Properties</a>
           <ul class="Focus">
               <h1 id="header">Select Object</h1>
               <canvas id="picker"></canvas>
@@ -278,13 +280,11 @@
   var objectMaterials = [];
   var selectedMaterial;
 
+  var Lights = [];
+  var lightCount = 0;
+
   var gridSize = 50;
   var skyboxSize = new THREE.Vector3(100,100,100);
-
-  //Clean Variables
-  var Lights = [];
-  var LightHelpers = [];
-  var Models = [];
 
   //Only 1 permitted per scene
   var skybox, grid, water;
@@ -334,12 +334,12 @@
     //spawnPlane();
     spawnGrid();
     spawnWater();
-    addLight();
-    addAmbient();
+    addLight("Directional");
+    //addLight("Ambient");
     loadSkybox("Default");
-    //loadFromFile("Monkey");
     toggleGrid()
-    updateObjectList();
+    updateList("Objects", Raycasts);
+    updateList("Lights", Lights);
 
     //Log for debugging
     console.log("Default Scene Hierarchy", scene);
@@ -350,7 +350,13 @@
     if(Raycasts.length != raycastCount)
     {
       raycastCount = Raycasts.length;
-      updateObjectList();
+      updateList("Objects", Raycasts);
+    }
+
+    if(Lights.length != lightCount)
+    {
+      lightCount = Lights.length;
+      updateList("Lights", Lights);
     }
 
     if (selectedObject != control.object)
@@ -553,23 +559,28 @@
     var newTex = document.getElementById('NewTexture').files[0];
     var JPGFile = URL.createObjectURL( newTex );
 
+    var manager = new THREE.LoadingManager();
+
+    manager.setURLModifier (function ( url ) {
+      url = JPGFile;
+    });
+
     var objLoader = new THREE.OBJLoader();
-    var mtlLoader = new THREE.MTLLoader();
+    var mtlLoader = new THREE.MTLLoader(manager);
+    var texLoader = new THREE.TextureLoader();
 
     if(typeof document.getElementById('NewModel').files[0] !== 'undefined')
     {
-      var newModel = document.getElementById('NewModel').files[0];
-      var modelURL = URL.createObjectURL( newModel );
-
       if(typeof document.getElementById('NewTexture').files[0] !== 'undefined')
       {
         mtlLoader.setResourcePath(JPGFile);
         mtlLoader.load(MTLFile, function (materials) {
+          console.log(mtlLoader);
           materials.preload();
           objLoader.setMaterials(materials)
           objLoader.load(OBJFile, function (object) {
-            var texture = new THREE.TextureLoader().load(JPGFile);
-
+            var texture = texLoader.load(JPGFile);
+            console.log(texture);
             object.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
                 child.material.map = texture;
@@ -581,38 +592,39 @@
       }
     }
   }
-  function updateObjectList(){
+  function updateList(listToUpdate, container){
 
-    var list = document.getElementById("ModelListTop");
+    var list = document.getElementById(listToUpdate);
     while (list.firstChild) {
       list.removeChild(list.firstChild);
     }
 
-    Raycasts.forEach(function(element) {
+    container.forEach(function(element) {
     {
         var newLi = document.createElement("li");
         newLi.setAttribute('id', element.name);
         var newA = document.createElement("a");
         newA.setAttribute('href', "#");
-        newA.setAttribute('onclick', "selectItem('" + element.name + "')");
+        newA.setAttribute('onclick', "select" + listToUpdate + "('" + element.name + "')");
         var newContent = document.createTextNode(element.name);
         newA.appendChild(newContent);
         newLi.appendChild(newA);
 
-        var parentLocation = document.getElementById("ModelListTop");
-        var insertLocation = document.getElementById("ModelListBottom");
+        var parentLocation = document.getElementById(listToUpdate);
+        var insertLocation = document.getElementById(listToUpdate + "Bottom");
         parentLocation.insertBefore(newA, insertLocation);
       }
     });
+
+
   }
-  function selectItem(item){
+  function selectObjects(item){
     for (var i = 0; i < Raycasts.length; i++) {
       if (item === Raycasts[ i ].name) {
         control.attach( Raycasts[i] );
         scene.add( control );
         i = Raycasts.length;
       }
-      closeSideMenu();
     }
 
   }
@@ -774,45 +786,59 @@
     }
   }
   //Lighting
-  function addLight () {
-    var light = new THREE.DirectionalLight(0xffe6b8, 1)
-    light.name = "Directional Light";
-    light.position.set(0,30,0);
-    var target = new THREE.Object3D();
-    target.position.set(0,0,0);
-    light.target = target;
+  function addLight (type) {
+    var light;
+    switch (type)
+    {
+      case "Ambient":
+      {
+        light = new THREE.AmbientLight(0xffffff, 1.0);
+        light.intensity = 0.5;
+        light.name = "Ambient Light";
+        break;
+      }
+      case "Directional":
+      {
+        light = new THREE.DirectionalLight(0xffe6b8, 1)
+        light.name = "Directional Light";
+        light.position.set(0,30,0);
+        var target = new THREE.Object3D();
+        target.position.set(0,0,0);
+        light.target = target;
 
-    light.shadow.camera.left = -10;
-    light.shadow.camera.right = 10;
-    light.shadow.camera.top = 10;
-    light.shadow.camera.bottom = -10;
-    light.shadow.camera.near = 10;
-    light.shadow.camera.far = 400;
-    light.shadow.mapSize.width = 2048;
-    light.shadow.mapSize.height = 2048;
-    light.castShadow = true;
+        light.shadow.camera.left = -10;
+        light.shadow.camera.right = 10;
+        light.shadow.camera.top = 10;
+        light.shadow.camera.bottom = -10;
+        light.shadow.camera.near = 10;
+        light.shadow.camera.far = 400;
+        light.shadow.mapSize.width = 2048;
+        light.shadow.mapSize.height = 2048;
+        light.castShadow = true;
+        break;
+      }
 
-    //Create a helper for the shadow camera (optional)
-    var helper = new THREE.CameraHelper( light.shadow.camera );
+      case "Point":
+      {
+        var light = new THREE.PointLight( 0xff0000, 1, 100 );
+        light.position.set( 50, 50, 50 );
+        light.name = "Point Light";
+        break;
+      }
+    }
 
-    //scene.add(helper);
     scene.add(light);
-
-    var newLi = document.createElement("li");
-    var newA = document.createElement("a");
-    var newContent = document.createTextNode(light.name);
-    newA.appendChild(newContent);
-    newLi.appendChild(newA);
-
-    var parentLocation = document.getElementById("LightListTop");
-    var insertLocation = document.getElementById("LightListBottom");
-    parentLocation.insertBefore(newA, insertLocation);
+    Lights.push(light);
   }
-  function addAmbient() {
-    ambient = new THREE.AmbientLight(0xffffff, 1.0);
-    ambient.intensity = 0.5;
-    ambient.name = "Ambient Light";
-    scene.add(ambient);
+  function selectLights(item){
+    for (var i = 0; i < Lights.length; i++) {
+      if (item === Lights[ i ].name) {
+        control.attach( Raycasts[i] );
+        scene.add( control );
+        i = Lights.length;
+      }
+    }
+
   }
   //Rendering
   //Skybox
@@ -929,8 +955,7 @@
       Raycasts = [];
     }
     toggleGrid();
-    addAmbient();
-    addLight();
+    addLight("Ambient");
   }
   //Properties
   function removeObject(){
