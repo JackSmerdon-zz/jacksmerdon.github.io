@@ -197,7 +197,7 @@
               <ul>
                 <a>Size</a>
                 <div class="slidecontainer">
-                  <input type="range" min="0" max="10000" value="8000" class="rangeSlider" id="skybox" step="1">
+                  <input type="range" min="10" max="10000" value="8000" class="rangeSlider" id="skybox" step="1">
                 </div>
               </ul>
             </li>
@@ -369,6 +369,7 @@
     window.addEventListener( 'mousedown',onDocumentMouseDown, false );
     window.addEventListener( 'mousemove', onMouseMove, false );
     window.addEventListener( 'resize', onWindowResize, false );
+    document.addEventListener('touchend', onDocumentTouchEnd, false);
 
     //To be replaced by GLTF load
     spawnPlane();
@@ -495,8 +496,12 @@
 	  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
   }
+  function onDocumentTouchEnd(event) {
+    mouse.x = (event.changedTouches[0].clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.changedTouches[0].clientY / window.innerHeight) * 2 + 1;
+    onDocumentMouseDown();
+  }
   function onDocumentMouseDown( e ) { //Raycasting
-
     raycaster.setFromCamera( mouse, camera );
     var intersects = raycaster.intersectObjects( Raycasts, true );
 
@@ -525,41 +530,7 @@
         }
       }
     }
-
-    /*//Old code with model highlight
-  if ( intersects.length > 0 ) {
-    if ( INTERSECTED != intersects[ 0 ].object ) {
-      var outlineMaterial = new THREE.MeshBasicMaterial( { color: 0x00ffff, side: THREE.BackSide } );
-
-      for (var i = 0; i < Raycasts.length; i++) {
-          if (intersects[ 0 ].object.parent === Raycasts[ i ]) {
-            SelectedObject.position = Raycasts[i].position;
-            SelectedObject.add(Raycasts[i]);
-            var group = new THREE.Object3D();      //create an empty container
-
-            Raycasts[i].traverse( function ( child ) {
-              if (child instanceof THREE.Mesh)
-              {
-                var outlineMesh = new THREE.Mesh(child.geometry, outlineMaterial);
-                outlineMesh.scale.multiplyScalar(1.01);
-                outlineMesh.position = child.position;
-                outlineMesh.name = "outlineMesh";
-                group.add(outlineMesh);
-              }
-            });
-
-            SelectedObject.add(group);
-            var axesHelper = new THREE.AxesHelper( 5 );
-            SelectedObject.add(axesHelper);
-          }
-        }
-        SelectedObject.translateZ(1);
-        console.log(scene);
-        //scene.add(SelectedObject);
-      }
-    }
   }
-  */}
 
   /* SideBar Controls */
   function showInfo() {
