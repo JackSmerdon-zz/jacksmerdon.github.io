@@ -47,6 +47,13 @@
                 <span class="slider round"></span>
               </label></a>
             </li>
+            <li><a>Standard Views:</a>
+              <ul>
+                <a href="#" onclick="camView('Front')">Front</a>
+                <a href="#" onclick="camView('Side')">Side</a>
+                <a href="#" onclick="camView('Top')">Top</a>
+              </ul>
+            </li>
             <li><a href="#" onclick="toggleCamReset()">Reset</a></li>
           </ul>
         </li>
@@ -83,7 +90,6 @@
                 <a href="#" onclick="spawnCylinder()">Cylinder</a>
                 <a href="#" onclick="spawnPlane()">Plane</a>
                 <a href="#" onclick="spawnSphere()">Sphere</a>
-                <a href="#" onclick="spawnText()">Text</a>
               </ul>
             </li>
             <li><a>Other:</a>
@@ -116,14 +122,35 @@
               <ul id="Lights">
               <ul id="LightsBottom"></ul>
             </ul>
-            <li ><a href="#" onclick="addLight('Point')">Spawn Light</a></li>
+            <li><a>Spawn:</a>
+              <ul>
+                <a href="#" onclick="addLight('Directional')">Directional</a>
+                <a href="#" onclick="addLight('Ambient')">Ambient</a>
+                <a href="#" onclick="addLight('Point')">Point</a>
+                <a href="#" onclick="addLight('Spot')">Spot</a>
+              </ul>
+            </li>
+            <li><a>Preset:</a>
+              <ul>
+                <a href="#" onclick="lightingPreset('Bright')">Bright</a>
+                <a href="#" onclick="lightingPreset('Sunset')">Sunset</a>
+                <a href="#" onclick="lightingPreset('Moonlight')">Moonlight</a>
+                <a href="#" onclick="lightingPreset('Spotlight')">Spotlight</a>
+                <a href="#" onclick="lightingPreset('Moody')">Moody</a>
+              </ul>
+            </li>
           </ul>
         </li>
 
         <!-- Rendering Settings -->
         <li class="rendering"><a>Rendering</a>
           <ul class="renderingDark">
-            <li><a href="#" onclick=""></a></li>
+            <li><a>Wireframes
+              <label class="switch">
+                <input type="checkbox"  onclick="toggleWireframe()">
+                <span class="slider round"></span>
+              </label></a>
+            </li>
           </ul>
         </li>
 
@@ -149,7 +176,7 @@
 
                 <a>Left:</a>
                 <input type="file" id="NewLeftIMG" accept="image/*">
-                <a href="#" onclick="updateSkybox()">Reload</a>
+                <a href="#" onclick="updateSkybox()">Load Skybox</a>
               </ul>
             </li>
 
@@ -170,7 +197,7 @@
               <ul>
                 <a>Size</a>
                 <div class="slidecontainer">
-                  <input type="range" min="0" max="15000" value="10000" class="rangeSlider" id="skybox" step="1">
+                  <input type="range" min="0" max="10000" value="8000" class="rangeSlider" id="skybox" step="1">
                 </div>
               </ul>
             </li>
@@ -191,18 +218,23 @@
                   <input type="range" min="2" max="499" value="50" class="rangeSlider" id="grid" step="2">
                   <output  id="range_weight_disp"></output>
                 </div>
+                <a>Water Size</a>
+                <div class="slidecontainer">
+                  <input type="range" min="0" max="0.085" value="0" class="rangeSlider" id="water" step="0.0001">
+                </div>
               </ul>
             </li>
             <li><a>Sample Scenes:</a>
               <ul>
-                <a>Jungle</a>
-                <a>Island</a>
-                <a>Sky</a>
+                <a href="#" onclick="loadSampleScene()">Jungle</a>
+                <a href="#" onclick="loadSampleScene()">Island</a>
+                <a href="#" onclick="loadSampleScene()">Space</a>
               </ul>
             </li>
             <li><a>Load Scene:</a>
               <ul>
-                  <a><input type="file" id="NewGLTF" accept=".gltf" style="font-size: 10px;"></a>
+                <a>GLTF:</a>
+                  <input type="file" id="NewGLTF" accept=".gltf" style="font-size: 10px;">
                   <a href="#" onclick="loadScene()">Load GLTF</a>
               </ul>
             </li>
@@ -234,6 +266,10 @@
                 <div><label>G</label> <input type="text" id="gVal" /></div>
                 <div><label>B</label> <input type="text" id="bVal" /></div>
                 <div><label>HEX</label> <input type="text" id="hexVal" /></div>
+              </div>
+              <a id="materialSliderTitle"></a>
+              <div class="slidecontainer">
+                <input type="range" min="0" max="1" value="1" class="rangeSlider" id="material" step="0.1">
               </div>
               <a href="#" onclick="removeObject()">Remove Object</a>
           </ul>
@@ -279,6 +315,10 @@
   var selectedObject;
   var objectMaterials = [];
   var selectedMaterial;
+  var objectType;
+
+  var wireframes = false;
+  var shadows = false;
 
   var Lights = [];
   var lightCount = 0;
@@ -322,7 +362,7 @@
   }
   function init() {
     closeSideMenu();
-    setupCamera(0, 7, 15, 0.1, 10000);
+    setupCamera(0, 7, 15, 0.1, 25000);
 
     //Events
     window.addEventListener('resize', onWindowResize, false);
@@ -331,15 +371,16 @@
     window.addEventListener( 'resize', onWindowResize, false );
 
     //To be replaced by GLTF load
-    //spawnPlane();
+    spawnPlane();
     spawnGrid();
     spawnWater();
-    addLight("Directional");
-    //addLight("Ambient");
+    loadFromFile("Monkey");
     loadSkybox("Default");
     toggleGrid()
     updateList("Objects", Raycasts);
     updateList("Lights", Lights);
+
+    lightingPreset("Bright");
 
     //Log for debugging
     console.log("Default Scene Hierarchy", scene);
@@ -351,6 +392,10 @@
     {
       raycastCount = Raycasts.length;
       updateList("Objects", Raycasts);
+      if(wireframes){
+        wireframes = false;
+        toggleWireframe();
+      }
     }
 
     if(Lights.length != lightCount)
@@ -411,11 +456,15 @@
     renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
     container.appendChild(renderer.domElement);
 
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
     orbit = new THREE.OrbitControls(camera, renderer.domElement);
     orbit.enableDamping = true;
     orbit.dampingFactor = 0.08;
     orbit.enableZoom = true;
     orbit.minDistance = 3;
+    orbit.maxDistance = far;
     orbit.autoRotate = false;
     orbit.autoRotateSpeed = -0.1;
     orbit.maxPolarAngle = 1.5;
@@ -630,9 +679,11 @@
   }
   //Prefabs
   function spawnBox() {
-    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var geometry = new THREE.BoxGeometry( 5, 5, 5 );
     var material = new THREE.MeshPhongMaterial( {color: 0xaaaaaa} );
     var cube = new THREE.Mesh( geometry, material );
+    cube.castShadow = true;
+    cube.receiveShadow = true;
     cube.name = "Cube";
     scene.add(cube);
     Raycasts.push(cube);
@@ -641,9 +692,12 @@
     var geometry = new THREE.CylinderGeometry( 5, 5, 20, 32 );
     var material = new THREE.MeshPhongMaterial( {color: 0xaaaaaa} );
     var cylinder = new THREE.Mesh( geometry, material );
+    cylinder.castShadow = true;
+    cylinder.receiveShadow = true;
     scene.add( cylinder );
     cylinder.name = "Cylinder";
     Raycasts.push(cylinder);
+    console.log(cylinder);
   }
   function spawnPlane(x = 50, y = 50) {
     var planeGeometry = new THREE.PlaneGeometry( x, y, 1, 1 );
@@ -654,13 +708,15 @@
     plane.name = "Plane";
     scene.add( plane );
     Raycasts.push(plane);
-    planeSize = new THREE.Box3().setFromObject( plane );
+    //planeSize = new THREE.Box3().setFromObject( plane );
 
   }
   function spawnSphere() {
     var geometry = new THREE.SphereGeometry( 5, 32, 32 );
     var material = new THREE.MeshPhongMaterial( {color: 0xaaaaaa} );
     var sphere = new THREE.Mesh( geometry, material );
+    sphere.castShadow = true;
+    sphere.receiveShadow = true;
     sphere.name = "Sphere";
     scene.add( sphere );
     Raycasts.push(sphere);
@@ -729,18 +785,10 @@
   function toggleGrid() {
     if(scene.getObjectByName("Grid"))
     {
-      control.detach();
-      scene.remove( control );
       scene.remove(grid);
-      for( var i = 0; i < Raycasts.length; i++){
-       if ( Raycasts[i].name === "Grid") {
-         Raycasts.splice(i, 1);
-       }
-      }
     }
     else {
       scene.add(grid);
-      Raycasts.push(grid);
     }
   }
   function spawnWater() {
@@ -758,8 +806,9 @@
         } ),
         alpha: 1.0,
         sunDirection: new THREE.Vector3(10,10,10).normalize(),
-        sunColor: 0x000000,
-        waterColor: 0x5b696e,
+        sunColor: 0xffffff,
+        //waterColor: 0x5b696e,
+        waterColor: 0x256d7b,
         distortionScale: 25,
         fog: scene.fog !== undefined
       }
@@ -799,31 +848,46 @@
       }
       case "Directional":
       {
-        light = new THREE.DirectionalLight(0xffe6b8, 1)
+        light = new THREE.DirectionalLight(0xffffff, 1)
         light.name = "Directional Light";
-        light.position.set(0,30,0);
+        light.position.set(0,0,0);
         var target = new THREE.Object3D();
         target.position.set(0,0,0);
         light.target = target;
 
-        light.shadow.camera.left = -10;
-        light.shadow.camera.right = 10;
-        light.shadow.camera.top = 10;
-        light.shadow.camera.bottom = -10;
+        light.shadow.camera.left = -1000;
+        light.shadow.camera.right = 1000;
+        light.shadow.camera.top = 1000;
+        light.shadow.camera.bottom = -1000;
         light.shadow.camera.near = 10;
-        light.shadow.camera.far = 400;
-        light.shadow.mapSize.width = 2048;
-        light.shadow.mapSize.height = 2048;
+        light.shadow.camera.far = 10000;
+        light.shadow.mapSize.width = 300000;
+        light.shadow.mapSize.height = 300000;
         light.castShadow = true;
+
         break;
       }
 
       case "Point":
       {
-        var light = new THREE.PointLight( 0xff0000, 1, 100 );
-        light.position.set( 50, 50, 50 );
+        light = new THREE.PointLight( 0xff0000, 1, 100 );
+        light.position.set( 0, 0, 0 );
         light.name = "Point Light";
         break;
+      }
+      case "Spot":
+      {
+        light = new THREE.SpotLight(0xffffff);
+        light.castShadow = true;
+
+        light.shadow.mapSize.width = 1024;
+        light.shadow.mapSize.height = 1024;
+
+        light.shadow.camera.near = 500;
+        light.shadow.camera.far = 4000;
+        light.shadow.camera.fov = 30;
+
+        light.name = "Spot Light";
       }
     }
 
@@ -833,14 +897,133 @@
   function selectLights(item){
     for (var i = 0; i < Lights.length; i++) {
       if (item === Lights[ i ].name) {
-        control.attach( Raycasts[i] );
+        control.attach( Lights[i] );
         scene.add( control );
         i = Lights.length;
       }
     }
 
   }
+  function lightingPreset(type){
+    for(var i = 0; i < Lights.length; i++)
+    {
+      scene.remove(Lights[i]);
+    }
+
+    Lights = [];
+
+    switch(type)
+    {
+      case "Bright":
+      {
+        addLight("Ambient");
+        Lights[0].intensity = 0.8;
+
+        addLight("Directional");
+        Lights[1].position.set (1000,1000,1000);
+        break;
+      }
+      case "Sunset":
+      {
+        addLight("Ambient")
+        Lights[0].intensity = 0.25;
+        Lights[0].colour = new THREE.Color(0x362D59);
+
+        addLight("Directional");
+        Lights[1].position.set (0,0,5000);
+        Lights[1].color = new THREE.Color(0xFF4400);
+        Lights[1].intensity = 2;
+        break;
+      }
+      case "Moonlight":
+      {
+        addLight("Ambient")
+        Lights[0].intensity = 0.1;
+        Lights[0].colour = new THREE.Color(0x362D59);
+
+        addLight("Directional");
+        Lights[1].position.set (1000,5000,1000);
+        Lights[1].color = new THREE.Color(0xFFFFBB);
+        Lights[1].intensity = 0.6;
+        break;
+      }
+      case "Spotlight":
+      {
+        addLight("Directional");
+        Lights[0].position.set (1000,5000,1000);
+        Lights[0].color = new THREE.Color(0xFFFFFF);
+        Lights[0].intensity = 2;
+        break;
+      }
+      case "Moody":
+      {
+        addLight("Ambient");
+        Lights[0].color = new THREE.Color(0xFF0000);
+        Lights[0].intensity = 0.5;
+        break;
+
+        addLight("Directional");
+        Lights[1].position.set (0,5000,0);
+        Lights[1].color = new THREE.Color(0xF500FF);
+        Lights[1].intensity = 1;
+      }
+      case "Jungle":
+      {
+        addLight("Ambient");
+        Lights[0].intensity = 0.8;
+
+        addLight("Directional");
+        Lights[1].position.set (0,10,-10);
+        Lights[1].color = new THREE.Color(0xCAFFE1);
+        break;
+      }
+      case "Sky":
+      {
+        addLight("Ambient");
+        Lights[0].intensity = 0.8;
+
+        addLight("Directional");
+        Lights[1].position.set (10,10,-10);
+        Lights[1].color = new THREE.Color(0xFFFFBB);
+        break;
+      }
+      case "Space":
+      {
+        addLight("Ambient");
+        Lights[0].intensity = 0.1;
+
+        addLight("Directional");
+        Lights[1].position.set (-20,0,-100);
+        Lights[1].color = new THREE.Color(0xFFFFBB);
+        Lights[1].intensity = 2;
+        break;
+      }
+    }
+
+    updateList("Lights", Lights);
+  }
   //Rendering
+  function toggleWireframe() {
+    wireframes = !wireframes;
+    for (var i = 0; i < Raycasts.length; i++)
+    {
+      Raycasts[i].traverse( function ( child ) {
+        if (child instanceof THREE.Mesh)
+        {
+          if (child.material.length > 0)
+          {
+            for(var i = 0; i < child.material.length; i++)
+            {
+              child.material[i].wireframe = wireframes;
+            }
+          }
+          else {
+            child.material.wireframe = wireframes;
+          }
+        }
+      });
+    }
+  }
   //Skybox
   function updateSkybox(){
 
@@ -879,6 +1062,7 @@
     scene.add(skybox);
   }
   function loadSkybox(name) {
+    lightingPreset(name);
     scene.remove(skybox);
     var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
     var skyboxMaterials =
@@ -910,11 +1094,7 @@
 
     loader.load( gltfURL, function ( gltf ) {
       scene = gltf.scene;
-		  gltf.animations; // Array<THREE.AnimationClip>
-		  gltf.scene; // THREE.Scene
-		  gltf.scenes; // Array<THREE.Scene>
-		  gltf.cameras; // Array<THREE.Camera>
-		  gltf.asset; // Object
+		  //camera = gltf.cameras[0];
 
       gltf.scene.traverse( function ( child )
       {
@@ -927,26 +1107,24 @@
 	  // called while loading is progressing
 	  function ( xhr ) { console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' ); },
 	  // called when loading has errors
-	  function ( error ) { console.log( 'An error happened' ); }
+	  function ( error ) { console.log( error ); }
   );}
   function saveScene(){
     var gltfExporter = new THREE.GLTFExporter();
+    var options = {
+        trs: false,
+        onlyVisible: false,
+        truncateDrawRange: true,
+        binary: false,
+        forceIndices: false,
+        forcePowerOfTwoTextures: false
+      };
 
-    gltfExporter.parse( Raycasts, function ( result ) {
-
-      if ( result instanceof ArrayBuffer ) {
-
-        saveArrayBuffer( result, 'scene.glb' );
-
-      } else {
-
-        var output = JSON.stringify( result, null, 2 );
-        console.log( output );
-        saveString( output, 'scene.gltf' );
-
-      }
-
-    });
+    gltfExporter.parse( scene, function( result ) {
+      var output = JSON.stringify( result, null, 2 );
+      console.log( output );
+      saveString( output, "Scene.gltf");
+    }, options);
   }
   function clearScene() {
     while(scene.children.length > 0)
@@ -962,16 +1140,25 @@
     control.detach();
     scene.remove( control );
     scene.remove(selectedObject);
+    var removed = false;
     for( var i = 0; i < Raycasts.length; i++){
-     if ( Raycasts[i].name === selectedObject.name) {
+     if ( Raycasts[i].uuid === selectedObject.uuid) {
        Raycasts.splice(i, 1);
+       i = Raycasts.length;
+       removed = true;
      }
+    }
+    if (!removed)
+    {
+      for( var i = 0; i < Lights.length; i++){
+       if ( Lights[i].uuid === selectedObject.uuid) {
+         Lights.splice(i, 1);
+         i = Lights.length;
+       }
+      }
     }
   }
   function updateProperties (obj) {
-    //dynamically add materials to List
-    //give them materialClick fnction
-    //change picker code to affect selected material
 
     objectMaterials = [];
 
@@ -980,30 +1167,80 @@
       parentLocation.removeChild(parentLocation.firstChild);
     }
 
-    obj.traverse( function ( child )
+    switch(obj.type)
     {
-      if (child instanceof THREE.Mesh)
+      case "PointLight":
+      case "AmbientLight":
+      case "DirectionalLight":
       {
-        objectMaterials = child.material;
-        console.log(objectMaterials);
-        for(var idx = 0; idx < objectMaterials.length; idx++)
-        {
-          var newA = document.createElement("a");
-          newA.setAttribute('href', "#");
-          newA.setAttribute("onclick","materialClick('" + idx + "')");
-          var newContent = document.createTextNode(objectMaterials[idx].name);
-          newA.appendChild(newContent);
+        var newA = document.createElement("a");
+        newA.setAttribute('href', "#");
+        newA.setAttribute("onclick","materialClick('-1')");
+        var newContent = document.createTextNode("Colour");
+        newA.appendChild(newContent);
 
-          var insertLocation = document.getElementById("MatListBottom");
-          parentLocation.insertBefore(newA, insertLocation);
-        }
+        var insertLocation = document.getElementById("MatListBottom");
+        parentLocation.insertBefore(newA, insertLocation);
+        break;
       }
-    });
+      case "Group":
+      {
+        obj.traverse( function ( child )
+        {
+          if (child instanceof THREE.Mesh)
+          {
+            objectMaterials = child.material;
+            for(var idx = 0; idx < objectMaterials.length; idx++)
+            {
+              var newA = document.createElement("a");
+              newA.setAttribute('href', "#");
+              newA.setAttribute("onclick","materialClick('" + idx + "')");
+              var newContent = document.createTextNode(objectMaterials[idx].name);
+              newA.appendChild(newContent);
+
+              var insertLocation = document.getElementById("MatListBottom");
+              parentLocation.insertBefore(newA, insertLocation);
+            }
+          }
+        });
+        break;
+      }
+      case "Mesh":
+      {
+        objectMaterial = obj.color;
+        var newA = document.createElement("a");
+        newA.setAttribute('href', "#");
+        newA.setAttribute("onclick","materialClick('-2')");
+        var newContent = document.createTextNode("Colour");
+        newA.appendChild(newContent);
+
+        var insertLocation = document.getElementById("MatListBottom");
+        parentLocation.insertBefore(newA, insertLocation);
+        break;
+      }
+    }
   }
   function materialClick(materialIdx) {
-    selectedMaterial = objectMaterials[materialIdx];
-    var header = document.getElementById("dropbtn");
-    header.textContent = objectMaterials[materialIdx].name;
+    if(materialIdx == -2)
+    {
+      selectedMaterial = selectedObject.material;
+      var header = document.getElementById("dropbtn");
+      header.textContent = "Colour";
+    }
+
+    else if(materialIdx == -1)
+    {
+      selectedMaterial = selectedObject;
+      var header = document.getElementById("dropbtn");
+      header.textContent = "Colour";
+    }
+
+    else
+    {
+      selectedMaterial = objectMaterials[materialIdx];
+      var header = document.getElementById("dropbtn");
+      header.textContent = objectMaterials[materialIdx].name;
+    }
   }
 
   /* HTML JavaScript Extensions */
@@ -1011,7 +1248,7 @@
   function openSideMenu() {
     document.getElementById('SettingsMenu').style.width = '250px';
     document.getElementById('SettingsMenu').style.fontSize = '100%';
-    document.getElementById('SettingsMenu').style.opacity = '1';
+    document.getElementById('SettingsMenu').style.opacity = '0.925';
     document.getElementById('SideBar').style.marginLeft = '250px';
     document.getElementById('burger').style.opacity = '0';
   }
@@ -1036,9 +1273,6 @@
   }
   function saveString( text, filename ) {
      save( new Blob( [ text ], { type: 'text/plain' } ), filename );
-   }
-  function saveArrayBuffer( buffer, filename ) {
-     save( new Blob( [ buffer ], { type: 'application/octet-stream' } ), filename );
    }
 
   /* jquery */
@@ -1099,10 +1333,8 @@
       $('#picker').click(function(e) { bCanPreview = !bCanPreview; });
       $('#SideBar').mouseover(function(e) { raycastEnabled = false; });
       $('#SideBar').mouseout(function(e) { raycastEnabled = true; });
-      $('#icons').mouseover(function(e) { raycastEnabled = false; });
-      $('#icons').mouseout(function(e) { raycastEnabled = true; });
-      $('#burgerHeader').mouseover(function(e) { raycastEnabled = false; });
-      $('#burgerHeader').mouseout(function(e) { raycastEnabled = true; });
+      $('#Icons').mouseover(function(e) { raycastEnabled = false; });
+      $('#Icons').mouseout(function(e) { raycastEnabled = true; });
 
 
 
