@@ -147,7 +147,13 @@
           <ul class="renderingDark">
             <li><a>Wireframes
               <label class="switch">
-                <input type="checkbox"  onclick="toggleWireframe()">
+                <input type="checkbox" id="wireframeSwitch" onclick="toggleRendering('Wireframes')">
+                <span class="slider round"></span>
+              </label></a>
+            </li>
+            <li><a>Shadows
+              <label class="switch">
+                <input type="checkbox" id="shadowSwitch" onclick="toggleRendering('Shadows')"checked>
                 <span class="slider round"></span>
               </label></a>
             </li>
@@ -220,7 +226,7 @@
                 </div>
                 <a>Water Size</a>
                 <div class="slidecontainer">
-                  <input type="range" min="0" max="0.085" value="0" class="rangeSlider" id="water" step="0.0001">
+                  <input type="range" min="2" max="10000" value="0" class="rangeSlider" id="water" step="2">
                 </div>
               </ul>
             </li>
@@ -318,12 +324,14 @@
   var objectType;
 
   var wireframes = false;
-  var shadows = false;
+  var shadows = true;
 
   var Lights = [];
   var lightCount = 0;
+  var containsDirectional = false;
 
   var gridSize = 50;
+  var waterSize = 50;
   var skyboxSize = new THREE.Vector3(100,100,100);
 
   //Only 1 permitted per scene
@@ -362,7 +370,7 @@
   }
   function init() {
     closeSideMenu();
-    setupCamera(0, 7, 15, 0.1, 25000);
+    setupCamera(0, 10, 25, 0.1, 25000);
 
     //Events
     window.addEventListener('resize', onWindowResize, false);
@@ -375,6 +383,7 @@
     spawnPlane();
     spawnGrid();
     spawnWater();
+    toggleWater();
     loadFromFile("Monkey");
     loadSkybox("Default");
     toggleGrid()
@@ -395,7 +404,11 @@
       updateList("Objects", Raycasts);
       if(wireframes){
         wireframes = false;
-        toggleWireframe();
+        toggleRendering('Wireframes');
+      }
+      if(!shadows){
+        shadows = true;
+        toggleRendering('Shadows');
       }
     }
 
@@ -440,6 +453,12 @@
     skyboxSlider.oninput = function () {
       skyboxSize = this.value;
       updateSkyboxSize();
+    }
+
+    var waterSlider = document.getElementById("water");
+    waterSlider.oninput = function () {
+      waterSize = this.value;
+      spawnWater();
     }
   }
   function setupCamera(x, y, z, near, far) {
@@ -568,6 +587,32 @@
   function toggleCamReset () {
     orbit.reset();
   }
+  function camView (view){
+    switch (view)
+    {
+      case "Top":
+      {
+        camera.position.x = 0;
+        camera.position.y = 25;
+        camera.position.z = 0;
+        break;
+      }
+      case "Side":
+      {
+        camera.position.x = 25;
+        camera.position.y = 10;
+        camera.position.z = 0;
+        break;
+      }
+      case "Front":
+      {
+        camera.position.x = 0;
+        camera.position.y = 10;
+        camera.position.z = 25;
+        break;
+      }
+    }
+  }
   //Models
   function loadNewModel() {
     var newModel = document.getElementById('NewModel').files[0];
@@ -635,7 +680,6 @@
         parentLocation.insertBefore(newA, insertLocation);
       }
     });
-
 
   }
   function selectObjects(item){
@@ -752,6 +796,7 @@
   function spawnGrid() {
     grid = new THREE.GridHelper(gridSize, gridSize/2 + 1);
     grid.name = "Grid";
+
   }
   function toggleGrid() {
     if(scene.getObjectByName("Grid"))
@@ -763,7 +808,12 @@
     }
   }
   function spawnWater() {
-    var waterGeometry = new THREE.PlaneBufferGeometry( 50, 50 );
+    if(scene.getObjectByName("Water"))
+    {
+      scene.remove(water);
+    }
+
+    var waterGeometry = new THREE.PlaneBufferGeometry( waterSize, waterSize );
 
     water = new THREE.Water(
       waterGeometry,
@@ -775,10 +825,9 @@
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
         } ),
-        alpha: 1.0,
+        alpha: 0.9,
         sunDirection: new THREE.Vector3(10,10,10).normalize(),
         sunColor: 0xffffff,
-        //waterColor: 0x5b696e,
         waterColor: 0x256d7b,
         distortionScale: 25,
         fog: scene.fog !== undefined
@@ -787,6 +836,8 @@
     water.rotation.x = -Math.PI / 2;
     water.name = "Water";
     water.material.transparent = true;
+
+    scene.add(water);
   }
   function toggleWater() {
     if(scene.getObjectByName("Water"))
@@ -815,35 +866,44 @@
         light = new THREE.AmbientLight(0xffffff, 1.0);
         light.intensity = 0.5;
         light.name = "Ambient Light";
+        scene.add(light);
+        Lights.push(light);
         break;
       }
       case "Directional":
       {
-        light = new THREE.DirectionalLight(0xffffff, 1)
-        light.name = "Directional Light";
-        light.position.set(0,0,0);
-        var target = new THREE.Object3D();
-        target.position.set(0,0,0);
-        light.target = target;
+        if(!containsDirectional)
+        {
+          light = new THREE.DirectionalLight(0xffffff, 1)
+          light.name = "Directional Light";
+          light.position.set(0,0,0);
+          var target = new THREE.Object3D();
+          target.position.set(0,0,0);
+          light.target = target;
 
-        light.shadow.camera.left = -1000;
-        light.shadow.camera.right = 1000;
-        light.shadow.camera.top = 1000;
-        light.shadow.camera.bottom = -1000;
-        light.shadow.camera.near = 10;
-        light.shadow.camera.far = 10000;
-        light.shadow.mapSize.width = 300000;
-        light.shadow.mapSize.height = 300000;
-        light.castShadow = true;
-
+          light.shadow.camera.left = -1000;
+          light.shadow.camera.right = 1000;
+          light.shadow.camera.top = 1000;
+          light.shadow.camera.bottom = -1000;
+          light.shadow.camera.near = 10;
+          light.shadow.camera.far = 10000;
+          light.shadow.mapSize.width = 300000;
+          light.shadow.mapSize.height = 300000;
+          light.castShadow = true;
+          containsDirectional = true;
+          scene.add(light);
+          Lights.push(light);
+        }
         break;
       }
 
       case "Point":
       {
         light = new THREE.PointLight( 0xff0000, 1, 100 );
-        light.position.set( 0, 0, 0 );
+        light.position.set( 0, 3, 0 );
         light.name = "Point Light";
+        scene.add(light);
+        Lights.push(light);
         break;
       }
       case "Spot":
@@ -859,11 +919,11 @@
         light.shadow.camera.fov = 30;
 
         light.name = "Spot Light";
+        light.position.set( 0, 3, 0 );
+        scene.add(light);
+        Lights.push(light);
       }
     }
-
-    scene.add(light);
-    Lights.push(light);
   }
   function selectLights(item){
     for (var i = 0; i < Lights.length; i++) {
@@ -882,6 +942,14 @@
     }
 
     Lights = [];
+    containsDirectional = false;
+
+    var shadowHelp = false;
+    if(shadows)
+    {
+      toggleRendering("Shadows");
+      shadowHelp = true;
+    }
 
     switch(type)
     {
@@ -972,15 +1040,27 @@
     }
 
     updateList("Lights", Lights);
+    if(shadowHelp)
+    {
+      toggleRendering("Shadows");
+    }
   }
   //Rendering
-  function toggleWireframe() {
-    wireframes = !wireframes;
+  function toggleRendering(type) {
+    if (type == "Shadows")
+    {
+      shadows = !shadows;
+    }
+    else {
+      wireframes = !wireframes;
+    }
+
     for (var i = 0; i < Raycasts.length; i++)
     {
       Raycasts[i].traverse( function ( child ) {
-        if (child instanceof THREE.Mesh)
+        if (child instanceof THREE.Mesh && child.name != "Plane")
         {
+          child.castShadow = shadows;
           if (child.material.length > 0)
           {
             for(var i = 0; i < child.material.length; i++)
@@ -1102,9 +1182,10 @@
     {
       scene.remove(scene.children[0]);
       Raycasts = [];
+      Lights = [];
     }
     toggleGrid();
-    addLight("Ambient");
+    lightingPreset("Bright");
   }
   //Properties
   function removeObject(){
@@ -1123,6 +1204,10 @@
     {
       for( var i = 0; i < Lights.length; i++){
        if ( Lights[i].uuid === selectedObject.uuid) {
+         if(Lights[i].isDirectionalLight)
+         {
+           containsDirectional = false;
+         }
          Lights.splice(i, 1);
          i = Lights.length;
        }
