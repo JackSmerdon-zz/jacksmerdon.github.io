@@ -10,20 +10,21 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-  <!-- GUI -->
+  <!-- Top Bar -->
   <div class="icons">
     <img src='Assets/Icons/Burger.png' onmouseover="this.src='Assets/Icons/BurgerHover.png';" onmouseout="this.src='Assets/Icons/Burger.png';" href="#" onclick="openSideMenu()" alt="T" id="burger"/>
     <img src='Assets/Icons/Snap.png' onmouseover="this.src='Assets/Icons/SnapHover.png';" onmouseout="this.src='Assets/Icons/Snap.png';" href="#" onclick="toggleSnap()" alt="T" id="icon" />
-    <img src='Assets/Icons/Translate.png' onmouseover="this.src='Assets/Icons/TranslateHover.png';" onmouseout="this.src='Assets/Icons/Translate.png';" href="#" onclick="toggleTransform('translate')" alt="T" id="icon" />
-    <img src='Assets/Icons/Rotate.png' onmouseover="this.src='Assets/Icons/RotateHover.png';" onmouseout="this.src='Assets/Icons/Rotate.png';" href="#" onclick="toggleTransform('rotate')" alt="R" id="icon" />
     <img src='Assets/Icons/Scale.png' onmouseover="this.src='Assets/Icons/ScaleHover.png';" onmouseout="this.src='Assets/Icons/Scale.png';" href="#" onclick="toggleTransform('scale')" alt="S" id="icon" />
-    <img src='Assets/Icons/Info.png' onmouseover="this.src='Assets/Icons/InfoHover.png';" onmouseout="this.src='Assets/Icons/Info.png';" href="#" onclick="showInfo()" alt="I" id="icon" />
+    <img src='Assets/Icons/Rotate.png' onmouseover="this.src='Assets/Icons/RotateHover.png';" onmouseout="this.src='Assets/Icons/Rotate.png';" href="#" onclick="toggleTransform('rotate')" alt="R" id="icon" />
+    <img src='Assets/Icons/Translate.png' onmouseover="this.src='Assets/Icons/TranslateHover.png';" onmouseout="this.src='Assets/Icons/Translate.png';" href="#" onclick="toggleTransform('translate')" alt="T" id="icon" />
   </div>
+
+  <!-- Left Side Navigation Menu -->
   <div id="SideBar">
-    <div id="SettingsMenu" class="nav">
+    <div id="SettingsMenu">
       <ul class="SideBarUl">
         <!-- Header -->
-        <li href="#" class="close">
+        <li href="#" class="header">
           <div>
             <h1>3D Level Design Tool
               <h2>Jack Smerdon</h2>
@@ -256,9 +257,11 @@
 
         <!-- Properties -->
         <li class="properties"><a>Properties</a>
-          <ul class="Focus">
+          <ul class="ColourPicker">
               <h1 id="header">Select Object</h1>
-              <canvas id="picker"></canvas>
+
+              <canvas id="ColourWheel"></canvas>
+
               <div class="dropdown">
                 <button id="dropbtn">Select Material</button>
                 <div class="dropdown-content">
@@ -267,16 +270,19 @@
                   </ul>
                 </div>
               </div>
-              <div class="controls">
+
+              <div class="rgbValues">
                 <div><label>R</label> <input type="text" id="rVal" /></div>
                 <div><label>G</label> <input type="text" id="gVal" /></div>
                 <div><label>B</label> <input type="text" id="bVal" /></div>
                 <div><label>HEX</label> <input type="text" id="hexVal" /></div>
               </div>
+
               <a id="materialSliderTitle"></a>
               <div class="slidecontainer">
                 <input type="range" min="0" max="1" value="1" class="rangeSlider" id="material" step="0.1">
               </div>
+
               <a href="#" onclick="removeObject()">Remove Object</a>
           </ul>
         </li>
@@ -303,17 +309,18 @@
   //Displays message to the user if webGL is not supported in the browser.
   if (!Detector.webgl) { Detector.addGetWebGLMessage(); }
 
-  //Globals
+  //Essentials
   var container = document.createElement('div');
   document.getElementsByClassName("container")[0].appendChild(container);
   var scene = new THREE.Scene();
   var snap = false;
+  var camera, control, orbit, renderer;
+  var skybox, grid, water;
 
   //Raycasting
   var Raycasts = [];
   var raycastCount = 0;
   var raycaster = new THREE.Raycaster();
-  //raycaster.far = 10000;
   var mouse = new THREE.Vector2(), INTERSECTED;
   var raycastEnabled = true;
 
@@ -323,20 +330,19 @@
   var selectedMaterial;
   var objectType;
 
-  var wireframes = false;
-  var shadows = false;
-
+  //Light Selection & Modification
   var Lights = [];
   var lightCount = 0;
   var containsDirectional = false;
 
+  //Rendering
+  var wireframes = false;
+  var shadows = false;
+
+  //Scene Settings
   var gridSize = 50;
   var waterSize = 50;
   var skyboxSize = new THREE.Vector3(100,100,100);
-
-  //Only 1 permitted per scene
-  var skybox, grid, water;
-  var camera, control, orbit, renderer;
 
   var windowHalfX = window.innerWidth / 2;
   var windowHalfY = window.innerHeight / 2;
@@ -356,28 +362,32 @@
     render();
   }
   function render() {
+    //Passes time to water shader to make it 'move'
     if(scene.getObjectByName("Water"))
     {
         water.material.uniforms[ "time" ].value += 1.0 / 600.0;
     }
 
+    //Renders the scene
     renderer.render(scene, camera);
-    /*// Stops user from refreshing the page
+
+    // Stops user from refreshing the page
     window.onbeforeunload = function() {
         return "Leaving the page without saving will result in loss of data. Do you wish to continue?";
     }
-    */
   }
   function init() {
+    //Fixes bug where side menu is distorted on first load
     closeSideMenu();
+
+    //Initialises camera
     setupCamera(0, 10, 25, 0.1, 25000);
 
     //Events
     window.addEventListener('resize', onWindowResize, false);
     window.addEventListener( 'mousedown',onDocumentMouseDown, false );
     window.addEventListener( 'mousemove', onMouseMove, false );
-    window.addEventListener( 'resize', onWindowResize, false );
-    document.addEventListener('touchend', onDocumentTouchEnd, false);
+    window.addEventListener('touchend', onDocumentTouchEnd, false);
 
     //To be replaced by GLTF load
     spawnPlane();
@@ -389,19 +399,25 @@
     toggleGrid()
     updateList("Objects", Raycasts);
     updateList("Lights", Lights);
-
     lightingPreset("Bright");
 
-    //Log for debugging
-    console.log("Default Scene Hierarchy", scene);
+    //Logs scene hierarchy to console for debugging
+    //console.log("Default Scene Hierarchy", scene);
   }
   function update() {
+
+    //Required for auto-rotation button
     orbit.update();
 
+    //Detects if a new object has been added to scene
     if(Raycasts.length != raycastCount)
     {
+      //Updates counter
       raycastCount = Raycasts.length;
+      //Updates GUI
       updateList("Objects", Raycasts);
+
+      //Calls rendering functions to sync new object with scene
       if(wireframes){
         wireframes = false;
         toggleRendering('Wireframes');
@@ -412,31 +428,51 @@
       }
     }
 
+    //Detects if new light has been added to the scene
     if(Lights.length != lightCount)
     {
+      //Updates light counter
       lightCount = Lights.length;
+      //Updates GUI
       updateList("Lights", Lights);
     }
 
+    //Detects if a new object has been clicked on by the user
+    //Or if the object has been de-selected
     if (selectedObject != control.object)
     {
+      //Gets header (properties menu) from HTML
       var header = document.getElementById("header");
+      //Updates selection validation
       selectedObject = control.object;
+
+      //If there is a new object selected:
       if(selectedObject)
       {
+        //Update properties title
         header.textContent = selectedObject.name;
+        //Load properties into GUI
         updateProperties(selectedObject);
       }
+      //If there is no longer an object selected:
       else {
+        //Resets title
         header.textContent = "Select Object";
       }
+
+      //Gets dropdown button from HTML
       var btn = document.getElementById("dropbtn");
+      //Resets button
       btn.textContent = "Select Material";
+      //Resets material selection validation
       selectedMaterial = null;
     }
 
+    //Gets grid size slider from HTML
     var gridSlider = document.getElementById("grid");
+    //Detects change in slider and calls function:
     gridSlider.oninput = function () {
+      //Removes grid from scene, updates size, spawns and adds new grid
       toggleGrid();
       gridSize = this.value;
       grid = null;
@@ -444,20 +480,31 @@
       toggleGrid();
     }
 
+    //Gets fog density slider from HTML
     var fogSlider = document.getElementById("fog");
+    //Detects change in slider and calls function:
     fogSlider.oninput = function () {
+      //Updates fog density based on slider value
       scene.fog = new THREE.FogExp2(0xffffff, this.value);
     }
 
+    //Gets skybox size slider from HTML
     var skyboxSlider = document.getElementById("skybox");
+    //Detects change in slider and calls function:
     skyboxSlider.oninput = function () {
+      //Updates size variable
       skyboxSize = this.value;
+      //Spawns new skybox with updated size
       updateSkyboxSize();
     }
 
+    //Gets water size slider from HTML
     var waterSlider = document.getElementById("water");
+    //Detects change in slider and calls function:
     waterSlider.oninput = function () {
+      //Updates size variable
       waterSize = this.value;
+      //Spawns new skybox with updated size
       spawnWater();
     }
   }
@@ -961,7 +1008,7 @@
         Lights[0].colour = new THREE.Color(0x362D59);
 
         addLight("Directional");
-        Lights[1].position.set (0,0,5000);
+        Lights[1].position.set (0,0,500);
         Lights[1].color = new THREE.Color(0xFF4400);
         Lights[1].intensity = 2;
         break;
@@ -973,7 +1020,7 @@
         Lights[0].colour = new THREE.Color(0x362D59);
 
         addLight("Directional");
-        Lights[1].position.set (1000,5000,1000);
+        Lights[1].position.set (100,500,100);
         Lights[1].color = new THREE.Color(0xFFFFBB);
         Lights[1].intensity = 0.6;
         break;
@@ -981,7 +1028,7 @@
       case "Spotlight":
       {
         addLight("Directional");
-        Lights[0].position.set (1000,5000,1000);
+        Lights[0].position.set (100,500,100);
         Lights[0].color = new THREE.Color(0xFFFFFF);
         Lights[0].intensity = 2;
         break;
@@ -991,12 +1038,12 @@
         addLight("Ambient");
         Lights[0].color = new THREE.Color(0xFF0000);
         Lights[0].intensity = 0.5;
-        break;
 
         addLight("Directional");
-        Lights[1].position.set (0,5000,0);
+        Lights[1].position.set (0,500,0);
         Lights[1].color = new THREE.Color(0xF500FF);
-        Lights[1].intensity = 1;
+        Lights[1].intensity = 0.4;
+        break;
       }
       case "Jungle":
       {
@@ -1315,7 +1362,6 @@
   }
 
   //Export Functions from https://threejs.org/examples/misc_exporter_gltf.html
-  //Not working correctly
   var link = document.createElement( 'a' );
   link.style.display = 'none';
   document.body.appendChild( link );
@@ -1336,7 +1382,7 @@
       var bCanPreview = true; // can preview
 
       // create canvas and context objects
-      var canvas = document.getElementById('picker');
+      var canvas = document.getElementById('ColourWheel');
       canvas.width /= 2;
       canvas.height = canvas.width;
       var ctx = canvas.getContext('2d');
@@ -1352,7 +1398,7 @@
           ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height); // draw the image on the canvas
       }
 
-      $('#picker').mousemove(function(e) { // mouse move handler
+      $('#ColourWheel').mousemove(function(e) { // mouse move handler
           if (bCanPreview) {
               // get coordinates of current position
               var canvasOffset = $(canvas).offset();
@@ -1363,9 +1409,7 @@
               var imageData = ctx.getImageData(canvasX, canvasY, 1, 1);
               var pixel = imageData.data;
 
-              // update preview color
               var pixelColor = "rgb("+pixel[0]+", "+pixel[1]+", "+pixel[2]+")";
-              $('.preview').css('backgroundColor', pixelColor);
 
               // update controls
               $('#rVal').val(pixel[0]);
@@ -1384,7 +1428,7 @@
       });
 
       /* Misc */
-      $('#picker').click(function(e) { bCanPreview = !bCanPreview; });
+      $('#ColourWheel').click(function(e) { bCanPreview = !bCanPreview; });
       $('#SideBar').mouseover(function(e) { raycastEnabled = false; });
       $('#SideBar').mouseout(function(e) { raycastEnabled = true; });
       $('#Icons').mouseover(function(e) { raycastEnabled = false; });

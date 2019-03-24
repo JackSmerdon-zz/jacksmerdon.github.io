@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Quicksand');
+/* Global Settings */
 body {
   font-family: 'Quicksand', sans-serif;
   overflow: hidden;
@@ -6,45 +7,19 @@ body {
   padding: 0;
   background: #222222;
 }
+
+/* THREE.JS Canvas */
 .container {
   position: sticky;
   overflow-y: hidden;
 }
-.nav {
-  height: 100%;
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  background-color: #282828;
-  overflow-x: hidden;
-  transition: 0.5s;
-}
-/*Headings*/
-.nav a {
-  display: block;
-  padding: 2%;
-  font-size: 150%;
-  text-decoration: none;
-  color: #eeeeee;
-  margin-left: 0%;
-  transition: 0.2s;
-  font-weight: 400;
-}
-/*Heading Hover*/
-.nav a:hover {
-  letter-spacing: -0.6px;
-  opacity: 0.5;
-  transition: 0.2s;
-}
-/*Icons*/
 
+/* Top Bar Icons */
 .icons {
   position: absolute;
   z-index: 1;
   width: 100%;
 }
-
 #icon {
   padding-top: 0.5%;
   width: 5%;
@@ -64,73 +39,103 @@ body {
   padding-top: 0.5%;
 }
 
-/*Global List Settings*/
-li {
+/* Default Side Bar Styles */
+#SettingsMenu {
+  height: 100%;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #282828;
+  overflow-x: hidden;
+  transition: 0.5s;
+}
+#SettingsMenu a {
+  display: block;
+  padding: 2%;
+  font-size: 150%;
+  text-decoration: none;
+  color: #eeeeee;
+  margin-left: 0%;
+  transition: 0.2s;
+  font-weight: 400;
+}
+#SettingsMenu a:hover {
+  letter-spacing: -0.6px;
+  opacity: 0.5;
+  transition: 0.2s;
+}
+#SettingsMenu li {
   list-style: none;
   margin-left: -20%;
   padding: 1.5%;
 }
-.close {
+
+/* Small Header Box Above Main Menu */
+.header {
   font-size: 150%;
   text-transform: lowercase;
   text-align: center;
 }
-.close div {
+.header div {
   background-color: #6b6b6b;
   padding: 1%;
   margin-left: 3%;
   margin-right: 3%;
 }
-.close h1 {
+.header h1 {
   font-size: 100%;
   color: #ffffff;
   font-weight: normal;
   text-transform: none;
   text-align: center;
 }
-.close h2 {
+.header h2 {
   font-size: 50%;
   color: #ffffff;
   font-weight: normal;
   text-transform: none;
   text-align: center;
 }
-.close a:hover {
+.header a:hover {
   font-size: 150%;
   color: #f6bda7;
 }
 
-
-.cameraDark        { background-color: #f6b9a2; }
+/* Styling for each section of the list */
 .camera            { background-color: #f6bda7; }
+.cameraDark        { background-color: #f6b9a2; }
 
-.modelsDark        { background-color: #f8ab8d; }
 .models            { background-color: #f8b195; }
+.modelsDark        { background-color: #f8ab8d; }
 
-.prefabDark        { background-color: #dc8e95 }
-.prefab            { background-color: #dc9399 }
+.prefab            { background-color: #dc9399; }
+.prefabDark        { background-color: #dc8e95; }
 
-.lightingDark      { background-color: #b27797; }
 .lighting          { background-color: #b27e9a; }
+.lightingDark      { background-color: #b27797; }
 
-.renderingDark     { background-color: #7e688f; }
 .rendering         { background-color: #806d8f; }
+.renderingDark     { background-color: #7e688f; }
 
-.skyboxDark        { background-color: #4d5877; }
 .skybox            { background-color: #525c77; }
+.skyboxDark        { background-color: #4d5877; }
 
-.sceneDark         { background-color: #2a4658; }
 .scene             { background-color: #2f4858; }
+.sceneDark         { background-color: #2a4658; }
 
-/*.propertiesDark  { background-color: #202c36; }*/
 .properties        { background-color: #23323c; }
+/*.propertiesDark  { background-color: #202c36; } (For Reference)*/
 
+/* Unordered List Styling */
 .SideBarUl li ul{
   opacity: 1;
   height: auto;
   transition: opacity 1s ease-out;
   font-size: 75%;
 }
+
+/* Indentation Tweaks */
 .SideBarUl li ul li {
     margin-left: -15%;
 }
@@ -140,6 +145,8 @@ li {
 .SideBarUl li ul li ul input{
     margin-left: 2%;
 }
+
+/* Input Box Styles */
 .SideBarUl input {
   font-family: 'Quicksand', sans-serif;
   font-size: 20px;
@@ -147,7 +154,6 @@ li {
   font-size: 100%;
   width: 88%;
 }
-
 .SideBarUl .models input [type=files]{
     background: #fff;
 }
@@ -158,45 +164,44 @@ li {
   background-color: #fff;
 }
 
-
-/* ----------- Colour Picker ----------- */
-.Focus {
+/* Colour Picker in Properties */
+.ColourPicker {
   font-family: 'Quicksand', sans-serif;
   background-color: #202c36;
   color: #ccc;
   margin-left: -15%;
   text-align: center;
 }
-.Focus h1 {
+.ColourPicker h1 {
   font-weight: normal;
   padding-top: 4%;
   text-align: center;
 }
 /* Image */
-#picker {
+#ColourWheel {
     cursor: crosshair;
     text-align: center;
 }
 /* Container for Controls */
-.controls {
+.rgbValues {
   display: inline-block;
   text-align: center;
   width: 75%;
 }
 /* Indevidual Controls */
-.controls > div {
+.rgbValues > div {
     border: 1px solid #FFFFFF;
     margin-bottom: 2%;
     overflow: hidden;
     padding: 2%
 }
-.controls label {
+.rgbValues label {
     float: left;
     margin-left: 2%;
 }
 
 /* Input Boxes */
-.controls > div input {
+.rgbValues > div input {
     /*background-color: #121212;*/
     border: 1px solid #273151;
     color: #000000;
@@ -246,6 +251,7 @@ li {
 /* Links inside the dropdown */
 .dropdown-content a {
   color: black;
+  text-emphasis-color: black;
   padding: 12px 16px;
   text-decoration: none;
   display: block;
@@ -260,8 +266,8 @@ li {
 /* Change the background color of the dropdown button when the dropdown content is shown */
 .dropdown:hover #dropbtn {background-color: #3e8e41;}
 
-/* ----------- iOS Style Sliders ----------- */
-/*Box around the slider */
+/* ----------- iOS Style Switch ----------- */
+/* Box around the switch */
 .switch {
   position: relative;
   display: inline-block;
