@@ -240,15 +240,13 @@
             </li>
             <li><a>Load Scene:</a>
               <ul>
-                <a>GLTF:</a>
-                  <input type="file" id="NewGLTF" accept=".gltf" style="font-size: 10px;">
-                  <a href="#" onclick="loadScene()">Load GLTF</a>
+                <input type="file" id="NewGLTF" accept=".gltf" style="font-size: 10px;">
+                <a href="#" onclick="loadScene()">Load Scene</a>
               </ul>
             </li>
             <li><a>Save Scene:</a>
               <ul>
-                  <a href="#" onclick="saveScene()">Save as GLTF</a>
-                  <a href="#" onclick="saveScene()">Save as OBJ</a>
+                  <a href="#" onclick="saveScene()">Save as GLTF</a>``
               </ul>
             </li>
             <li><a href="#" onclick="clearScene()">New Scene</a></li>
@@ -313,15 +311,17 @@
   var container = document.createElement('div');
   document.getElementsByClassName("container")[0].appendChild(container);
   var scene = new THREE.Scene();
-  var snap = false;
   var camera, control, orbit, renderer;
   var skybox, grid, water;
+
+  //Grid snapping bool
+  var snap = false;
 
   //Raycasting
   var Raycasts = [];
   var raycastCount = 0;
   var raycaster = new THREE.Raycaster();
-  var mouse = new THREE.Vector2(), INTERSECTED;
+  var mouse = new THREE.Vector2();
   var raycastEnabled = true;
 
   //Object Selection & Modification
@@ -343,9 +343,6 @@
   var gridSize = 50;
   var waterSize = 50;
   var skyboxSize = new THREE.Vector3(100,100,100);
-
-  var windowHalfX = window.innerWidth / 2;
-  var windowHalfY = window.innerHeight / 2;
 
   init();
   animate();
@@ -382,6 +379,14 @@
 
     //Initialises camera
     setupCamera(0, 10, 25, 0.1, 25000);
+    setupRenderer();
+    setupOrbitControls();
+    setupTransformControls();
+
+    spawnGrid();
+    toggleGrid()
+    spawnWater();
+    toggleWater();
 
     //Events
     window.addEventListener('resize', onWindowResize, false);
@@ -390,13 +395,7 @@
     window.addEventListener('touchend', onDocumentTouchEnd, false);
 
     //To be replaced by GLTF load
-    spawnPlane();
-    spawnGrid();
-    spawnWater();
-    toggleWater();
-    loadFromFile("Monkey");
-    loadSkybox("Default");
-    toggleGrid()
+
     updateList("Objects", Raycasts);
     updateList("Lights", Lights);
     lightingPreset("Bright");
@@ -508,134 +507,176 @@
       spawnWater();
     }
   }
+
+  /* Camera Setup */
   function setupCamera(x, y, z, near, far) {
-    /* Camera */
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, near, far);
+
+    //Update position
     camera.position.x = x;
     camera.position.y = y;
     camera.position.z = z;
-    camera.target = camera.position;
-
-    /* Renderer */
+  }
+  function setupRenderer() {
     renderer = new THREE.WebGLRenderer({antialias: true});
-    //renderer.renderTarget = THREE.HalfFloatType;
+
+    //Update size to fit device
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
+
+    //Sets the background to a dark grey
     renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
+
+    //Adds the renderer to the HTML
     container.appendChild(renderer.domElement);
 
+    //Enable shadows
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
+  }
+  function setupOrbitControls(){
     orbit = new THREE.OrbitControls(camera, renderer.domElement);
+
+    //Smooths movement when panning by adding 'weight'
     orbit.enableDamping = true;
     orbit.dampingFactor = 0.08;
+    orbit.keyPanSpeed = 5;
+
+    //Enables zoom and sets how far you can zoom in and out
     orbit.enableZoom = true;
     orbit.minDistance = 3;
-    orbit.maxDistance = far;
+    orbit.maxDistance = camera.far;
+
+    //Disables auto-rotate as default (Can be toggled in GUI)
     orbit.autoRotate = false;
     orbit.autoRotateSpeed = -0.1;
+
+    //Fixes rotation to prevent looking from underneath (Can be toggled)
     orbit.maxPolarAngle = 1.5;
-    orbit.keyPanSpeed = 5;
+
+    //Applies changes
 		orbit.update();
+
+    //Calls the render function if a change is detected
 		orbit.addEventListener( 'change', render );
-
-		control = new THREE.TransformControls( camera, renderer.domElement );
-		control.addEventListener( 'change', render );
-		control.addEventListener( 'dragging-changed', function ( event ) {
-		  orbit.enabled = ! event.value;
-      raycastEnabled =! event.value;
-		} );
   }
-  function onWindowResize() {
-    windowHalfX = window.innerWidth / 2;
-    windowHalfY = window.innerHeight / 2;
+  function setupTransformControls() {
+    control = new THREE.TransformControls( camera, renderer.domElement );
 
+    //Calls render function if change is detected
+    control.addEventListener( 'change', render );
+
+    //Disables orbit controls and switching selected object when transforming
+    control.addEventListener( 'dragging-changed', function ( event ) {
+      orbit.enabled = !event.value;
+      raycastEnabled = !event.value;
+    } );
+  }
+
+  /* Events */
+  function onWindowResize() {
+    //Updates camera and rendered with new window size
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-
     renderer.setSize(window.innerWidth, window.innerHeight);
   }
   function onMouseMove( event ) {
-	  //calculate mouse position in normalized device coordinates
-
+	  //Calculate mouse position
 	  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
   }
   function onDocumentTouchEnd(event) {
+    //Updates mouse position with touch input
     mouse.x = (event.changedTouches[0].clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.changedTouches[0].clientY / window.innerHeight) * 2 + 1;
+
+    //Fires mousedown as all touches end with a click, unlike mouse movement
     onDocumentMouseDown();
   }
-  function onDocumentMouseDown( e ) { //Raycasting
+  function onDocumentMouseDown( e ) {
+    //Updates raycaster with new mouse position
     raycaster.setFromCamera( mouse, camera );
+
+    //Gets a list of all objects which intersect with the raycast
     var intersects = raycaster.intersectObjects( Raycasts, true );
 
+    //If there are no objects in the ray:
     if(intersects.length === 0)
     {
+      //Disabled when interacting with GUI
       if(raycastEnabled)
       {
+        //Detach and remove the transform controls from the scene
         control.detach();
         scene.remove( control );
       }
     }
     else if(raycastEnabled)
     {
-      if ( intersects.length > 0 ) {
-        if ( INTERSECTED != intersects[0].object ) {
-          for (var i = 0; i < Raycasts.length; i++) {
-            if (intersects[0].object.parent === Raycasts[ i ]) {
-              control.attach( Raycasts[i] );
-              scene.add( control );
-            }
-            else if (intersects[0].object === Raycasts[ i ]) {
-              control.attach( Raycasts[i] );
-              scene.add( control );
-            }
-          }
+      //Checks all elements of array of selectable objects
+      for (var i = 0; i < Raycasts.length; i++) {
+
+        //Imported models are in a group
+        //Parent is in Raycasts but child is seen by raycaster
+        if (intersects[0].object.parent === Raycasts[ i ]) {
+          //Attaches transform controls
+          control.attach( Raycasts[i] );
+          scene.add( control );
+        }
+        else if (intersects[0].object === Raycasts[ i ]) {
+          control.attach( Raycasts[i] );
+          scene.add( control );
         }
       }
     }
   }
 
-  /* SideBar Controls */
-  function showInfo() {
-
-  }
+  /* Top Bar Controls */
   function toggleTransform(type) {
-
+    //Updates to translation, rotation or scale based on string 'type'
     control.setMode( type );
   }
   function toggleSnap() {
+    //Flips the boolean
     snap = !snap;
     if(snap) {
+      //Calculates an appropriate snap size based on the size of the grid
       control.setTranslationSnap( (gridSize/2) / (gridSize/2 + 1) );
+      //Sets the rotation snap to 15 degrees
       control.setRotationSnap( THREE.Math.degToRad( 15 ) );
     }
     else {
+      //Turns off snapping of translation & rotation
       control.setTranslationSnap( null );
       control.setRotationSnap( null );
     }
   }
+
+  /* Side Bar Controls */
   //Camera
   function toggleAutoRotate () {
+    //Flips the auto rotation bool on the orbit controls
     orbit.autoRotate = !orbit.autoRotate;
   }
   function toggleRotationLock() {
     if (orbit.maxPolarAngle === 1.5)
     {
+      //Default value for no rotation limit
       orbit.maxPolarAngle = Math.PI;
     }
     else {
+      //Stops the rotation at the level of the grid
       orbit.maxPolarAngle = 1.5;
     }
+    //Updates the controls
     orbit.update();
   }
   function toggleCamReset () {
+    //Resets the camera to its original position
     orbit.reset();
   }
   function camView (view){
+    //Updates the cameras position to desired view
     switch (view)
     {
       case "Top":
@@ -663,190 +704,209 @@
   }
   //Models
   function loadNewModel() {
+    //Assume the model doesn't have textures
+    var loadTex = false;
+
+    //Locates files from input boxes in the HTML that the user has uploaded
     var newModel = document.getElementById('NewModel').files[0];
-    var OBJFile = URL.createObjectURL( newModel );
-
     var newMat = document.getElementById('NewMaterial').files[0];
-    var MTLFile = URL.createObjectURL( newMat );
-
     var newTex = document.getElementById('NewTexture').files[0];
-    var JPGFile = URL.createObjectURL( newTex );
 
-    var manager = new THREE.LoadingManager();
-
-    manager.setURLModifier (function ( url ) {
-      url = JPGFile;
-      return url;
-    });
-
-    var objLoader = new THREE.OBJLoader();
-    var mtlLoader = new THREE.MTLLoader(manager);
-    var texLoader = new THREE.TextureLoader();
-
-    if(typeof document.getElementById('NewModel').files[0] !== 'undefined')
+    //Ensures there is a model and material present or errors will occur
+    if(typeof document.getElementById('NewModel').files[0] !== 'undefined' && typeof document.getElementById('NewMaterial').files[0] !== 'undefined')
     {
+      //Creates a URL so that the JavaScript is able to interact with the blob
+      var OBJFile = URL.createObjectURL( newModel );
+      var MTLFile = URL.createObjectURL( newMat );
+
+      //Loading manager to help with texture loading issue
+      var manager = new THREE.LoadingManager();
+
+      //If the user has uploaded a texture:
       if(typeof document.getElementById('NewTexture').files[0] !== 'undefined')
       {
-        //mtlLoader.setResourcePath(JPGFile);
-        mtlLoader.load(MTLFile, function (materials) {
-          materials.preload();
-          objLoader.setMaterials(materials)
-          objLoader.load(OBJFile, function (object) {
+        //Creates URL
+        var JPGFile = URL.createObjectURL( newTex );
+
+        //Fixes URL location
+        //Material contains path for texture which overwrites newTex URL, this fixes it
+        manager.setURLModifier (function ( url ) {
+          url = JPGFile;
+          return url;
+        });
+
+        loadTex = true;
+      }
+
+      //Creates instances of loaders required. The material loader uses the manager to fix this ^^ issue
+      var objLoader = new THREE.OBJLoader();
+      var mtlLoader = new THREE.MTLLoader(manager);
+      var texLoader = new THREE.TextureLoader();
+
+      mtlLoader.load(MTLFile, function (materials) {
+        objLoader.setMaterials(materials)
+        objLoader.load(OBJFile, function (object) {
+          if (loadTex)
+          {
+            //Loads the texture
             var texture = texLoader.load(JPGFile);
             object.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
+              if (child instanceof THREE.Mesh) {
+                //Maps the texture to each mesh instance
                 child.material.map = texture;
-            }
-          });
+              }
+            });
+          }
+          //Adds the object to the scene
           scene.add(object);
+          //Adds it to Raycasts so it can be manipulated
           Raycasts.push(object);
-          });
         });
-      }
+      });
     }
   }
   function updateList(listToUpdate, container){
 
+    //Clears the list from the HTML
     var list = document.getElementById(listToUpdate);
     while (list.firstChild) {
       list.removeChild(list.firstChild);
     }
 
+    //For each element in Lights or Raycasts (container)
     container.forEach(function(element) {
-    {
-        var newLi = document.createElement("li");
-        newLi.setAttribute('id', element.name);
-        var newA = document.createElement("a");
-        newA.setAttribute('href', "#");
-        newA.setAttribute('onclick', "select" + listToUpdate + "('" + element.name + "')");
-        var newContent = document.createTextNode(element.name);
-        newA.appendChild(newContent);
-        newLi.appendChild(newA);
+      //Create new list item
+      var newLi = document.createElement("li");
+      newLi.setAttribute('id', element.name);
 
-        var parentLocation = document.getElementById(listToUpdate);
-        var insertLocation = document.getElementById(listToUpdate + "Bottom");
-        parentLocation.insertBefore(newA, insertLocation);
-      }
+      //Create new hyperlink item
+      var newA = document.createElement("a");
+      newA.setAttribute('href', "#");
+      //Assign function call to hyperlink
+      newA.setAttribute('onclick', "select" + listToUpdate + "('" + element.name + "')");
+
+      //Create content to add the name of the object in the GUI
+      var newContent = document.createTextNode(element.name);
+
+      //Append the created elements to form hierarchy
+      newA.appendChild(newContent);
+      newLi.appendChild(newA);
+
+      //Appends the created HTML element to the end of the list
+      var parentLocation = document.getElementById(listToUpdate);
+      var insertLocation = document.getElementById(listToUpdate + "Bottom");
+      parentLocation.insertBefore(newA, insertLocation);
     });
 
   }
   function selectObjects(item){
+    //Iterates through all selectable objects
     for (var i = 0; i < Raycasts.length; i++) {
+      //Selects item based on name
       if (item === Raycasts[ i ].name) {
+        //Attaches transform to the selected object
         control.attach( Raycasts[i] );
         scene.add( control );
+        //Exits the loop
         i = Raycasts.length;
       }
     }
-
   }
   //Prefabs
   function spawnBox() {
+    //Create geometry and material to form a mesh
     var geometry = new THREE.BoxGeometry( 5, 5, 5 );
     var material = new THREE.MeshPhongMaterial( {color: 0xaaaaaa} );
     var cube = new THREE.Mesh( geometry, material );
+    //Enable shadows
     cube.castShadow = true;
     cube.receiveShadow = true;
+    //Rename it for GUI readability
     cube.name = "Cube";
+    //Add the cube to the scene and to list of selectable objects
     scene.add(cube);
     Raycasts.push(cube);
   }
   function spawnCylinder() {
+    //Create geometry and material to form a mesh
     var geometry = new THREE.CylinderGeometry( 5, 5, 20, 32 );
     var material = new THREE.MeshPhongMaterial( {color: 0xaaaaaa} );
     var cylinder = new THREE.Mesh( geometry, material );
+    //Enable shadows
     cylinder.castShadow = true;
     cylinder.receiveShadow = true;
-    scene.add( cylinder );
+    //Rename for GUI readability
     cylinder.name = "Cylinder";
+    //Add the cylinder to the scene and to list of selectable objects
+    scene.add( cylinder );
     Raycasts.push(cylinder);
-    console.log(cylinder);
   }
-  function spawnPlane(x = 50, y = 50) {
-    var planeGeometry = new THREE.PlaneGeometry( x, y, 1, 1 );
+  function spawnPlane() {
+    //Create geometry and material to form a mesh
+    var planeGeometry = new THREE.PlaneGeometry( 50, 50, 1, 1 );
     var planeMaterial = new THREE.MeshPhongMaterial( {color: 0x707070, side: THREE.DoubleSide} );
     var plane = new THREE.Mesh( planeGeometry, planeMaterial );
+    //Rotate from vertical to horizontal
     plane.rotation.x = toRadians(90);
+    //Enable shadows
     plane.receiveShadow = true;
+    //Rename for GUI readability
     plane.name = "Plane";
+    //Add to the scene and to list of selectable objects
     scene.add( plane );
     Raycasts.push(plane);
-    //planeSize = new THREE.Box3().setFromObject( plane );
-
   }
   function spawnSphere() {
+    //Create geometry and material to form a mesh
     var geometry = new THREE.SphereGeometry( 5, 32, 32 );
     var material = new THREE.MeshPhongMaterial( {color: 0xaaaaaa} );
     var sphere = new THREE.Mesh( geometry, material );
+    //Enable shadows
     sphere.castShadow = true;
     sphere.receiveShadow = true;
+    //Rename for GUI readability
     sphere.name = "Sphere";
+    //Add to the scene and to list of selectable objects
     scene.add( sphere );
     Raycasts.push(sphere);
   }
-  function spawnText() {
-    var loader = new THREE.FontLoader();
-				loader.load( 'Assets/Fonts/helvetiker_regular.typeface.json', function ( font ) {
-					var textGeo = new THREE.TextBufferGeometry( "Made with Jack's Tool", {
-						font: font,
-						size: 8,
-						height: 2,
-						curveSegments: 5,
-						bevelThickness: 1,
-						bevelSize: 1,
-						bevelEnabled: false
-					} );
-					textGeo.computeBoundingBox();
-					var centerOffset = - 0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
-					var textMaterial = new THREE.MeshPhongMaterial( { color: 0xff0000, specular: 0xffffff } );
-					var mesh = new THREE.Mesh( textGeo, textMaterial );
-					mesh.position.x = centerOffset;
-					mesh.position.y = 0;
-					mesh.castShadow = true;
-					mesh.receiveShadow = true;
-					scene.add( mesh );
-          Raycasts.push( mesh );
-				} );
-
-  }
   function loadFromFile(name) {
+    //Instantiate loaders
     var mtlLoader = new THREE.MTLLoader();
+    var objLoader = new THREE.OBJLoader();
+    //Set the path for loading files
     mtlLoader.setPath('Assets/Models/');
+    objLoader.setPath('Assets/Models/');
+
     mtlLoader.load( (name + '.mtl'), function( materials )
     {
-      materials.preload();
-
-      var objLoader = new THREE.OBJLoader();
-
       objLoader.setMaterials( materials );
-      objLoader.setPath('Assets/Models/');
       objLoader.load( (name + '.obj'), function ( object ) {
-
-        model = object;
-
-        var group = new THREE.Object3D();
-        model.traverse( function ( child ) {
+        //Traverses the loaded object and enables shadows per mesh
+        object.traverse( function ( child ) {
           if (child instanceof THREE.Mesh)
           {
               child.castShadow = true;
           }
         });
-
-        //Needs to find bottom of object and set point to 0
-        model.translateY(1.5);
-
-        model.name = name;
-        scene.add(model);
-        Raycasts.push(model);
+        //Moves the object closer to the grid
+        object.translateY(1.5);
+        //Renames object for readability
+        object.name = name;
+        //Add object to scene and selectable objects
+        scene.add(object);
+        Raycasts.push(object);
       } );
     } );
   }
   function spawnGrid() {
+    //Create grid instance in global variable
     grid = new THREE.GridHelper(gridSize, gridSize/2 + 1);
+    //Rename for GUI readability
     grid.name = "Grid";
-
   }
   function toggleGrid() {
+    //Removes or adds the grid based on if it is present in the scene
     if(scene.getObjectByName("Grid"))
     {
       scene.remove(grid);
@@ -856,50 +916,65 @@
     }
   }
   function spawnWater() {
+    //Removes the water if there is some present in the scene already
     if(scene.getObjectByName("Water"))
     {
       scene.remove(water);
     }
 
+    //Generates a new plane using the size set by the user (Default is 50)
     var waterGeometry = new THREE.PlaneBufferGeometry( waterSize, waterSize );
 
     water = new THREE.Water(
       waterGeometry,
       {
+        //Load in the normal map from file
         textureWidth: 512,
         textureHeight: 512,
         waterNormals: new THREE.TextureLoader().load( 'Assets/Water.png', function ( texture ) {
-
+        //Apply wrapping for realistic effect
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-
         } ),
-        alpha: 0.9,
+        //Transparancy
+        alpha: 0.85,
+        //Static values given, could be done dynamically for better effect
         sunDirection: new THREE.Vector3(10,10,10).normalize(),
         sunColor: 0xffffff,
         waterColor: 0x256d7b,
-        distortionScale: 25,
-        fog: scene.fog !== undefined
+        distortionScale: 20,
+        fog: false
       }
     );
-    water.rotation.x = -Math.PI / 2;
+    //Rotates so that it lies horizontally
+    water.rotation.x = toRadians(-90);
+    //Raised above the grid to prevent unwanted reflection artifacts
+    water.position.y = 0.05;
+    //Renamed to be found by toggle function
     water.name = "Water";
+    //Enable transparency
     water.material.transparent = true;
-
+    //Add to the scene
     scene.add(water);
   }
   function toggleWater() {
+    //Checks to see if the scene already contrains water
     if(scene.getObjectByName("Water"))
     {
+      //Removes transform controls
       control.detach();
       scene.remove( control );
+      //Removes the water
       scene.remove(water);
+      //Locates the element in the Raycasts array
       for( var i = 0; i < Raycasts.length; i++){
        if ( Raycasts[i].name === "Water") {
+         //Removes water from Raycasts
          Raycasts.splice(i, 1);
        }
       }
     }
     else {
+      //Add the water to the scene and selectable objects
       scene.add(water);
       Raycasts.push(water);
     }
@@ -907,13 +982,18 @@
   //Lighting
   function addLight (type) {
     var light;
+    //Type is passed in from HTML button press to determine type
     switch (type)
     {
       case "Ambient":
       {
+        //Create new instance of ambient light
         light = new THREE.AmbientLight(0xffffff, 1.0);
+        //Default is 0.5 intensity, can be between 0 and 2
         light.intensity = 0.5;
+        //Renamed for GUI readability
         light.name = "Ambient Light";
+        //Added to the scene and array of lights
         scene.add(light);
         Lights.push(light);
         break;
@@ -922,13 +1002,19 @@
       {
         if(!containsDirectional)
         {
+          //Create new instance of directional light
           light = new THREE.DirectionalLight(0xffffff, 1)
+          //Renamed for GUI readability
           light.name = "Directional Light";
-          light.position.set(0,0,0);
+          //Default position is directly above
+          light.position.set(0,10,0);
+
+          //Create a target of the origin which the light is directed at
           var target = new THREE.Object3D();
           target.position.set(0,0,0);
           light.target = target;
 
+          //Setup shadows
           light.shadow.camera.left = -1000;
           light.shadow.camera.right = 1000;
           light.shadow.camera.top = 1000;
@@ -937,8 +1023,12 @@
           light.shadow.camera.far = 500;
           light.shadow.mapSize.width = 8192;
           light.shadow.mapSize.height = 8192;
+
+          //Disable shadows as weaker systems can't handle them
           light.castShadow = false;
+          //Boolean to ensure only one directional light is in the scene
           containsDirectional = true;
+          //Adds the light to the scene and array
           scene.add(light);
           Lights.push(light);
         }
@@ -947,42 +1037,54 @@
 
       case "Point":
       {
+        //Creates new point light instance
         light = new THREE.PointLight( 0xff0000, 1, 100 );
+        //Sets default position to be just above origin
         light.position.set( 0, 3, 0 );
+        //Renamed for readability
         light.name = "Point Light";
+        //Added to scene and light array
         scene.add(light);
         Lights.push(light);
         break;
       }
       case "Spot":
       {
+        //Create new spot light instance
         light = new THREE.SpotLight(0xffffff);
-        light.name = "Spot Light";
+        //Positioned central above origin
         light.position.set( 0, 3, 0 );
+        //Renamed for GUI readability
+        light.name = "Spot Light";
+        //Added to scene and light array
         scene.add(light);
         Lights.push(light);
       }
     }
   }
   function selectLights(item){
+    //Loops through array to locate selected object based on name
     for (var i = 0; i < Lights.length; i++) {
       if (item === Lights[ i ].name) {
+        //Attaches transfrom controls to object and exits loop
         control.attach( Lights[i] );
         scene.add( control );
         i = Lights.length;
       }
     }
-
   }
   function lightingPreset(type){
+    //Removes all light from the scene
     for(var i = 0; i < Lights.length; i++)
     {
       scene.remove(Lights[i]);
     }
 
+    //Clears the light array and resets bool
     Lights = [];
     containsDirectional = false;
 
+    //Turns on shadows if required
     var shadowHelp = false;
     if(shadows)
     {
@@ -990,6 +1092,8 @@
       shadowHelp = true;
     }
 
+    //Preset scenes with directional and ambient lights
+    //of varying colour and intensity
     switch(type)
     {
       case "Bright":
@@ -1078,7 +1182,9 @@
       }
     }
 
+    //Calls the function to update the GUI
     updateList("Lights", Lights);
+    //Toggles shadows if required
     if(shadowHelp)
     {
       toggleRendering("Shadows");
@@ -1088,62 +1194,71 @@
   function toggleRendering(type) {
     if (type == "Shadows")
     {
+      //Flips identifier boolean
       shadows = !shadows;
+      //Loops through array to find the directional light
       for(var i = 0; i < Lights.length; i++)
       {
         if(Lights[i].type == "DirectionalLight")
         {
+          //Updates shadows on the directional light
           Lights[i].castShadow = shadows;
+          //Exits the loop
+          i = Lights.length;
         }
       }
     }
     else {
+      //Flips wireframe boolean
       wireframes = !wireframes;
-    }
-
-    for (var i = 0; i < Raycasts.length; i++)
-    {
-      Raycasts[i].traverse( function ( child ) {
-        if (child instanceof THREE.Mesh && child.name != "Plane")
-        {
-          if (child.material.length > 0)
+      //Iterates through selectable objects
+      for (var i = 0; i < Raycasts.length; i++)
+      {
+        Raycasts[i].traverse( function ( child ) {
+          //Adds wireframe to any mesh that isnt a plane
+          if (child instanceof THREE.Mesh && child.name != "Plane")
           {
-            for(var i = 0; i < child.material.length; i++)
+            //For multi-material models
+            if (child.material.length > 0)
             {
-              child.material[i].wireframe = wireframes;
+              for(var i = 0; i < child.material.length; i++)
+              {
+                child.material[i].wireframe = wireframes;
+              }
+            }
+            //For primatives
+            else {
+              child.material.wireframe = wireframes;
             }
           }
-          else {
-            child.material.wireframe = wireframes;
-          }
-        }
-      });
+        });
+      }
     }
   }
   //Skybox
   function updateSkybox(){
-
+    //Removes current skybox from the scene
     scene.remove(skybox);
 
+    //Retrieves user uploaded files from HTML
     var front = document.getElementById('NewFrontIMG').files[0];
-    var frontURL = URL.createObjectURL( front );
-
     var back = document.getElementById('NewBackIMG').files[0];
-    var backURL = URL.createObjectURL( back );
-
     var up = document.getElementById('NewUpIMG').files[0];
-    var upURL = URL.createObjectURL( up );
-
     var down = document.getElementById('NewDownIMG').files[0];
-    var downURL = URL.createObjectURL( down );
-
     var right = document.getElementById('NewRightIMG').files[0];
-    var rightURL = URL.createObjectURL( right );
-
     var left = document.getElementById('NewLeftIMG').files[0];
+
+    //Generates URL for each blob
+    var frontURL = URL.createObjectURL( front );
+    var backURL = URL.createObjectURL( back );
+    var upURL = URL.createObjectURL( up );
+    var downURL = URL.createObjectURL( down );
+    var rightURL = URL.createObjectURL( right );
     var leftURL = URL.createObjectURL( left );
 
+    //Create a cube for the skybox
     var skyboxGeometry = new THREE.CubeGeometry(skyboxSize);
+    //Create an array of materials which are mapped with the user files
     skyboxMaterials =
     [
       new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load(frontURL), side: THREE.DoubleSide}),
@@ -1154,13 +1269,19 @@
       new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load(leftURL), side: THREE.DoubleSide})
     ];
 
+    //Instantiate a mesh with the new geometry and material array to replace current skybox
     skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
+    //Add the new skybox to the scene
     scene.add(skybox);
   }
   function loadSkybox(name) {
+    //Loads relevant lighting preset
     lightingPreset(name);
+    //Removes current skybox
     scene.remove(skybox);
+    //Create new cube geometry
     var skyboxGeometry = new THREE.CubeGeometry(10000, 10000, 10000);
+    //Load from file using paramater as directory name to load desired files
     var skyboxMaterials =
     [
       new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/" + name + "/Front.png"), side: THREE.DoubleSide}),
@@ -1171,15 +1292,21 @@
       new THREE.MeshBasicMaterial ( { map: new THREE.TextureLoader().load("Assets/Skybox/" + name + "/Left.png"), side: THREE.DoubleSide})
     ];
 
+    //Create new skybox using geometry and materials to replace current one
     skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
-    skybox.name = "Skybox";
+    //Add to the scene
     scene.add (skybox);
   }
   function updateSkyboxSize(){
+    //Remove from scene
     scene.remove(skybox);
+    //Duplicate materials
     var materials = skybox.material;
+    //Create new geometry using updated size
     var skyboxGeometry = new THREE.CubeGeometry(skyboxSize, skyboxSize, skyboxSize);
+    //Instantiate new skybox using old materials and new geometry
     skybox = new THREE.Mesh(skyboxGeometry, materials);
+    //Add back scene
     scene.add(skybox);
   }
   //Scene
@@ -1190,7 +1317,6 @@
 
     loader.load( gltfURL, function ( gltf ) {
       scene = gltf.scene;
-		  //camera = gltf.cameras[0];
 
       gltf.scene.traverse( function ( child )
       {
@@ -1199,6 +1325,7 @@
           Raycasts.push(child);
         }
       });
+      console.log(scene);
 	  },
 	  // called while loading is progressing
 	  function ( xhr ) { console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' ); },
@@ -1209,7 +1336,7 @@
     var gltfExporter = new THREE.GLTFExporter();
     var options = {
         trs: false,
-        onlyVisible: false,
+        onlyVisible: true,
         truncateDrawRange: true,
         binary: false,
         forceIndices: false,
@@ -1232,141 +1359,11 @@
     toggleGrid();
     lightingPreset("Bright");
   }
-  //Properties
-  function removeObject(){
-    control.detach();
-    scene.remove( control );
-    scene.remove(selectedObject);
-    var removed = false;
-    for( var i = 0; i < Raycasts.length; i++){
-     if ( Raycasts[i].uuid === selectedObject.uuid) {
-       Raycasts.splice(i, 1);
-       i = Raycasts.length;
-       removed = true;
-     }
-    }
-    if (!removed)
-    {
-      for( var i = 0; i < Lights.length; i++){
-       if ( Lights[i].uuid === selectedObject.uuid) {
-         if(Lights[i].isDirectionalLight)
-         {
-           containsDirectional = false;
-         }
-         Lights.splice(i, 1);
-         i = Lights.length;
-       }
-      }
-    }
-  }
-  function updateProperties (obj) {
-
-    objectMaterials = [];
-
-    var parentLocation = document.getElementById("MatListTop");
-    while (parentLocation.firstChild) {
-      parentLocation.removeChild(parentLocation.firstChild);
-    }
-
-    switch(obj.type)
-    {
-      case "PointLight":
-      case "AmbientLight":
-      case "DirectionalLight":
-      {
-        var newA = document.createElement("a");
-        newA.setAttribute('href', "#");
-        newA.setAttribute("onclick","materialClick('-1')");
-        var newContent = document.createTextNode("Colour");
-        newA.appendChild(newContent);
-
-        var insertLocation = document.getElementById("MatListBottom");
-        parentLocation.insertBefore(newA, insertLocation);
-        break;
-      }
-      case "Group":
-      {
-        obj.traverse( function ( child )
-        {
-          if (child instanceof THREE.Mesh)
-          {
-            objectMaterials = child.material;
-            for(var idx = 0; idx < objectMaterials.length; idx++)
-            {
-              var newA = document.createElement("a");
-              newA.setAttribute('href', "#");
-              newA.setAttribute("onclick","materialClick('" + idx + "')");
-              var newContent = document.createTextNode(objectMaterials[idx].name);
-              newA.appendChild(newContent);
-
-              var insertLocation = document.getElementById("MatListBottom");
-              parentLocation.insertBefore(newA, insertLocation);
-            }
-          }
-        });
-        break;
-      }
-      case "Mesh":
-      {
-        objectMaterial = obj.color;
-        var newA = document.createElement("a");
-        newA.setAttribute('href', "#");
-        newA.setAttribute("onclick","materialClick('-2')");
-        var newContent = document.createTextNode("Colour");
-        newA.appendChild(newContent);
-
-        var insertLocation = document.getElementById("MatListBottom");
-        parentLocation.insertBefore(newA, insertLocation);
-        break;
-      }
-    }
-  }
-  function materialClick(materialIdx) {
-    if(materialIdx == -2)
-    {
-      selectedMaterial = selectedObject.material;
-      var header = document.getElementById("dropbtn");
-      header.textContent = "Colour";
-    }
-
-    else if(materialIdx == -1)
-    {
-      selectedMaterial = selectedObject;
-      var header = document.getElementById("dropbtn");
-      header.textContent = "Colour";
-    }
-
-    else
-    {
-      selectedMaterial = objectMaterials[materialIdx];
-      var header = document.getElementById("dropbtn");
-      header.textContent = objectMaterials[materialIdx].name;
-    }
-  }
-
-  /* HTML JavaScript Extensions */
-  //Sliding Nav Bar
-  function openSideMenu() {
-    document.getElementById('SettingsMenu').style.width = '250px';
-    document.getElementById('SettingsMenu').style.fontSize = '100%';
-    document.getElementById('SettingsMenu').style.opacity = '0.925';
-    document.getElementById('SideBar').style.marginLeft = '250px';
-    document.getElementById('burger').style.opacity = '0';
-  }
-  function closeSideMenu() {
-    document.getElementById('SettingsMenu').style.width = '0px';
-    document.getElementById('SettingsMenu').style.fontSize = '0px'
-    document.getElementById('SettingsMenu').style.opacity = '0';
-    document.getElementById('SideBar').style.marginLeft = '0px';
-    document.getElementById('burger').style.opacity = '1';
-  }
-
-  //Export Functions from https://threejs.org/examples/misc_exporter_gltf.html
-  var link = document.createElement( 'a' );
-  link.style.display = 'none';
-  document.body.appendChild( link );
-
   function save( blob, filename ) {
+    var link = document.createElement( 'a' );
+    link.style.display = 'none';
+    document.body.appendChild( link );
+
     link.href = URL.createObjectURL( blob );
     link.download = filename;
     link.click();
@@ -1374,67 +1371,253 @@
   function saveString( text, filename ) {
      save( new Blob( [ text ], { type: 'text/plain' } ), filename );
    }
+  //Properties
+  function removeObject(){
+    //Remove transfrom controls from object
+    control.detach();
+    scene.remove( control );
+    //Remove the object from the scene
+    scene.remove(selectedObject);
+
+    //Bool to search lights if it's not an object
+    var removed = false;
+    //Iterates through selectable objects
+    for( var i = 0; i < Raycasts.length; i++){
+      //Checks using uuid to remove the exact object
+     if ( Raycasts[i].uuid === selectedObject.uuid) {
+       //Removes object from raycasts array
+       Raycasts.splice(i, 1);
+       //Exits loop
+       i = Raycasts.length;
+       //Flips bool to not search through lights
+       removed = true;
+     }
+    }
+    if (!removed)
+    {
+      //Iterates through Lights array to find object
+      for( var i = 0; i < Lights.length; i++){
+       if ( Lights[i].uuid === selectedObject.uuid) {
+         if(Lights[i].isDirectionalLight)
+         {
+           //Flips boolean so a new directional light can be added
+           containsDirectional = false;
+         }
+         //Removes light from the array
+         Lights.splice(i, 1);
+         //Exits loop
+         i = Lights.length;
+       }
+      }
+    }
+  }
+  function updateProperties (obj) {
+    //Clears material array to be populated with new materials
+    objectMaterials = [];
+
+    //Clears HTML elements in drop down menu
+    var parentLocation = document.getElementById("MatListTop");
+    while (parentLocation.firstChild) {
+      parentLocation.removeChild(parentLocation.firstChild);
+    }
+
+
+    switch(obj.type)
+    {
+      //Case falls through from any type of light to directional
+      case "SpotLight":
+      case "PointLight":
+      case "AmbientLight":
+      case "DirectionalLight":
+      {
+        //Creates new hyperlink element
+        var newA = document.createElement("a");
+        newA.setAttribute('href', "#");
+        //Sets function to fire on click
+        newA.setAttribute("onclick","materialClick('-1')");
+        //Creates visable "Colour" text
+        var newContent = document.createTextNode("Colour");
+        //Appends content to hyperlink object
+        newA.appendChild(newContent);
+
+        //Finds drop down menu for insertion
+        var insertLocation = document.getElementById("MatListBottom");
+        //Appends new element to the list
+        parentLocation.insertBefore(newA, insertLocation);
+        break;
+      }
+
+      //Multi-mesh model
+      case "Group":
+      {
+        obj.traverse( function ( child )
+        {
+          if (child instanceof THREE.Mesh)
+          {
+            //Obtains the material array
+            objectMaterials = child.material;
+            //Iterates through each material in the model
+            for(var idx = 0; idx < child.material.length; idx++)
+            {
+              //Creates new hyperlink element
+              var newA = document.createElement("a");
+              newA.setAttribute('href', "#");
+              //Sets function to fire on click
+              newA.setAttribute("onclick","materialClick('" + idx + "')");
+              //Adds the material name as the content in the GUI
+              var newContent = document.createTextNode(objectMaterials[idx].name);
+              //Adds content to hyperlink element
+              newA.appendChild(newContent);
+
+              //Finds drop down menu for insertion
+              var insertLocation = document.getElementById("MatListBottom");
+              //Appends new element to material list
+              parentLocation.insertBefore(newA, insertLocation);
+            }
+          }
+        });
+        break;
+      }
+
+      case "Mesh":
+      {
+        //Sets material as colour
+        //With a primative you change the colour not the colour of the material
+        objectMaterial = obj.color;
+        //Creates new hyperlink element
+        var newA = document.createElement("a");
+        newA.setAttribute('href', "#");
+        //Sets function to fire on click
+        newA.setAttribute("onclick","materialClick('-2')");
+        //Creates visable "Colour" text
+        var newContent = document.createTextNode("Colour");
+        //Appends content to hyperlink object
+        newA.appendChild(newContent);
+
+        //Finds drop down menu for insertion
+        var insertLocation = document.getElementById("MatListBottom");
+        //Appends new element to the list
+        parentLocation.insertBefore(newA, insertLocation);
+        break;
+      }
+    }
+  }
+  function materialClick(materialIdx) {
+    //Mesh
+    if(materialIdx == -2)
+    {
+      //Obtains the correct material from the object
+      selectedMaterial = selectedObject.material;
+      var header = document.getElementById("dropbtn");
+      //Updates content of the button to show change in selection
+      header.textContent = "Colour";
+    }
+
+    //Light
+    else if(materialIdx == -1)
+    {
+      //Obtains the correct material from the object
+      selectedMaterial = selectedObject;
+      var header = document.getElementById("dropbtn");
+      //Updates content of the button to show change in selection
+      header.textContent = "Colour";
+    }
+
+    //Group
+    else
+    {
+      //Obtains material using index of drop down menu
+      selectedMaterial = objectMaterials[materialIdx];
+      var header = document.getElementById("dropbtn");
+      //Updates content of button with name of selected material
+      header.textContent = objectMaterials[materialIdx].name;
+    }
+  }
+
+  /* HTML JavaScript Extensions */
+  //Sliding Nav Bar
+  function openSideMenu() {
+    //Updates style of elements to their open state
+    document.getElementById('SettingsMenu').style.width = '250px';
+    document.getElementById('SettingsMenu').style.fontSize = '100%';
+    document.getElementById('SettingsMenu').style.opacity = '0.925';
+    document.getElementById('SideBar').style.marginLeft = '250px';
+    //Hides burger icon
+    document.getElementById('burger').style.opacity = '0';
+  }
+  function closeSideMenu() {
+    //Updates styles of elements to make them hide away as much as possible
+    document.getElementById('SettingsMenu').style.width = '0px';
+    document.getElementById('SettingsMenu').style.fontSize = '0px'
+    document.getElementById('SettingsMenu').style.opacity = '0';
+    document.getElementById('SideBar').style.marginLeft = '0px';
+    //Shows the burger icon
+    document.getElementById('burger').style.opacity = '1';
+  }
 
   /* jquery */
   $(function(){
 
-    /* Picker */
-      var bCanPreview = true; // can preview
+    //Enables mouse over colour selection
+    var bCanPreview = true;
 
-      // create canvas and context objects
-      var canvas = document.getElementById('ColourWheel');
-      canvas.width /= 2;
-      canvas.height = canvas.width;
-      var ctx = canvas.getContext('2d');
+    //Create canvas and context objects for colour wheel
+    var canvas = document.getElementById('ColourWheel');
+    canvas.width /= 2;
+    canvas.height = canvas.width;
+    var ctx = canvas.getContext('2d');
 
-      // drawing active image
-      var image = new Image();
+    //Create new image for the colour wheel
+    var image = new Image();
 
-      // select desired colorwheel
-      var imageSrc = 'Assets/ColourWheel.png';
-      image.src = imageSrc;
+    //Load image from file
+    var imageSrc = 'Assets/ColourWheel.png';
+    image.src = imageSrc;
 
-      image.onload = function () {
-          ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height); // draw the image on the canvas
+    //Draw the image on the canvas
+    image.onload = function () {
+      ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
+    }
+
+    $('#ColourWheel').mousemove(function(e) {
+      //If selection has been made, colour isn't collected until the user clicks again
+      if (bCanPreview) {
+        //Maps mouse to correct image co-ordinates
+        var canvasOffset = $(canvas).offset();
+        var canvasX = Math.floor(e.pageX - canvasOffset.left);
+        var canvasY = Math.floor(e.pageY - canvasOffset.top);
+
+        //Get pixel at mouse position
+        var imageData = ctx.getImageData(canvasX, canvasY, 1, 1);
+        var pixel = imageData.data;
+        var pixelColor = "rgb("+pixel[0]+", "+pixel[1]+", "+pixel[2]+")";
+
+        //Update GUI with colour values
+        $('#rVal').val(pixel[0]);
+        $('#gVal').val(pixel[1]);
+        $('#bVal').val(pixel[2]);
+        $('#rgbVal').val(pixel[0]+','+pixel[1]+','+pixel[2]);
+
+        //Calculate hex value
+        var dColor = pixel[2] + 256 * pixel[1] + 65536 * pixel[0];
+        $('#hexVal').val('#' + ('0000' + dColor.toString(16)).substr(-6));
+        $('#hexVal').css('backgroundColor', pixelColor);
+
+        //Update selected material of selected object
+        if(selectedMaterial){
+          selectedMaterial.color = new THREE.Color(pixelColor);
+        }
       }
+    });
 
-      $('#ColourWheel').mousemove(function(e) { // mouse move handler
-          if (bCanPreview) {
-              // get coordinates of current position
-              var canvasOffset = $(canvas).offset();
-              var canvasX = Math.floor(e.pageX - canvasOffset.left);
-              var canvasY = Math.floor(e.pageY - canvasOffset.top);
+    //Allows the user to click and select a colour on the colour wheel
+    $('#ColourWheel').click(function(e) { bCanPreview = !bCanPreview; });
 
-              // get current pixel
-              var imageData = ctx.getImageData(canvasX, canvasY, 1, 1);
-              var pixel = imageData.data;
-
-              var pixelColor = "rgb("+pixel[0]+", "+pixel[1]+", "+pixel[2]+")";
-
-              // update controls
-              $('#rVal').val(pixel[0]);
-              $('#gVal').val(pixel[1]);
-              $('#bVal').val(pixel[2]);
-              $('#rgbVal').val(pixel[0]+','+pixel[1]+','+pixel[2]);
-
-              var dColor = pixel[2] + 256 * pixel[1] + 65536 * pixel[0];
-              $('#hexVal').val('#' + ('0000' + dColor.toString(16)).substr(-6));
-              $('#hexVal').css('backgroundColor', pixelColor);
-
-              if(selectedMaterial){
-                selectedMaterial.color = new THREE.Color(pixelColor);
-              }
-          }
-      });
-
-      /* Misc */
-      $('#ColourWheel').click(function(e) { bCanPreview = !bCanPreview; });
-      $('#SideBar').mouseover(function(e) { raycastEnabled = false; });
-      $('#SideBar').mouseout(function(e) { raycastEnabled = true; });
-      $('#Icons').mouseover(function(e) { raycastEnabled = false; });
-      $('#Icons').mouseout(function(e) { raycastEnabled = true; });
-
-
+    //Prevents the raycaster from de-selecting an object when the GUI is being interacted with
+    $('#SideBar').mouseover(function(e) { raycastEnabled = false; });
+    $('#SideBar').mouseout(function(e) { raycastEnabled = true; });
+    $('#Icons').mouseover(function(e) { raycastEnabled = false; });
+    $('#Icons').mouseout(function(e) { raycastEnabled = true; });
 
   });
   </script>

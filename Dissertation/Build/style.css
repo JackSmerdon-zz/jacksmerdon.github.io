@@ -55,7 +55,6 @@ body {
   padding: 2%;
   font-size: 150%;
   text-decoration: none;
-  color: #eeeeee;
   margin-left: 0%;
   transition: 0.2s;
   font-weight: 400;
@@ -133,6 +132,9 @@ body {
   height: auto;
   transition: opacity 1s ease-out;
   font-size: 75%;
+}
+.SideBarUl a {
+    color: #eeeeee;
 }
 
 /* Indentation Tweaks */
