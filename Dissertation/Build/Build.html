@@ -227,7 +227,7 @@
                 </div>
                 <a>Water Size</a>
                 <div class="slidecontainer">
-                  <input type="range" min="2" max="10000" value="0" class="rangeSlider" id="water" step="2">
+                  <input type="range" min="2" max="9500" value="0" class="rangeSlider" id="water" step="2">
                 </div>
               </ul>
             </li>
@@ -276,7 +276,7 @@
                 <div><label>HEX</label> <input type="text" id="hexVal" /></div>
               </div>
 
-              <a id="materialSliderTitle"></a>
+              <a id="materialSliderTitle">Intensity</a>
               <div class="slidecontainer">
                 <input type="range" min="0" max="1" value="1" class="rangeSlider" id="material" step="0.1">
               </div>
@@ -596,10 +596,8 @@
   function onDocumentMouseDown( e ) {
     //Updates raycaster with new mouse position
     raycaster.setFromCamera( mouse, camera );
-
     //Gets a list of all objects which intersect with the raycast
     var intersects = raycaster.intersectObjects( Raycasts, true );
-
     //If there are no objects in the ray:
     if(intersects.length === 0)
     {
@@ -615,7 +613,6 @@
     {
       //Checks all elements of array of selectable objects
       for (var i = 0; i < Raycasts.length; i++) {
-
         //Imported models are in a group
         //Parent is in Raycasts but child is seen by raycaster
         if (intersects[0].object.parent === Raycasts[ i ]) {
@@ -1335,13 +1332,21 @@
   function saveScene(){
     var gltfExporter = new THREE.GLTFExporter();
     var options = {
-        trs: false,
-        onlyVisible: true,
-        truncateDrawRange: true,
-        binary: false,
-        forceIndices: false,
-        forcePowerOfTwoTextures: false
-      };
+      //Export position, translation and rotation instead of matrix per node
+      trs: false,
+      //Only export visable objects
+      onlyVisible: true,
+      //Only export object within the current drawing range
+      truncateDrawRange: true,
+      //Export as GLB
+      binary: false,
+      //Embed images into exported GLTF
+      embedImages: true,
+      //Generate indicies for non-index geometry
+      forceIndices: false,
+      //Export with images resized to power of two
+      forcePowerOfTwoTextures: false
+    };
 
     gltfExporter.parse( scene, function( result ) {
       var output = JSON.stringify( result, null, 2 );

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>3D Level Design Tool</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+
+  <!-- Includes -->
+  <script src="Imports/three.js"></script>
+  <script src="Imports/Detector.js"></script>
+  <script src="Imports/TransformControls.js"></script>
+  <script src="Imports/OrbitControls.js"></script>
+  <script src="Imports/OBJLoader.js"></script>
+  <script src="Imports/MTLLoader.js"></script>
+  <script src="Imports/GLTFLoader.js"></script>
+  <script src="Imports/GLTFExporter.js"></script>
+  <script src="Imports/Water.js"></script>
+  <script src="Imports/jquery.js"></script>
+
+  <!-- Program -->
+  <div class="container"></div>
+  <script>
+
+  //Displays message to the user if webGL is not supported in the browser.
+  if (!Detector.webgl) { Detector.addGetWebGLMessage(); }
+
+  var container = document.createElement('div');
+  document.getElementsByClassName("container")[0].appendChild(container);
+  var scene = new THREE.Scene();
+  var camera, control, orbit, renderer;
+  var mouse = new THREE.Vector2();
+  var gridSize = 50;
+
+  init();
+  animate();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    render();
+  }
+  function render() {
+    renderer.render(scene, camera);
+  }
+  function init() {
+    //Initialises camera
+    setupCamera(0, 10, 25, 0.1, 25000);
+    setupRenderer();
+    setupOrbitControls();
+
+    loadFromFile("1");
+    loadFromFile("2");
+    loadFromFile("3");
+
+    addLight("Ambient");
+    spawnGrid();
+
+    //Events
+    window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener( 'mousemove', onMouseMove, false );
+  }
+  function setupCamera(x, y, z, near, far) {
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, near, far);
+
+    //Update position
+    camera.position.x = x;
+    camera.position.y = y;
+    camera.position.z = z;
+  }
+  function setupRenderer() {
+    renderer = new THREE.WebGLRenderer({antialias: true});
+
+    //Update size to fit device
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    //Sets the background to a dark grey
+    renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
+
+    //Adds the renderer to the HTML
+    container.appendChild(renderer.domElement);
+
+    //Enable shadows
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  }
+  function setupOrbitControls(){
+    orbit = new THREE.OrbitControls(camera, renderer.domElement);
+
+    //Smooths movement when panning by adding 'weight'
+    orbit.enableDamping = true;
+    orbit.dampingFactor = 0.08;
+    orbit.keyPanSpeed = 5;
+
+    //Enables zoom and sets how far you can zoom in and out
+    orbit.enableZoom = true;
+    orbit.minDistance = 3;
+    orbit.maxDistance = camera.far;
+
+    //Disables auto-rotate as default (Can be toggled in GUI)
+    orbit.autoRotate = false;
+    orbit.autoRotateSpeed = -0.1;
+
+    //Fixes rotation to prevent looking from underneath (Can be toggled)
+    orbit.maxPolarAngle = 1.5;
+
+    //Applies changes
+		orbit.update();
+
+    //Calls the render function if a change is detected
+		orbit.addEventListener( 'change', render );
+  }
+  function setupTransformControls() {
+    control = new THREE.TransformControls( camera, renderer.domElement );
+
+    //Calls render function if change is detected
+    control.addEventListener( 'change', render );
+
+    //Disables orbit controls and switching selected object when transforming
+    control.addEventListener( 'dragging-changed', function ( event ) {
+      orbit.enabled = !event.value;
+      raycastEnabled = !event.value;
+    } );
+  }
+  function onWindowResize() {
+    //Updates camera and rendered with new window size
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+  function onMouseMove( event ) {
+	  //Calculate mouse position
+	  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+  }
+  function loadFromFile(name) {
+    //Instantiate loaders
+    var mtlLoader = new THREE.MTLLoader();
+    var objLoader = new THREE.OBJLoader();
+    //Set the path for loading files
+    mtlLoader.setPath('Assets/');
+    objLoader.setPath('Assets/');
+
+    mtlLoader.load( (name + '.mtl'), function( materials )
+    {
+      objLoader.setMaterials( materials );
+      objLoader.load( (name + '.obj'), function ( object ) {
+        //Traverses the loaded object and enables shadows per mesh
+        object.traverse( function ( child ) {
+          if (child instanceof THREE.Mesh)
+          {
+              child.castShadow = true;
+          }
+        });
+        //Moves the object closer to the grid
+        object.translateY(1.5);
+        //Renames object for readability
+        object.name = name;
+        //Add object to scene and selectable objects
+        scene.add(object);
+      } );
+    } );
+  }
+  function addLight (type) {
+    var light;
+    //Type is passed in from HTML button press to determine type
+    switch (type)
+    {
+      case "Ambient":
+      {
+        //Create new instance of ambient light
+        light = new THREE.AmbientLight(0xffffff, 1.0);
+        //Default is 0.5 intensity, can be between 0 and 2
+        light.intensity = 0.5;
+        //Renamed for GUI readability
+        light.name = "Ambient Light";
+        //Added to the scene and array of lights
+        scene.add(light);
+        break;
+      }
+      case "Directional":
+      {
+        if(!containsDirectional)
+        {
+          //Create new instance of directional light
+          light = new THREE.DirectionalLight(0xffffff, 1)
+          //Renamed for GUI readability
+          light.name = "Directional Light";
+          //Default position is directly above
+          light.position.set(0,10,0);
+
+          //Create a target of the origin which the light is directed at
+          var target = new THREE.Object3D();
+          target.position.set(0,0,0);
+          light.target = target;
+
+          //Setup shadows
+          light.shadow.camera.left = -1000;
+          light.shadow.camera.right = 1000;
+          light.shadow.camera.top = 1000;
+          light.shadow.camera.bottom = -1000;
+          light.shadow.camera.near = 10;
+          light.shadow.camera.far = 500;
+          light.shadow.mapSize.width = 8192;
+          light.shadow.mapSize.height = 8192;
+
+          //Disable shadows as weaker systems can't handle them
+          light.castShadow = false;
+          //Boolean to ensure only one directional light is in the scene
+          containsDirectional = true;
+          //Adds the light to the scene and array
+          scene.add(light);
+        }
+        break;
+      }
+
+      case "Point":
+      {
+        //Creates new point light instance
+        light = new THREE.PointLight( 0xff0000, 1, 100 );
+        //Sets default position to be just above origin
+        light.position.set( 0, 3, 0 );
+        //Renamed for readability
+        light.name = "Point Light";
+        //Added to scene and light array
+        scene.add(light);
+        break;
+      }
+      case "Spot":
+      {
+        //Create new spot light instance
+        light = new THREE.SpotLight(0xffffff);
+        //Positioned central above origin
+        light.position.set( 0, 3, 0 );
+        //Renamed for GUI readability
+        light.name = "Spot Light";
+        //Added to scene and light array
+        scene.add(light);
+      }
+    }
+  }
+  function spawnGrid() {
+    //Create grid instance in global variable
+    grid = new THREE.GridHelper(gridSize, gridSize/2 + 1);
+    //Rename for GUI readability
+    grid.name = "Grid";
+  }
+  </script>
