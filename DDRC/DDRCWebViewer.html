@@ -70,6 +70,8 @@
     camera.position.x = x;
     camera.position.y = y;
     camera.position.z = z;
+
+    camera.target = camera.position;
   }
   function setupRenderer() {
     renderer = new THREE.WebGLRenderer({antialias: true});
@@ -102,7 +104,7 @@
     orbit.maxDistance = camera.far;
 
     //Disables auto-rotate as default (Can be toggled in GUI)
-    orbit.autoRotate = false;
+    orbit.autoRotate = true;
     orbit.autoRotateSpeed = -0.1;
 
     //Fixes rotation to prevent looking from underneath (Can be toggled)
