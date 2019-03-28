@@ -304,8 +304,6 @@
   <div class="container"></div>
   <script>
 
-  javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
-
   //Displays message to the user if webGL is not supported in the browser.
   if (!Detector.webgl) { Detector.addGetWebGLMessage(); }
 
@@ -386,11 +384,12 @@
     setupTransformControls();
 
     spawnGrid();
-    spawnPlane();
-    loadFromFile("Monkey");
-    toggleGrid()
+    loadFromFile("Planet");
+    toggleGrid();
+    toggleGrid();
     spawnWater();
     toggleWater();
+    loadSkybox("Space");
 
     //Events
     window.addEventListener('resize', onWindowResize, false);
@@ -1027,8 +1026,8 @@
           light.shadow.camera.bottom = -100;
           light.shadow.camera.near = 10;
           light.shadow.camera.far = 500;
-          light.shadow.mapSize.width = 8192;
-          light.shadow.mapSize.height = 8192;
+          light.shadow.mapSize.width = 2048;
+          light.shadow.mapSize.height = 2048;
 
           //Disable shadows as weaker systems can't handle them
           light.castShadow = false;
@@ -1302,6 +1301,8 @@
 
     //Create new skybox using geometry and materials to replace current one
     skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
+    //Update name for identification
+    skybox.name = "Skybox";
     //Add to the scene
     scene.add (skybox);
   }
@@ -1323,17 +1324,53 @@
     var newGLTF = document.getElementById('NewGLTF').files[0];
     var gltfURL = URL.createObjectURL( newGLTF );
 
+    Raycasts = [];
+    Lights = [];
+
+    //clearScene();
+    toggleGrid();
+
     loader.load( gltfURL, function ( gltf ) {
       scene = gltf.scene;
 
       gltf.scene.traverse( function ( child )
       {
-        if (child instanceof THREE.Mesh)
+        switch(child.type)
         {
-          Raycasts.push(child);
+          case "SpotLight":
+          case "PointLight":
+          case "AmbientLight":
+          case "DirectionalLight":
+          {
+            console.log("Lighting is currently not supported. Switching to default lighting.");
+            Lights.push(child);
+            break;
+          }
+
+          case "Group":
+          {
+            console.log("Multi-material meshes are not supported. Object removed.")
+            scene.remove(child);
+            break;
+          }
+
+          default:
+          {
+            if (child instanceof THREE.Mesh)
+            {
+              Raycasts.push(child);
+            }
+            else {
+              console.log("Undefined object has been removed.")
+              //scene.remove(child);
+            }
+            break;
+          }
         }
       });
       console.log(scene);
+      loadSkybox("Default");
+      lightingPreset("Bright");
 	  },
 	  // called while loading is progressing
 	  function ( xhr ) { console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' ); },
