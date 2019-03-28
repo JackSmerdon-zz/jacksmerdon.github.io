@@ -392,7 +392,7 @@
     window.addEventListener('resize', onWindowResize, false);
     window.addEventListener( 'mousedown',onDocumentMouseDown, false );
     window.addEventListener( 'mousemove', onMouseMove, false );
-    window.addEventListener('touchstart', onDocumentTouchStart, false);
+    window.addEventListener('touchmove', onDocumentTouchMove, false);
 
     //To be replaced by GLTF load
 
@@ -590,7 +590,7 @@
 	  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   }
-  function onDocumentTouchStart(event) {
+  function onDocumentTouchMove(event) {
     //Updates mouse position with touch input
     mouse.x = (event.changedTouches[0].clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.changedTouches[0].clientY / window.innerHeight) * 2 + 1;
