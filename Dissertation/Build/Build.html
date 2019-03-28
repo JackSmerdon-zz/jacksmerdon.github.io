@@ -541,6 +541,7 @@
     orbit.enableDamping = true;
     orbit.dampingFactor = 0.08;
     orbit.keyPanSpeed = 5;
+    orbit.panSpeed = 0.05;
 
     //Enables zoom and sets how far you can zoom in and out
     orbit.enableZoom = true;
@@ -550,6 +551,9 @@
     //Disables auto-rotate as default (Can be toggled in GUI)
     orbit.autoRotate = false;
     orbit.autoRotateSpeed = -0.1;
+
+    //Slows rotation to improve user experience and precision
+    orbit.rotateSpeed = 0.1;
 
     //Fixes rotation to prevent looking from underneath (Can be toggled)
     orbit.maxPolarAngle = 1.5;
@@ -1048,12 +1052,14 @@
       case "Spot":
       {
         //Create new spot light instance
-        light = new THREE.SpotLight(0xffffff);
+        light = new THREE.SpotLight(0xffffff, 1, 10, 0.3);
         //Positioned central above origin
         light.position.set( 0, 3, 0 );
         //Renamed for GUI readability
         light.name = "Spot Light";
         //Added to scene and light array
+        var spotLightHelper = new THREE.SpotLightHelper( light );
+        scene.add( spotLightHelper );
         scene.add(light);
         Lights.push(light);
       }
