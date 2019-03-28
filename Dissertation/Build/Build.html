@@ -304,6 +304,8 @@
   <div class="container"></div>
   <script>
 
+  javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
+
   //Displays message to the user if webGL is not supported in the browser.
   if (!Detector.webgl) { Detector.addGetWebGLMessage(); }
 
@@ -337,7 +339,7 @@
 
   //Rendering
   var wireframes = false;
-  var shadows = false;
+  var shadows = true;
 
   //Scene Settings
   var gridSize = 50;
@@ -384,6 +386,8 @@
     setupTransformControls();
 
     spawnGrid();
+    spawnPlane();
+    loadFromFile("Monkey");
     toggleGrid()
     spawnWater();
     toggleWater();
@@ -1017,10 +1021,10 @@
           light.target = target;
 
           //Setup shadows
-          light.shadow.camera.left = -1000;
-          light.shadow.camera.right = 1000;
-          light.shadow.camera.top = 1000;
-          light.shadow.camera.bottom = -1000;
+          light.shadow.camera.left = -100;
+          light.shadow.camera.right = 100;
+          light.shadow.camera.top = 100;
+          light.shadow.camera.bottom = -100;
           light.shadow.camera.near = 10;
           light.shadow.camera.far = 500;
           light.shadow.mapSize.width = 8192;
