@@ -233,9 +233,9 @@
             </li>
             <li><a>Sample Scenes:</a>
               <ul>
-                <a href="#" onclick="loadSampleScene()">Jungle</a>
-                <a href="#" onclick="loadSampleScene()">Island</a>
-                <a href="#" onclick="loadSampleScene()">Space</a>
+                <a href="#" onclick="presetScene('Jungle')">Jungle</a>
+                <a href="#" onclick="presetScene('Island')">Island</a>
+                <a href="#" onclick="presetScene('Space')">Space</a>
               </ul>
             </li>
             <li><a>Load Scene:</a>
@@ -246,7 +246,7 @@
             </li>
             <li><a>Save Scene:</a>
               <ul>
-                  <a href="#" onclick="saveScene()">Save as GLTF</a>``
+                  <a href="#" onclick="saveScene()">Save as GLTF</a>
               </ul>
             </li>
             <li><a href="#" onclick="clearScene()">New Scene</a></li>
@@ -384,20 +384,15 @@
     setupTransformControls();
 
     spawnGrid();
-    loadFromFile("Planet");
-    toggleGrid();
     toggleGrid();
     spawnWater();
     toggleWater();
-    loadSkybox("Space");
 
     //Events
     window.addEventListener('resize', onWindowResize, false);
     window.addEventListener( 'mousedown',onDocumentMouseDown, false );
     window.addEventListener( 'mousemove', onMouseMove, false );
     window.addEventListener('touchmove', onDocumentTouchMove, false);
-
-    //To be replaced by GLTF load
 
     updateList("Objects", Raycasts);
     updateList("Lights", Lights);
@@ -455,6 +450,16 @@
         header.textContent = selectedObject.name;
         //Load properties into GUI
         updateProperties(selectedObject);
+
+        //Updates properties tab slider title
+        var sliderTitle = document.getElementById("materialSliderTitle");
+        if(selectedObject.type == "DirectionalLight" || selectedObject.type == "PointLight" || selectedObject.type == "SpotLight" || selectedObject.type == "AmbientLight")
+        {
+          sliderTitle.textContent = "Intensity";
+        }
+        else {
+          sliderTitle.textContent = "Specular";
+        }
       }
       //If there is no longer an object selected:
       else {
@@ -508,6 +513,11 @@
       waterSize = this.value;
       //Spawns new skybox with updated size
       spawnWater();
+    }
+
+    var intensitySlider = document.getElementById("material");
+    intensitySlider.oninput = function () {
+      materialSliderUpdate(intensitySlider.value);
     }
   }
 
@@ -1327,7 +1337,7 @@
     Raycasts = [];
     Lights = [];
 
-    //clearScene();
+    clearScene();
     toggleGrid();
 
     loader.load( gltfURL, function ( gltf ) {
@@ -1376,7 +1386,67 @@
 	  function ( xhr ) { console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' ); },
 	  // called when loading has errors
 	  function ( error ) { console.log( error ); }
-  );}
+  );
+  }
+  function loadSceneFromAssets(name){
+    Raycasts = [];
+    Lights = [];
+
+    var gltf = "Assets/Scenes/" + name + ".gltf";
+
+    clearScene();
+    toggleGrid();
+
+    var loader = new THREE.GLTFLoader();
+
+    loader.load( gltf, function ( gltf ) {
+      scene = gltf.scene;
+
+      gltf.scene.traverse( function ( child )
+      {
+        switch(child.type)
+        {
+          case "SpotLight":
+          case "PointLight":
+          case "AmbientLight":
+          case "DirectionalLight":
+          {
+            console.log("Lighting is currently not supported. Switching to default lighting.");
+            Lights.push(child);
+            break;
+          }
+
+          case "Group":
+          {
+            console.log("Multi-material meshes are not supported. Object removed.")
+            scene.remove(child);
+            break;
+          }
+
+          default:
+          {
+            if (child instanceof THREE.Mesh)
+            {
+              Raycasts.push(child);
+            }
+            else {
+              console.log("Undefined object has been removed.")
+              //scene.remove(child);
+            }
+            break;
+          }
+        }
+      });
+      console.log(scene);
+      loadSkybox("Default");
+      lightingPreset("Bright");
+	  },
+	  // called while loading is progressing
+	  function ( xhr ) { console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' ); },
+	  // called when loading has errors
+	  function ( error ) { console.log( error ); }
+  );
+  }
   function saveScene(){
     var gltfExporter = new THREE.GLTFExporter();
     var options = {
@@ -1401,6 +1471,36 @@
       console.log( output );
       saveString( output, "Scene.gltf");
     }, options);
+  }
+  function presetScene(name){
+    clearScene();
+
+    switch (name)
+    {
+      case "Jungle":
+      {
+        //loadSceneFromAssets("Jungle");
+        loadSkybox("Jungle");
+        loadFromFile("Monkey");
+        break;
+      }
+      case "Island":
+      {
+        loadSkybox("Sky");
+        loadFromFile("Donut");
+        waterSize = 9500;
+        toggleWater();
+        break;
+      }
+      case "Space":
+      {
+        loadSkybox("Space");
+        loadFromFile("Planet");
+        toggleGrid();
+        toggleAutoRotate();
+        break;
+      }
+    }
   }
   function clearScene() {
     while(scene.children.length > 0)
@@ -1586,7 +1686,23 @@
       header.textContent = objectMaterials[materialIdx].name;
     }
   }
-
+  function materialSliderUpdate(value) {
+    if(typeof selectedMaterial !== 'undefined' && selectedMaterial !== null)
+    {
+      if(selectedObject.type == "DirectionalLight" || selectedObject.type == "PointLight" || selectedObject.type == "SpotLight" || selectedObject.type == "AmbientLight")
+      {
+        //Updates the intensity of the light
+        selectedMaterial.intensity = value*2;
+      }
+      else
+      {
+        //Updates the specular of the material
+        selectedMaterial.shininess = value;
+        selectedMaterial.specular = new THREE.Color(value, value, value);
+        selectedMaterial.needsUpdate = true;
+      }
+    }
+  }
   /* HTML JavaScript Extensions */
   //Sliding Nav Bar
   function openSideMenu() {
@@ -1669,8 +1785,8 @@
     //Prevents the raycaster from de-selecting an object when the GUI is being interacted with
     $('#SideBar').mouseover(function(e) { raycastEnabled = false; });
     $('#SideBar').mouseout(function(e) { raycastEnabled = true; });
-    $('#Icons').mouseover(function(e) { raycastEnabled = false; });
-    $('#Icons').mouseout(function(e) { raycastEnabled = true; });
+    $('#icon').mouseover(function(e) { raycastEnabled = false; console.log("hit");});
+    $('#icon').mouseout(function(e) { raycastEnabled = true; });
 
   });
   </script>
