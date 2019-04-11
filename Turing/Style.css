@@ -34,7 +34,7 @@ body {
   font-size: 72px;
 }
 
-#rc-imageselect, .g-recaptcha {
+#recaptcha_image, .g-recaptcha {
   display: inline-block;
   transform:scale(2.5);
   -webkit-transform:scale(2.5);
