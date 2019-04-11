@@ -91,6 +91,6 @@ body {
   position: relative;
   background-image: linear-gradient(to bottom, #20b900, #4ec600, #6fd201, #8cdf08, #a8eb12);
   text-align: center;
-  top: 40%;
-  bottom: 60%;
+  top: 30%;
+  bottom: 70%;
 }
