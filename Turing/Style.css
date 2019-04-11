@@ -51,7 +51,7 @@ transform-origin:0 0 !important;
   color: #fff;
   background-color: #444444;
   border: none;
-  border-radius: 15px;
+  border-radius: 75px;
   box-shadow: 0 9px #999;
   transition: 0.2s;
 }
@@ -79,15 +79,14 @@ transform-origin:0 0 !important;
         font-size: 750%;
         cursor: pointer;
         text-align: center;
-        text-decoration: none;
-        outline: none;
         color: #fff;
         border: none;
         border-radius: 75px;
-        box-shadow: 0 18px #999;
+        box-shadow: 0 9px #999;
         transition: 0.2s;
 }
 
 .granted {
   background-image: linear-gradient(to bottom, #20b900, #4ec600, #6fd201, #8cdf08, #a8eb12);
+  text-align: center;
 }
