@@ -31,6 +31,14 @@ body {
   transform:scale(2.5);
   -webkit-transform:scale(2.5);
 }
+
+.gc-reset{
+transform:scale(2.5) !important;
+-webkit-transform:scale(2.5) !important;
+transform-origin:0 0 !important;
+-webkit-transform-origin:0 0 !important;
+}
+
 .button {
   font-family: 'Source Code Pro', monospace;
   display: inline-block;
