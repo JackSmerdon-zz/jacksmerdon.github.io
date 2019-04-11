@@ -42,8 +42,8 @@ transform-origin:0 0 !important;
 .button {
   font-family: 'Source Code Pro', monospace;
   display: inline-block;
-  padding: 15px 25px;
-  font-size: 24px;
+  padding: 150px 250px;
+  font-size: 240px;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
@@ -75,16 +75,16 @@ transform-origin:0 0 !important;
         text-decoration: none;
         font-family: 'Source Code Pro', monospace;
         display: inline-block;
-        padding: 15px 25px;
-        font-size: 24px;
+        padding: 10% 25%;
+        font-size: 750%;
         cursor: pointer;
         text-align: center;
         text-decoration: none;
         outline: none;
         color: #fff;
         border: none;
-        border-radius: 15px;
-        box-shadow: 0 9px #999;
+        border-radius: 75px;
+        box-shadow: 0 18px #999;
         transition: 0.2s;
 }
 
