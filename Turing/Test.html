@@ -12,8 +12,17 @@
     <form action="?" method="POST">
       <div class="g-recaptcha" data-sitekey="6Ld0n50UAAAAAI13vvyNJW2Ceu8oMbg0_A-0bDBT"></div>
       <br/><br/>
-      <input class = "button" type="submit" value="Submit">
+      <div id="button">
+        <input class = "button" disabled="disabled" id="leave_room" type="submit" name="submit" value="Submit" onclick="location.href='http://google.com';">
+      </div>
     </form>
-    <b>recaptcha</b>
+    <b>ahctpacer</b>
   </body>
+  1
+<script type="text/javascript">
+  function recaptcha_callback() {
+    $('#leave_room').removeAttr('disabled');
+  };
+ </script>
+
 </html>
