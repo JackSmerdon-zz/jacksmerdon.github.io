@@ -42,8 +42,8 @@ transform-origin:0 0 !important;
 .button {
   font-family: 'Source Code Pro', monospace;
   display: inline-block;
-  padding: 150px 250px;
-  font-size: 240px;
+  padding: 10% 25%;
+  font-size: 750%;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
