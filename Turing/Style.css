@@ -34,14 +34,10 @@ body {
   font-size: 72px;
 }
 
-.g-recaptcha {
+#rc-imageselect, .g-recaptcha {
   display: inline-block;
   transform:scale(2.5);
   -webkit-transform:scale(2.5);
-}
-.gc-reset{
-transform:scale(2.5) !important;
--webkit-transform:scale(2.5) !important;
 }
 
 .button {
