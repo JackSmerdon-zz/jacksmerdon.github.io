@@ -5,17 +5,15 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   </head>
   <body>
-    <b>recaptcha</b>
-    <h1>Are you a <br>human?<br></h1>
-    <h1>Prove it to leave the room...</h1>
-    <br/><br/><br/><br/><br/>
+    <b class = "top">recaptchaexample</b>
+    <h1>Are you human?<br></h1>
+    <h1>Prove it to exit...</h1>
     <form action="?" method="POST">
-      <div class="g-recaptcha" data-sitekey="6Ld0n50UAAAAAI13vvyNJW2Ceu8oMbg0_A-0bDBT" data-callback="enableBtn"></div>
-      <br/><br/><br/><br/><br/>
-      <a id="leave_room" href="Granted.html" class="button_disabled">Let me out!</a>
+      <div class="g-recaptcha" data-sitekey="6Ld0n50UAAAAAI13vvyNJW2Ceu8oMbg0_A-0bDBT" data-callback="enableBtn">
+      </div>
     </form>
-    <br/><br/><br/><br/><br/>
-    <b>ahctpacer</b>
+    <a id="leave_room" href="Granted.html" class="button_disabled">Continue</a>
+    <b class = "bottom">elpmaxeahctpacer</b>
     <script type="text/javascript">
       document.getElementById("leave_room").style.pointerEvents = 'none';
 

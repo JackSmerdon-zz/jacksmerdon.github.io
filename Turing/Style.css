@@ -1,49 +1,54 @@
 @import url('https://fonts.googleapis.com/css?family=Libre+Barcode+39');
-@import url('https://fonts.googleapis.com/css?family=Source+Code+Pro');
+@import url('https://fonts.googleapis.com/css?family=Jura:300');
 
-h1 {
-  text-align: left;
-  font-family: 'Source Code Pro', monospace;
-  font-size: 750%;
-  color: white;
-  line-height: 95%;
-}
-h2 {
-  text-align: left;
-  font-family: 'Source Code Pro', monospace;
-  font-size: 1500%;
-  color: white;
-  line-height: 10px;
-}
 b {
   font-family: 'Libre Barcode 39', cursive;
   color: white;
-  font-size: 500%;
+  font-size: 100%;
+}
+
+.bottom {
+  display: inline-block;
+  padding-top: 20%;
+}
+
+h1 {
+  text-align: left;
+  font-family: 'Jura', sans-serif;
+  font-size: 100%;
+  color: white;
+  line-height: 95%;
+  padding-left: 8%;
+  padding-right: 8%;
+}
+
+form {
+  position: relative;
+  padding: 10%;
 }
 
 body {
   background-image: linear-gradient(to bottom, #051937, #0d1a32, #121b2c, #161b27, #1a1c21);
   text-align: center;
   padding: 5%;
+  font-size: 72px;
 }
+
 .g-recaptcha {
   display: inline-block;
   transform:scale(2.5);
   -webkit-transform:scale(2.5);
 }
-
 .gc-reset{
 transform:scale(2.5) !important;
 -webkit-transform:scale(2.5) !important;
-transform-origin:0 0 !important;
--webkit-transform-origin:0 0 !important;
 }
 
 .button {
-  font-family: 'Source Code Pro', monospace;
+  font-family: 'Jura', sans-serif;
   display: inline-block;
-  padding: 5% 12.5%;
-  font-size: 750%;
+  padding: 2.5% 5%;
+  font-size: 100%;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
@@ -73,10 +78,10 @@ transform-origin:0 0 !important;
         outline: none;
         opacity: 0.5;
         text-decoration: none;
-        font-family: 'Source Code Pro', monospace;
+        font-family: 'Jura', sans-serif;
         display: inline-block;
         padding: 5% 12.5%;
-        font-size: 750%;
+        font-size: 100%;
         cursor: pointer;
         text-align: center;
         color: #fff;
