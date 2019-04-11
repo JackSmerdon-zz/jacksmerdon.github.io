@@ -2,9 +2,9 @@
   <head>
     <title>Are you human?</title>
     <link rel="stylesheet" href="Style.css">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   </head>
   <body>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <b>recaptcha</b>
     <h1>Are you a human?<br>
         Prove it to leave the room!
@@ -17,12 +17,10 @@
       </div>
     </form>
     <b>ahctpacer</b>
+    <script type="text/javascript">
+      function recaptcha_callback() {
+        $('#leave_room').removeAttr('disabled');
+      };
+     </script>
   </body>
-  1
-<script type="text/javascript">
-  function recaptcha_callback() {
-    $('#leave_room').removeAttr('disabled');
-  };
- </script>
-
 </html>
