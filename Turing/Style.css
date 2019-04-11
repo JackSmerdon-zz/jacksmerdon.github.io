@@ -60,3 +60,7 @@ input[disabled]#leave_room:focus {
         opacity: 0.5;
         text-decoration: none;
 }
+
+.granted {
+  background-image: linear-gradient(to bottom, #20b900, #4ec600, #6fd201, #8cdf08, #a8eb12);
+}
