@@ -6,21 +6,21 @@
   </head>
   <body>
     <b>recaptcha</b>
-    <h1>Are you a </h1>
-    <h2>human?<h2>
+    <h1>Are you a <br>human?<br></h1>
     <h1>Prove it to leave the room...</h1>
     <form action="?" method="POST">
       <div class="g-recaptcha" data-sitekey="6Ld0n50UAAAAAI13vvyNJW2Ceu8oMbg0_A-0bDBT" data-callback="enableBtn"></div>
       <br/><br/><br/><br/><br/>
-      <div id="button">
-        <input class = "button" disabled="disabled" id="leave_room" type="submit" name="submit" value="Let me out!" onclick="location.href='Granted.html';">
-      </div>
+      <a id="leave_room" href="Granted.html" class="button_disabled">Let me out!</a>
     </form>
     <br/><br/><br/><br/><br/>
     <b>ahctpacer</b>
     <script type="text/javascript">
+      document.getElementById("leave_room").style.pointerEvents = 'none';
+
       function enableBtn() {
-        $('#leave_room').removeAttr('disabled');
+        document.getElementById("leave_room").style.pointerEvents = 'auto';
+        document.getElementById("leave_room").className = "button";
       };
      </script>
   </body>

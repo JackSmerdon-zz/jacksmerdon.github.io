@@ -59,15 +59,25 @@ body {
   transform: translateY(4px);
 }
 
-input[disabled]#leave_room,
-input[disabled]#leave_room:hover,
-input[disabled]#leave_room:active,
-input[disabled]#leave_room:focus {
+.button_disabled {
         background: #CCCCCC;
         box-shadow: none;
         outline: none;
         opacity: 0.5;
         text-decoration: none;
+        font-family: 'Source Code Pro', monospace;
+        display: inline-block;
+        padding: 15px 25px;
+        font-size: 24px;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        outline: none;
+        color: #fff;
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 9px #999;
+        transition: 0.2s;
 }
 
 .granted {
