@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css?family=Rock+Salt');
+
+h1 {
+  font-family: 'Rock Salt', cursive;
+  font-size: 250%;
+  color: white;
+  text-shadow: rgba(255, 0, 0, 1);
+}
+
+body {
+  background-image: linear-gradient(to bottom, #051937, #0d1a32, #121b2c, #161b27, #1a1c21);
+  text-align: center;
+}
+.g-recaptcha {
+  display: inline-block;
+  transform:scale(2);
+  -webkit-transform:scale(2);
+  //transform-origin:0 0;
+  //-webkit-transform-origin:0 0;
+}
