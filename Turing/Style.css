@@ -2,9 +2,18 @@
 @import url('https://fonts.googleapis.com/css?family=Source+Code+Pro');
 
 h1 {
+  text-align: left;
   font-family: 'Source Code Pro', monospace;
-  font-size: 550%;
+  font-size: 750%;
   color: white;
+  line-height: 95%;
+}
+h2 {
+  text-align: left;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 1500%;
+  color: white;
+  line-height: 10px;
 }
 b {
   font-family: 'Libre Barcode 39', cursive;
@@ -19,8 +28,8 @@ body {
 }
 .g-recaptcha {
   display: inline-block;
-  transform:scale(1.5);
-  -webkit-transform:scale(1.5);
+  transform:scale(2.5);
+  -webkit-transform:scale(2.5);
 }
 .button {
   font-family: 'Source Code Pro', monospace;
