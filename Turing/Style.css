@@ -42,7 +42,7 @@ transform-origin:0 0 !important;
 .button {
   font-family: 'Source Code Pro', monospace;
   display: inline-block;
-  padding: 10% 25%;
+  padding: 5% 12.5%;
   font-size: 750%;
   cursor: pointer;
   text-align: center;
@@ -75,7 +75,7 @@ transform-origin:0 0 !important;
         text-decoration: none;
         font-family: 'Source Code Pro', monospace;
         display: inline-block;
-        padding: 10% 25%;
+        padding: 5% 12.5%;
         font-size: 750%;
         cursor: pointer;
         text-align: center;
