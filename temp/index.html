@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Jack Smerdon - Graduate Games Developer</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  </head>
+  <body>
+    <!-- Top Orange Gradient Section -->
+    <section class="opening_section">
+      <h1 class="name_heading">Jack<br>Smerdon</h1>
+      <h2 class="sub_heading_box" id="subtitle" onload="typeWriter()"></h2>
+      <a class="contact_button" href="mailto:j.smerdon@icloud.com?subject=Tell me more about your portfolio!">Say Hello</a>
+    </section>
+
+    <section class="second_section">
+      <h3 class="welcome">Welcome to my portfolio!</h3>
+      <a href="/assignments.html">
+        <div class="block" style="transform: translate(36.5vw, 75%)">
+          <h2>Assignments</h2>
+        </div>
+      </a>
+      <div class="block" style="transform: translate(58.5vw, 75%)">
+        <h2>Dissertation</h2>
+      </div>
+
+      <div class="block" style="transform: translate(25.5vw, 195%)">
+        <h2>Game Jams</h2>
+      </div>
+      <div class="block" style="transform: translate(47.5vw, 195%)">
+        <h2>Experience</h2>
+      </div>
+
+      <div class="block" style="transform: translate(14.5vw, 315%)">
+        <h2>Side Projects</h2>
+      </div>
+      <div class="block" style="transform: translate(36.5vw, 315%);">
+        <h2>About</h2>
+      </div>
+    </section>
+
+    <section class="closing_section_offset"  style="padding-bottom: 0.9%;">
+      <h2 style="text-align: right; font-size: 1rem;">
+        <a href="https://www.linkedin.com/in/jack-smerdon/" class="fa fa-linkedin"></a>
+        <a href="https://github.com/JackSmerdon" class="fa fa-github" aria-hidden="true"></a>
+        <a class="fa" style="float: right;">
+        Copyright 2019
+        <span style="color: #8b8b8b; padding-left: 10px;">
+         Jack Smerdon
+        </span>
+      </a>
+      <h2>
+    </section>
+
+
+    <script>
+      var i = 0;
+      var subtitle = 'Graduate Games Developer';
+      var speed = 80;
+
+      window.onload = function typeWriter() {
+        if (i < subtitle.length) {
+          document.getElementById("subtitle").innerHTML += subtitle.charAt(i);
+          i++;
+          setTimeout(typeWriter, speed);
+        }
+      }
+    </script>
+  </body>
+</html>
