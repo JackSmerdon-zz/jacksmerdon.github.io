@@ -61,12 +61,14 @@
       var subtitle = 'Graduate Games Developer';
       var speed = 80;
 
-      window.onload = function typeWriter() {
+      window.onload = function pageStart() {
         if (i < subtitle.length) {
           document.getElementById("subtitle").innerHTML += subtitle.charAt(i);
           i++;
           setTimeout(typeWriter, speed);
         }
+        
+        
       }
     </script>
   </body>
